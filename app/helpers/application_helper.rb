@@ -47,54 +47,54 @@ module ApplicationHelper
 
   def monto_estimado
     {
-      1: "Presupuesto Disponible",
-      2: "Precio Referencial",
-      3: "Monto no es posible de estimar"
+      "1" =>  "Presupuesto Disponible",
+      "2": "Precio Referencial",
+      "3": "Monto no es posible de estimar"
     }
   end
 
   def modalidad_de_pago
     {
-      1: "Pago a 30 días",
-      2: "Pago a 30, 60 y 90 días",
-      3: "Pago al día",
-      4: "Pago anual",
-      5: "Pago bimensual",
-      6: "Pago contra entrega conforme",
-      7: "Pagos mensuales",
-      8: "Pago por estado de avance",
-      9: "Pago trimestral",
-      10: "Pago a 60 dias",
+      "1": "Pago a 30 días",
+      "2": "Pago a 30, 60 y 90 días",
+     "3": "Pago al día",
+      "4": "Pago anual",
+      "5": "Pago bimensual",
+      "6": "Pago contra entrega conforme",
+      "7": "Pagos mensuales",
+      "8": "Pago por estado de avance",
+      "9": "Pago trimestral",
+      "10": "Pago a 60 dias",
     }
   end
 
   def unidad_tiempo_evaluacion
     {
-      1: "Horas",
-      2: "Días",
-      3: "Semanas",
-      4: "Meses",
-      5: "Años"
+     "1": "Horas",
+      "2": "Días",
+      "3": "Semanas",
+      "4": "Meses",
+      "5": "Años"
     }
   end
 
   def unidad_tiempo_duracion_contrato
     {
-      1: "Horas",
-      2: "Días",
-      3: "Semanas",
-      4: "Meses",
-      5: "Años"
+      "1": "Horas",
+      "2": "Días",
+      "3": "Semanas",
+      "4": "Meses",
+      "5": "Años"
     }
   end
 
   def acto_que_autoriza
     {
-      1: "Autorización",
-      2: "Resolución",
-      3: "Acuerdo",
-      4: "Decreto",
-      5: "Otros"
+      "1": "Autorización",
+      "2": "Resolución",
+      "3": "Acuerdo",
+      "4": "Decreto",
+      "5": "Otros"
     }
   end
 
@@ -103,31 +103,32 @@ module ApplicationHelper
 
   def tipo_orden_compra
     {
-      8: "SE - Sin emisión automática",
-      9: "CM - Convenio Marco"
+      "8": "SE - Sin emisión automática",
+      "9": "CM - Convenio Marco"
     }
   end
 
   def tipo_despacho
     {
-      7: "Despachar a dirección de envío",
-      9: "Despachar según programa adjuntado",
-      12: "Otra forma de despacho, ver instruc.",
-      14: "Retiramos de su bodega",
-      20: "Despacho por courier o encomienda aérea",
-      21: "Despacho por courier o encomienda terrestre",
-      22: "A convenir"
+      "7": "Despachar a dirección de envío",
+      "9": "Despachar según programa adjuntado",
+      "12": "Otra forma de despacho, ver instruc.",
+      "14": "Retiramos de su bodega",
+      "20": "Despacho por courier o encomienda aérea",
+      "21": "Despacho por courier o encomienda terrestre",
+      "22": "A convenir"
     }
   end
 
   def format_pago_orden_compra
     {
-      1: "15 días contra la recepción de la factura",
-      2: "30 días contra la recepción de la factura",
-      39: "Otra forma de pago",
-      46: "50 días contra la recepción de la factura",
-      47: "60 días contra la recepción de la factura"
+      "1": "15 días contra la recepción de la factura",
+      "2": "30 días contra la recepción de la factura",
+      "39": "Otra forma de pago",
+      "46": "50 días contra la recepción de la factura",
+      "47": "60 días contra la recepción de la factura"
     }
   end
 
 end
+

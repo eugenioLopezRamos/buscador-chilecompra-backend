@@ -5,9 +5,14 @@ class RequestsController < ApplicationController
       @API_key = ENV['CC_TOKEN']
       @date = verify_correct_date(params[:date])
 
+      #consulta de ejemplo, para pruebas.
       @URI = URI("http://api.mercadopublico.cl/servicios/v1/publico/licitaciones.json?fecha=#{@date}&ticket=" << @API_key)
       Net::HTTP.get URI
-      
+
+  end
+
+  def test
+      render json: {"test": "successful!"}
   end
 
 
