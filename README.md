@@ -22,3 +22,8 @@ Things you may want to cover:
 * Deployment instructions
 
 * ...
+
+** TODO **
+
+- Need to return error messages in case of missing params or w/e when querying the API (ex. failed validation would return "Invalid parameter(s)")
+
