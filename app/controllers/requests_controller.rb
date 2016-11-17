@@ -131,6 +131,9 @@ class RequestsController < ApplicationController
 
 
     @estado_licitacion = params["estadoLicitacion"].to_s
+    if @estado_licitacion === "Todos"
+      @estado_licitacion = ""
+    end
     @query_parameters.push("estado=" << @estado_licitacion) unless @estado_licitacion.blank?
 
     @selected_date = params["selectedDate"]
