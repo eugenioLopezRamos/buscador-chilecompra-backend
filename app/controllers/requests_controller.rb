@@ -95,17 +95,32 @@ class RequestsController < ApplicationController
     mod = ApplicationController::ApplicationHelper
     if valid_get_misc_info_params?(params["info"]) && mod.respond_to?(params["info"])
        requested_info = mod.send("#{params['info']}")
-      render json: requested_info
+   
+      render json: requested_info.to_json
     end
   end
+  
 
+  def get_codigo_proveedor
+    return Proc.new { 
+      |proveedor, uri| 
+      to_get = uri << proveedor << @API_key_uri
+      to_get = URI(to_get)
+      @response = Net::HTTP.get(to_get)
+      @return_value = JSON.parse(@response)
+      @return_value = @return_value["listaEmpresas"][0] # "listaEmpresas is a 1 length array, so [0] returns => {"CodigoEmpresa": "111", "NombreEmpresa": "abcd"}
+      return @return_value
+    } 
+
+
+  end
 
   def get_chilecompra_data
 
     @API_key = ENV['CC_TOKEN']
-    @API_key_URI = "ticket=" << @API_key
+    @API_key_uri = "ticket=" << @API_key
     @API_licitaciones_uri = "http://api.mercadopublico.cl/servicios/v1/publico/licitaciones.json?"
-
+    @API_buscar_proveedores_uri = "http://api.mercadopublico.cl/servicios/v1/publico/empresas/BuscarProveedor?rutempresaproveedor="
 
     @data = params
     
@@ -121,18 +136,29 @@ class RequestsController < ApplicationController
     @selected_date = params["selectedDate"]
     @query_parameters.push @selected_date unless @selected_date.blank?
 
-
-
-
     @organismo_publico = params["organismoPublico"].to_s
-    # @query_parameters.push @organismo_publico unless @organismo_publico.blank? # esta se usa aparte, al igual que los rutproveedor. O se puede usar despues de recibidos los datos
-
-    @palabras_clave = params["palabrasClave"].to_s
-    # This is not used for the query. No need to push it
+    #Here's a catch: the view currently presents name, but needs to send the code. Shouldn't be much work to fix this, since it already has number, only it does not display it.
+    @query_parameters.push("codigoOrganismo=" << @organismo_publico) unless @organismo_publico.blank? # esta se usa aparte, al igual que los rutproveedor. O se puede usar despues de recibidos los datos
 
     @rut_proveedor = params["rutProveedor"].to_s
+    if !@rut_proveedor.blank?
+      @info_proveedor = get_codigo_proveedor(@rut_proveedor, @API_buscar_proveedores_uri)
+
+      @codigo_proveedor = JSON.parse(@info_proveedor)["CodigoEmpresa"]
+      @nombre_proveedor = JSON.parse(@info_proveedor)["NombreEmpresa"]
+    end
+    # Here's another catch! we need to get the code first.
+    #####
+
+
+    #####
+
+    @query_parameters.push("codigoproveedor=" << @codigo_proveedor) unless @codigo_proveedor.blank? # esta se usa aparte, al igual que los rutproveedor. O se puede usar despues de recibidos los datos
+
     # Neither is this. They are used after fetching the results.
 
+    @palabras_clave = params["palabrasClave"].to_s
+    # This is not used for the query. No need to push it - It should be used after the results are received, to filter them.
 
 
 
@@ -147,7 +173,7 @@ class RequestsController < ApplicationController
 
     end
 
-    @outward_api_call << "ticket=#{@API_key}"
+    @outward_api_call << @API_key_uri
 
     puts "VALOR DEL API TOKEN ES #{@API_key}"
     puts "VALOR DEL URI #{@outward_api_call}"
