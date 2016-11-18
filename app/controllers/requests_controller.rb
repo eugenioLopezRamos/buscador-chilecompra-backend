@@ -134,10 +134,12 @@ class RequestsController < ApplicationController
     if @estado_licitacion === "Todos"
       @estado_licitacion = ""
     end
+
     @query_parameters.push("estado=" << @estado_licitacion) unless @estado_licitacion.blank?
 
     @selected_date = params["selectedDate"]
-    @query_parameters.push @selected_date unless @selected_date.blank?
+    @selected_date.gsub!("-", "")
+    @query_parameters.push("fecha=" << @selected_date) unless @selected_date.blank?
 
     @organismo_publico = params["organismoPublico"].to_s
     #Here's a catch: the view currently presents name, but needs to send the code. Shouldn't be much work to fix this, since it already has number, only it does not display it.
@@ -207,21 +209,27 @@ class RequestsController < ApplicationController
     def verify_correct_date(date)
         begin
             Date.parse(date)
-            date.split("/")
-            Date.valid_date? date[0].to_i, date[1].to_i, date[2].to_i
-            date
-        raise ArgumentError
-            "Fecha en formato inválido, por favor intentar de nuevo. Formato requerido: DD/MM/AAAA"
+            date.split("-")
+            if Date.valid_date? date[0].to_i, date[1].to_i, date[2].to_i
+              return date
+            else
+              raise ArgumentError, {"mensaje": "Fecha en formato inválido, por favor intentar de nuevo. Formato requerido: DD-MM-AAAA"} 
+            end
+        rescue ArgumentError
+          render json: {"mensaje": "Fecha en formato inválido, por favor intentar de nuevo. Formato requerido: DD-MM-AAAA"} 
         end
     end
 
     def valid_get_misc_info_params?(params)
       begin 
-        ["estados_licitacion", "organismos_publicos"].include?(params)
-        return true
-      raise ArgumentError
-        render json: {"mensaje": "parámetros inválidos"}
+        if ["estados_licitacion", "organismos_publicos"].include?(params)
+          return true
+        else
+          raise ArgumentError("Parametros invalidos")
+        end
       end
+      rescue ArgumentError
+        render json: {"mensaje": "Parametros invalidos"}
     end
 
     def valid_get_info_params?
