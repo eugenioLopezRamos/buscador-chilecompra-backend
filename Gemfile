@@ -12,6 +12,8 @@ gem 'puma', '~> 3.0'
 
 # Use devise
 gem 'devise'
+# Use JWT
+gem 'jwt'
 
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 # gem 'jbuilder', '~> 2.5'

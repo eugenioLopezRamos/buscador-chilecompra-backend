@@ -2,6 +2,7 @@ class RequestsController < ApplicationController
 
   before_action :valid_get_info_params?, only: :get_chilecompra_data
   before_action :valid_entity_params?, only: :get_entity_data
+  before_filter :authenticate_request!, only: :show_hello
 
   def search(params)
 
@@ -165,11 +166,6 @@ class RequestsController < ApplicationController
     @palabras_clave = params["palabrasClave"].to_s
     # This is not used for the query. No need to push it - It should be used after the results are received, to filter them.
 
-
-
-
-
-
     @outward_api_call = @API_licitaciones_uri
 
     @query_parameters.each do |q|
@@ -187,9 +183,10 @@ class RequestsController < ApplicationController
     @response = Net::HTTP.get(URI(@outward_api_call))
 
 
+    #to be done => filter by palabras clave, etc
 
 
-
+    
       # api call return json etc
       render json: @response
     
@@ -200,8 +197,11 @@ class RequestsController < ApplicationController
     @API_proveedor_uri = URI("http://api.mercadopublico.cl/servicios/v1/Publico/Empresas/BuscarProveedor?rutempresaproveedor=")
     @API_comprador_uri = URI("http://api.mercadopublico.cl/servicios/v1/Publico/Empresas/BuscarComprador?rutempresaproveedor=")
 
+  end
 
 
+  def show_hello
+    render json: {"message": "hey there"}
   end
 
   private
