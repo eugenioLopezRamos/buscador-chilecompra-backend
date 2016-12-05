@@ -7,10 +7,12 @@ Rails.application.routes.draw do
   get '/test', to: "requests#testtwo"
 
   get '/get_misc_info', to: "requests#get_misc_info"
-  get '/get_info', to: "requests#get_chilecompra_data"
+  get '/get_chilecompra_data', to: "requests#get_chilecompra_data"
 
 
   post '/auth_user', to: 'authentication#authenticate_user'
   get '/home', to: 'requests#show_hello'
+  get '/user_example', to: 'request#return_example_user'
+
 
 end
