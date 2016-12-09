@@ -1,5 +1,5 @@
 class AuthenticationController < ApplicationController
-
+#https://www.sitepoint.com/introduction-to-using-jwt-in-rails/
   def authenticate_user
     user = User.find_for_database_authentication(email: params[:email])
     if user.valid_password?(params[:password])

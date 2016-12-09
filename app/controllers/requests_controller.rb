@@ -123,12 +123,12 @@ class RequestsController < ApplicationController
       ############# RUT PROVEEDOR
       @rut_proveedor = params["rutProveedor"].to_s
       if !@rut_proveedor.blank?
-        @info_proveedor = get_codigo_proveedor(@rut_proveedor, @API_buscar_proveedores_uri)
+        @info_proveedor = get_codigo_proveedor.(@rut_proveedor, @API_buscar_proveedores_uri)
 
-        @codigo_proveedor = JSON.parse(@info_proveedor)["CodigoEmpresa"]
-        @nombre_proveedor = JSON.parse(@info_proveedor)["NombreEmpresa"]
+        @codigo_proveedor = @info_proveedor["CodigoEmpresa"]
+        @nombre_proveedor = @info_proveedor["NombreEmpresa"]
       end
-      @query_parameters.push("codigoProvedor=" << @codigo_proveedor) unless @codigo_proveedor.blank?
+      @query_parameters.push("CodigoProveedor=" << @codigo_proveedor) unless @codigo_proveedor.blank?
 
       @query_parameters
     end
@@ -136,12 +136,13 @@ class RequestsController < ApplicationController
     def get_codigo_proveedor
       return Proc.new { 
         |proveedor, uri| 
-        to_get = uri << proveedor << @API_key_uri
+        to_get = uri << proveedor << "&" << @API_key_uri
         to_get = URI(to_get)
         @response = Net::HTTP.get(to_get)
         @return_value = JSON.parse(@response)
+        #binding.pry
         @return_value = @return_value["listaEmpresas"][0] # "listaEmpresas is a 1 length array, so [0] returns => {"CodigoEmpresa": "111", "NombreEmpresa": "abcd S.A"}
-        return @return_value
+        @return_value
       } 
     end
 
@@ -156,7 +157,6 @@ class RequestsController < ApplicationController
 
       filtered_listado = JSON.parse(orig_results)["Listado"].select { 
         |x| 
-        
         if x["Nombre"].downcase.match(filter_string)
           x
         end
