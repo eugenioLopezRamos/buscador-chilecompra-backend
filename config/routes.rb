@@ -12,7 +12,7 @@ Rails.application.routes.draw do
 
   post '/auth_user', to: 'authentication#authenticate_user'
   #post '/signup', to: 'users#create' #TBI
-  post '/signuptest', to: 'users#create'
+  post '/signup', to: 'users#create'
   get '/home', to: 'requests#show_hello'
   get '/user_example', to: 'requests#return_example_user'
   #resources :users

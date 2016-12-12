@@ -4,9 +4,9 @@ class UsersController < ApplicationController
 	def create
 		@user = User.new(user_params)
 		if @user.save
-			render json: {message: "¡Registro realizado correctamente! Revisa tu email para activar tu cuenta"}, status: 201
+			render json: {message: "¡Registro realizado correctamente! Revisa tu email para activar tu cuenta!", result:"success"}, status: 201
 		else
-			render json: {errors: user.errors}, status: 422
+			render json: {errors: @user.errors, result: "failure"}, status: 422
 		end
 	end
 
@@ -14,7 +14,7 @@ class UsersController < ApplicationController
 		if @user = User.find(params[:email])
 			render json: @user # For this it might be useful to install & use active_model_serializers
 		else
-			render json: {errors: user.errors}, status: 500
+			render json: {errors: @user.errors}, status: 500
 		end
 	end
 
@@ -32,7 +32,7 @@ class UsersController < ApplicationController
 	def user_params
 
 		params.require(:signup_data).permit(:name, :email, :password, :password_confirmation)
-				#binding.pry
+		
 	end
 
 	
