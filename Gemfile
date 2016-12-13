@@ -11,9 +11,11 @@ gem 'puma', '~> 3.0'
 
 # Use devise
 gem 'devise'
+# use devise token auth
+gem 'devise_token_auth'
 # Use JWT
 gem 'jwt'
-# Use ActiveModel has_secure_password
+# Use ActiveModel has_secure_passwordd
 gem 'bcrypt', '~> 3.1.7'
 
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder

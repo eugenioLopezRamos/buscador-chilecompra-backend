@@ -2,6 +2,7 @@ class AuthenticationController < ApplicationController
 #https://www.sitepoint.com/introduction-to-using-jwt-in-rails/
   def authenticate_user
     login_data = params[:login_data]
+    #### need to sanitize these data
     user = User.find_for_database_authentication(email: login_data[:email])
     if user.valid_password?(login_data[:password])
       render json: payload(user)
