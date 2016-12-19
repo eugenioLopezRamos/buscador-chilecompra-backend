@@ -26,6 +26,6 @@ Things you may want to cover:
 ** TODO **
 
 - Need to return error messages in case of missing params or w/e when querying the API (ex. failed validation would return "Invalid parameter(s)")
-- Need to eliminate Devise views, when confirming it gives out an error. Doesn't seem to crash the app but still looks awful
+- Need to translate error messages from devise_token_auth (and rails)
 - I can probably delete most of the application_helper by moving that to simple json files (since right now that looks weird to me)
- 
+- Need to make the user confirmable, so adding confirm_success_url

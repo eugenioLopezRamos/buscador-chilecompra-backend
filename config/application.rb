@@ -27,5 +27,7 @@ module Cc
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
   	config.action_controller.action_on_unpermitted_parameters = :raise
+    config.time_zone = 'America/Santiago'
+    config.active_record.default_timezone = :local
   end
 end

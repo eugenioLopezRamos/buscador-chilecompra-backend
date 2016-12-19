@@ -9,12 +9,11 @@ gem 'pg', '0.18.4'
 # Use Puma as the app server
 gem 'puma', '~> 3.0'
 
-# Use devise
-gem 'devise'
+# use omniauth - It's a dependency of devise_token_auth
+gem 'omniauth', '~>1.3.0'
 # use devise token auth
 gem 'devise_token_auth'
-# Use JWT
-gem 'jwt'
+
 # Use ActiveModel has_secure_passwordd
 gem 'bcrypt', '~> 3.1.7'
 
