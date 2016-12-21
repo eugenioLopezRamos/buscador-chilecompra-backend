@@ -4,4 +4,8 @@ class User < ActiveRecord::Base
           :recoverable, :rememberable, :trackable, :validatable,
           :omniauthable,:confirmable #No confirm success url for now
   include DeviseTokenAuth::Concerns::User
+
+  has_many :searches
+  has_many :results, :through => :user_results
+  
 end
