@@ -17,6 +17,15 @@ gem 'devise_token_auth'
 # Use ActiveModel has_secure_passwordd
 gem 'bcrypt', '~> 3.1.7'
 
+#Use resque for background jobs
+gem 'resque', '1.26.0'
+
+#Use resque scheduler for scheduling background jobs.
+gem 'resque-scheduler'
+
+#use sinatra. The version that comes with resque is 1.0.0 which uses rack 1.xx. Rails 5 uses Rack 2.0.0.
+gem 'sinatra', github: 'sinatra/sinatra'
+
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 # gem 'jbuilder', '~> 2.5'
 
