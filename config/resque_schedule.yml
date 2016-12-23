@@ -1,7 +1,23 @@
-get_licitaciones:
-#  every:
- #   - "1s"
-  #  - :first_in: '1s'
+get_licitaciones-8:
+  cron: 0 7 * * *
   class: "GetLicitaciones"
   queue: licitaciones
-  description: "Gets all licitaciones from chilecompra"
+  description: "Gets all licitaciones from chilecompra 8hrs"
+
+get_licitaciones-11:
+  cron: 0 10 * * *
+  class: "GetLicitaciones"
+  queue: licitaciones
+  description: "Gets all licitaciones from chilecompra 11hrs"
+
+get_licitaciones-15:
+  cron: 0 14 * * *
+  class: "GetLicitaciones"
+  queue: licitaciones
+  description: "Gets all licitaciones from chilecompra 15hrs"
+
+get_licitaciones-19:
+  cron: 0 18 * * *
+  class: "GetLicitaciones"
+  queue: licitaciones
+  description: "Gets all licitaciones from chilecompra 19hrs"
