@@ -1,0 +1,7 @@
+get_licitaciones:
+#  every:
+ #   - "1s"
+  #  - :first_in: '1s'
+  class: "GetLicitaciones"
+  queue: licitaciones
+  description: "Gets all licitaciones from chilecompra"

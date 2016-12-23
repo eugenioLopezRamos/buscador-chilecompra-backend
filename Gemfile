@@ -23,6 +23,12 @@ gem 'resque', '1.26.0'
 #Use resque scheduler for scheduling background jobs.
 gem 'resque-scheduler'
 
+#Use resque-pool to managing pools of workers
+gem 'resque-pool'
+
+#Use god to manage processes
+gem 'god'
+
 #use sinatra. The version that comes with resque is 1.0.0 which uses rack 1.xx. Rails 5 uses Rack 2.0.0.
 gem 'sinatra', github: 'sinatra/sinatra'
 

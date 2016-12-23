@@ -22,5 +22,8 @@
 .misc
 
 
+*.service
+
+
 # Ignore Byebug command history file.
 .byebug_history

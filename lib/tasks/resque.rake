@@ -1,12 +1,10 @@
 require 'resque/tasks'
 require 'resque/scheduler/tasks'
-require 'yaml'
+require 'resque/pool/tasks'
 
 namespace :resque do
   task :setup => :environment do
     require 'resque'
-
-    # you probably already have this somewhere
     Resque.redis = 'localhost:6379'
   end
 
@@ -24,7 +22,7 @@ namespace :resque do
     # The schedule doesn't need to be stored in a YAML, it just needs to
     # be a hash.  YAML is usually the easiest.
    
-    Resque.schedule = YAML.load_file("#{Rails.root}/lib/tasks/resque_schedule.yml")
+    Resque.schedule = YAML.load_file("#{Rails.root}/config/resque_schedule.yml")
 
     # If your schedule already has +queue+ set for each job, you don't
     # need to require your jobs.  This can be an advantage since it's
@@ -35,4 +33,12 @@ namespace :resque do
   end
 
   task :scheduler => :setup_schedule
+
+  task :pool => :setup do
+    Resque::Pool.after_prefork do |job|
+      Resque.redis.client.reconnect
+    end
+  end
+
+
 end
