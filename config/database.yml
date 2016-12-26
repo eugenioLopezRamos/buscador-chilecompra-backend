@@ -6,7 +6,7 @@
 #
 default: &default
   adapter: postgresql
-  pool: 5
+  pool: 8
   timeout: 5000
   username: cc
 
@@ -15,7 +15,7 @@ development:
   adapter: postgresql
   encoding: unicode
   database: cc_dev
-  pool: 5
+  pool: 8
   username: myapp
   password: <%= ENV["CC_PG_PW"]%>
 
@@ -23,7 +23,7 @@ test:
   adapter: postgresql
   encoding: unicode
   database: cc_test
-  pool: 5
+  pool: 8
   username: cc
   password: <%= ENV["CC_PG_PW"]%>
 

@@ -10,11 +10,22 @@ class GetLicitaciones
     def self.perform
 
         @licitaciones_del_dia_uri = @API_licitaciones_uri + @API_key_uri
+
+        File.open("#{Rails.root}/log/get_licitaciones.log", "a+"){|f| f << "Obteniendo batch a las #{Time.now()} \n" }
+        
         @response = Net::HTTP.get(URI(@licitaciones_del_dia_uri))
-        @listado = JSON.parse(@response)["Listado"].slice(0, 10)
+
+        #save the batch to DB
+        Resque.enqueue(SaveBatchToDB, JSON.parse(@response))
+
+        File.open("#{Rails.root}/log/get_licitaciones.log", "a+"){|f| f << "Encolado a las #{Time.now()} \n" }
+        #.slice is temp, so I don't run out of api requests while testing
+        @listado = JSON.parse(@response)["Listado"].slice(0, 100)
+        File.open("#{Rails.root}/log/get_licitaciones.log", "a+"){|f| f << " JSON a las #{Time.now()} \n" }
 
         @listado.each do |lic|
             codigo_externo = lic["CodigoExterno"]
+            File.open("#{Rails.root}/log/get_single_licitacion.log", "a+"){|f| f << "Enqueue lic a las #{Time.now()} \n" }
             Resque.enqueue(GetSingleLicitacion, codigo_externo, @licitaciones_del_dia_uri)
         end
 

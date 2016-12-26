@@ -1,23 +1,24 @@
 get_licitaciones-8:
-  cron: 0 7 * * *
+  cron: 0 8 * * *
   class: "GetLicitaciones"
   queue: licitaciones
   description: "Gets all licitaciones from chilecompra 8hrs"
 
 get_licitaciones-11:
-  cron: 0 10 * * *
+  cron: 0 11 * * *
   class: "GetLicitaciones"
   queue: licitaciones
   description: "Gets all licitaciones from chilecompra 11hrs"
 
 get_licitaciones-15:
-  cron: 0 14 * * *
+  cron: 0 15 * * *
   class: "GetLicitaciones"
   queue: licitaciones
   description: "Gets all licitaciones from chilecompra 15hrs"
 
 get_licitaciones-19:
-  cron: 0 18 * * *
+  cron: 0 19 * * *
   class: "GetLicitaciones"
   queue: licitaciones
   description: "Gets all licitaciones from chilecompra 19hrs"
+

@@ -14,4 +14,3 @@ class GetSingleLicitacion
     end
 
 end
-

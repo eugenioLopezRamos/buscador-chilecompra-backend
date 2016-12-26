@@ -4,11 +4,15 @@ Rails.application.routes.draw do
 
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 
-  get '/search', to: "requests#search"
-  get '/test', to: "requests#testtwo"
-
   get '/get_misc_info', to: "requests#get_misc_info"
+
+  #This one fetches from the Chilecompra API. (Will not make it into prod, its unscalable. Will instead use the resque cronjobs + DB for this.)
   get '/get_chilecompra_data', to: "requests#get_chilecompra_data"
+
+
+
+  #this one results from the DB. Will replace get_chilecompra_data
+  get '/get_info', to: "requests#get_info"
   
   #post '/signup', to: 'users#create' #TBI
   #post '/signup', to: 'users#create'

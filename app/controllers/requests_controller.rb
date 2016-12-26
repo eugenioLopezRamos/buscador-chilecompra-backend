@@ -1,6 +1,6 @@
 class RequestsController < ApplicationController
   include RequestsHelper
-  before_action :valid_get_info_params?, only: :get_chilecompra_data
+  before_action :valid_get_info_params?, only: :get_info
   before_action :valid_entity_params?, only: :get_entity_data
   before_action :authenticate_request!, only: :show_hello
 
@@ -42,6 +42,47 @@ class RequestsController < ApplicationController
     render json: @response
   end
 
+
+  def get_info
+
+   # @results = Result.all#.map {|r| r.value}
+   # @val = r.value["Listado"][0]
+    # @results = Result.find_each do |res|
+    #               puts "ressss #{res.inspect}"
+    #              # binding.pry
+    #               val = res.value["Listado"][0] 
+    #               res.value["Listado"][0].where("CodigoEstado -> ?",  params[:estadoLicitacion].to_s)
+    #                                      .where("Comprador ->> CodigoOrganismo -> ?", params[:organismoPublico].to_s)
+
+    #             end
+
+
+     # params.permit(:codigoLicitacion, :estadoLicitacion, :organismoPublico, :palabrasClave, :rutProveedor, :selectedDate)
+
+
+
+     #Ejemplo de query: Result.where("value-> 'Listado' -> 0 ->> 'CodigoExterno' = '1175-318-L116'") -> trae la id = 80 (en mi BD de dev temporal!)
+
+
+     @results = Result.where("value -> 'Listado' -> 0 -> 'Comprador' ->> 'CodigoOrganismo' = ?", params[:organismoPublico].to_s).pluck("value")
+      
+
+      # This can chain .where s... but I've to see if it's appropiate :/
+      
+      # sendme = [["value -> 'Listado' -> 0 -> 'Comprador' ->> 'CodigoOrganismo' = ?", '7248'], ["id = ?", "50"]]
+      # sendme.reduce(Result) {|prev, curr| prev.send("where", curr)}
+
+    render json: @results
+
+
+  end
+
+
+
+
+
+
+
   private
 
     def verify_correct_date(date)
@@ -58,17 +99,19 @@ class RequestsController < ApplicationController
         end
     end
 
+
     def valid_get_misc_info_params?(params)
       begin 
         if ["estados_licitacion", "organismos_publicos"].include?(params)
           return true
         else
-          raise ArgumentError("Parametros invalidos")
+          raise ArgumentError
         end
       end
       rescue ArgumentError
         render json: {"mensaje": "Parametros invalidos"}
     end
+
 
     def valid_get_info_params?
       
@@ -77,4 +120,10 @@ class RequestsController < ApplicationController
     end
 
 end
- 
+                                     #     .where('CodigoLicitacion -> ?', params[:codigoLicitacion].to_s)
+                                       #  .where('Items ->> Listado -> 0 ->> Adjudicacion -> RutProveedor -> ?', params[:rutProveedor].to_s) 
+                                               # val.Fechas.FechaPublicacion = params[:selectedDate],
+                                                # val.Comprador.CodigoOrganismo -> ,
+                                                # val.CodigoLicitacion -> params[:codigoLicitacion].to_s,
+                                                # val.Items.Listado[0].Adjudicacion.RutProveedor -> params[:rutProveedor].to_s,
+                #  )

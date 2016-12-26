@@ -3,6 +3,7 @@ class SaveSingleLicitacionToDB
 
     def self.perform(licitacion)
         datos_lic = licitacion["Listado"]
+            File.open("#{Rails.root}/log/save_to_db.log", "a+"){|f| f << "Intentando guardar #{datos_lic[0]['CodigoExterno']} a las #{Time.now()} \n" }
         result = Result.create(value: licitacion)
         if result.save
             File.open("#{Rails.root}/log/save_to_db.log", "a+"){|f| f << "Exito: Licitacion #{datos_lic[0]['CodigoExterno']} a las #{Time.now()} \n" }
