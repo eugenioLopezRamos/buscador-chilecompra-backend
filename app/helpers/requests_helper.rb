@@ -4,7 +4,6 @@
         Time.at(date.to_i/1000).strftime("%Y-%m-%d") #Need to divide the MomentJS date  by 1000 to get the correct one.
     end
 
-
     def filter_results(params)
 
       @param_data = Hash.new
@@ -13,7 +12,11 @@
       if @param_data["organismoPublico"] == "*"
         @param_data["organismoPublico"] = ""
       end
-    
+
+      if @param_data["estadoLicitacion"] == "*"
+        @param_data["estadoLicitacion"] = ""
+      end 
+      
       @to_send = Array.new
 
       @param_json_routes = {

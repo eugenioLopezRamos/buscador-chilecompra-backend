@@ -9,16 +9,21 @@ Rails.application.routes.draw do
 
   #This one fetches from the Chilecompra API. (Will not make it into prod, its unscalable. Will instead use the resque cronjobs + DB for this.)
  # get '/get_chilecompra_data', to: "requests#get_chilecompra_data"
-
-
-
+ 
   #this one results from the DB. Will replace get_chilecompra_data
   get '/get_info', to: "requests#get_info"
-  
-  #post '/signup', to: 'users#create' #TBI
-  #post '/signup', to: 'users#create'
-  #get '/home', to: 'requests#show_hello'
- # get '/user_example', to: 'requests#return_example_user'
-  #resources :users
+
+
+  #CRUD results
+  get '/results', to: "results#show"
+  post '/results', to: "results#save"
+  put '/results', to: "results#update"
+  delete '/results', to: "results#destroy"
+
+  #CRUD search queries
+  get '/searches', to: "searches#show"
+  post '/searches', to: "searches#save"
+  put '/searches', to: "searches#update"
+  delete '/searches', to: "searches#destroy"
 
 end
