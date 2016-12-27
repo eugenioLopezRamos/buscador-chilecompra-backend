@@ -4,10 +4,11 @@ Rails.application.routes.draw do
 
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 
+  #To be modified too, should get from cached request/db entry/whatever I decide, but not like it currently is
   get '/get_misc_info', to: "requests#get_misc_info"
 
   #This one fetches from the Chilecompra API. (Will not make it into prod, its unscalable. Will instead use the resque cronjobs + DB for this.)
-  get '/get_chilecompra_data', to: "requests#get_chilecompra_data"
+ # get '/get_chilecompra_data', to: "requests#get_chilecompra_data"
 
 
 

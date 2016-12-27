@@ -4,16 +4,16 @@ class RequestsController < ApplicationController
   before_action :valid_entity_params?, only: :get_entity_data
   before_action :authenticate_request!, only: :show_hello
 
-  def initialize
-    @API_key = ENV['CC_TOKEN']
-    @API_key_uri = "ticket=" << @API_key
-    @API_licitaciones_uri = "http://api.mercadopublico.cl/servicios/v1/publico/licitaciones.json?"
-    @API_buscar_proveedores_uri = "http://api.mercadopublico.cl/servicios/v1/publico/empresas/BuscarProveedor?rutempresaproveedor="
-    @API_buscar_comprador_uri = "http://api.mercadopublico.cl/servicios/v1/Publico/Empresas/BuscarComprador?rutempresaproveedor="
-  end
+  # def initialize
+  #   @API_key = ENV['CC_TOKEN']
+  #   @API_key_uri = "ticket=" << @API_key
+  #   @API_licitaciones_uri = "http://api.mercadopublico.cl/servicios/v1/publico/licitaciones.json?"
+  #   @API_buscar_proveedores_uri = "http://api.mercadopublico.cl/servicios/v1/publico/empresas/BuscarProveedor?rutempresaproveedor="
+  #   @API_buscar_comprador_uri = "http://api.mercadopublico.cl/servicios/v1/Publico/Empresas/BuscarComprador?rutempresaproveedor="
+  # end
 
   def get_misc_info
-  
+    #This will be replaced too.
     mod = ApplicationController::ApplicationHelper
     if valid_get_misc_info_params?(params["info"]) && mod.respond_to?(params["info"])
        requested_info = mod.send("#{params['info']}")
@@ -22,66 +22,31 @@ class RequestsController < ApplicationController
     end
   end
 
-  def get_chilecompra_data
+  # def get_chilecompra_data
 
-    #builds the query string => param1=val1&param2=val2
-    @query_string = build_query_string(params)
+  #   #builds the query string => param1=val1&param2=val2
+  #   @query_string = build_query_string(params)
 
-    #returns the API URI => chilecompra.cl/licitaciones?param1=value1&param2=value2&ticket=1234567
-    @outward_api_call = @API_licitaciones_uri << @query_string << "&" << @API_key_uri
+  #   #returns the API URI => chilecompra.cl/licitaciones?param1=value1&param2=value2&ticket=1234567
+  #   @outward_api_call = @API_licitaciones_uri << @query_string << "&" << @API_key_uri
 
-    #calls the API, gets the response
-    @response = Net::HTTP.get(URI(@outward_api_call))
+  #   #calls the API, gets the response
+  #   @response = Net::HTTP.get(URI(@outward_api_call))
 
-    @palabras_clave = params["palabrasClave"].to_s
+  #   @palabras_clave = params["palabrasClave"].to_s
 
-    #filters the results with .select if @palabras_clave is NOT blank.
-    @response = filter_palabras_clave(@response, @palabras_clave, "list") unless @palabras_clave.blank?
+  #   #filters the results with .select if @palabras_clave is NOT blank.
+  #   @response = filter_palabras_clave(@response, @palabras_clave, "list") unless @palabras_clave.blank?
 
-    # returns the result
-    render json: @response
-  end
+  #   # returns the result
+  #   render json: @response
+  # end
 
 
   def get_info
-
-   # @results = Result.all#.map {|r| r.value}
-   # @val = r.value["Listado"][0]
-    # @results = Result.find_each do |res|
-    #               puts "ressss #{res.inspect}"
-    #              # binding.pry
-    #               val = res.value["Listado"][0] 
-    #               res.value["Listado"][0].where("CodigoEstado -> ?",  params[:estadoLicitacion].to_s)
-    #                                      .where("Comprador ->> CodigoOrganismo -> ?", params[:organismoPublico].to_s)
-
-    #             end
-
-
-     # params.permit(:codigoLicitacion, :estadoLicitacion, :organismoPublico, :palabrasClave, :rutProveedor, :selectedDate)
-
-
-
-     #Ejemplo de query: Result.where("value-> 'Listado' -> 0 ->> 'CodigoExterno' = '1175-318-L116'") -> trae la id = 80 (en mi BD de dev temporal!)
-
-
-     @results = Result.where("value -> 'Listado' -> 0 -> 'Comprador' ->> 'CodigoOrganismo' = ?", params[:organismoPublico].to_s).pluck("value")
-      
-
-      # This can chain .where s... but I've to see if it's appropiate :/
-      
-      # sendme = [["value -> 'Listado' -> 0 -> 'Comprador' ->> 'CodigoOrganismo' = ?", '7248'], ["id = ?", "50"]]
-      # sendme.reduce(Result) {|prev, curr| prev.send("where", curr)}
-
+    @results = filter_results(params).pluck("value")
     render json: @results
-
-
   end
-
-
-
-
-
-
 
   private
 

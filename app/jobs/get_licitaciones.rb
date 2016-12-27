@@ -18,14 +18,14 @@ class GetLicitaciones
         #save the batch to DB
         Resque.enqueue(SaveBatchToDB, JSON.parse(@response))
 
-        File.open("#{Rails.root}/log/get_licitaciones.log", "a+"){|f| f << "Encolado a las #{Time.now()} \n" }
-        #.slice is temp, so I don't run out of api requests while testing
-        @listado = JSON.parse(@response)["Listado"].slice(0, 100)
+        File.open("#{Rails.root}/log/get_licitaciones.log", "a+"){|f| f << "Batch encolado a las #{Time.now()} \n" }
+
+        @listado = JSON.parse(@response)["Listado"]
         File.open("#{Rails.root}/log/get_licitaciones.log", "a+"){|f| f << " JSON a las #{Time.now()} \n" }
 
         @listado.each do |lic|
             codigo_externo = lic["CodigoExterno"]
-            File.open("#{Rails.root}/log/get_single_licitacion.log", "a+"){|f| f << "Enqueue lic a las #{Time.now()} \n" }
+            File.open("#{Rails.root}/log/get_single_licitacion.log", "a+"){|f| f << "Encolando licitacion #{codigo_externo} a las #{Time.now()} \n" }
             Resque.enqueue(GetSingleLicitacion, codigo_externo, @licitaciones_del_dia_uri)
         end
 
