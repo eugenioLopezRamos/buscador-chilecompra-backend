@@ -15,7 +15,7 @@ class RequestsController < ApplicationController
   end
 
   def get_info
-    @results = filter_results(params).pluck("value")
+    @results = filter_results(params)
     render json: @results
   end
 

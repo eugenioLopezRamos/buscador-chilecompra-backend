@@ -16,13 +16,13 @@ Rails.application.routes.draw do
 
   #CRUD results
   get '/results', to: "results#show"
-  post '/results', to: "results#save"
+  post '/results', to: "results#create"
   put '/results', to: "results#update"
   delete '/results', to: "results#destroy"
 
   #CRUD search queries
   get '/searches', to: "searches#show"
-  post '/searches', to: "searches#save"
+  post '/searches', to: "searches#create"
   put '/searches', to: "searches#update"
   delete '/searches', to: "searches#destroy"
 
