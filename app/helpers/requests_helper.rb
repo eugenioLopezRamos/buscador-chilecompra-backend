@@ -5,9 +5,10 @@
     end
 
     def filter_results(params)
-
       @param_data = Hash.new
-      @param_data.update(params) { |key, value| value.to_s }
+      #TODO fix deprecated to_hash
+      params.each_pair {|k, v| @param_data[k] = v.to_s} 
+    #  @param_data.update(params) { |key, value| value.to_s }
    
       if @param_data["organismoPublico"] == "*"
         @param_data["organismoPublico"] = ""

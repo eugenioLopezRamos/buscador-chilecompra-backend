@@ -4,12 +4,13 @@ class ResultsController < ApplicationController
 
 
     def show
+        #shows all results of an user. Will probably be changed to .pluck("name") as it would be impossible to show otherwise
         #get a user's saved results
-        @user_results = UserResult.where(user_id: current_user.id).pluck("result_id")
+       # @user_results = UserResult.where(user_id: current_user.id).pluck("result_id") # Will be .pluck("name") and to just change the name
         #make a query: "id = ? OR id = ?" ... that checks for all of the @user_results
-        @query = Array.new(@user_results.length, "id = ?").join(" OR ")
+        #@query = Array.new(@user_results.length, "id = ?").join(" OR ")
         #pass the user's result ids as args for the query using the splat operator
-        render json: Result.where(@query, *@user_results)
+        render json: UserResult.where(user_id: current_user.id).pluck("id", "name") #Result.where(@query, *@user_results)
     end
 
     def create
