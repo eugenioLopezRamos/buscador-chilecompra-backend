@@ -4,6 +4,12 @@ class ResultsController < ApplicationController
 
 
     def show
+        #get a user's saved results
+        @user_results = UserResult.where(user_id: current_user.id).pluck("result_id")
+        #make a query: "id = ? OR id = ?" ... that checks for all of the @user_results
+        @query = Array.new(@user_results.length, "id = ?").join(" OR ")
+        #pass the user's result ids as args for the query using the splat operator
+        render json: Result.where(@query, *@user_results)
     end
 
     def create
@@ -11,19 +17,20 @@ class ResultsController < ApplicationController
         @messages = Hash.new
 
         if valid_ids?(@results)
-            
             @results.each do |r|
-            
-                new_entry = UserResult.create(user_id: current_user.id, result_id: r)
-                if new_entry.save
-                    @messages[r] = true
-                else
-                    @messages[r] = false
-                end
+                begin        
+                  new_entry = UserResult.create(user_id: current_user.id, result_id: r)
+                    #puts successfully recorded ids on successful
+                    #and failed ids on failed
+                    if new_entry.save
+                        @messages[r] = true
+                    else
+                        @messages[r] = false
+                    end
+                  rescue ActiveRecord::RecordNotUnique
+                    @messages[r] = false        
+                end     
             end
-
-            #puts successfully recorded ids on successful
-            #and failed ids on failed
 
             successful = Array.new
             failed = Array.new
@@ -37,12 +44,10 @@ class ResultsController < ApplicationController
             end
 
             render json: {"message": {"successful": successful,
-                                        "failed": failed}}
+                                      "failed": failed}}
         else
             render json: {"message": "Id(s) inválido(s)"}
         end
-
-
     end
 
     # def update #Unneeded, this is just a "symlink" of result_id <=> user_id
