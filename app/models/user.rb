@@ -6,6 +6,7 @@ class User < ActiveRecord::Base
   include DeviseTokenAuth::Concerns::User
 
   has_many :searches
+  has_many :user_results, :dependent => :delete_all
   has_many :results, :through => :user_results
-  
+
 end
