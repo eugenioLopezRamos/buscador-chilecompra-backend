@@ -2,28 +2,27 @@ class ResultsController < ApplicationController
     include ResultsHelper
     
     before_action :authenticate_user!
-    before_action :valid_params?, only: [:create, :update, :destroy]
+#    before_action :valid_params?, only: [:create, :update, :destroy]
 
     def show
-        @to_send = create_user_results_hash
-        render json: @to_send
+        render json: return_grouped_user_results
     end
 
     def create
-        if valid_ids?(params[:results])
-            save_results(params[:results])
+        if valid_ids?(result_params)
+            save_results(result_params)
         else
             render json: {"message": {"errors": ["Id(s) inválido(s)"] } }
         end
     end
 
     def destroy
-
+        #destruirlos por nombre = "" where user_id = current_user ?
     end
 
     private
     
-    def valid_params?
+    def result_params
         params.permit(:results => [])
     end
 

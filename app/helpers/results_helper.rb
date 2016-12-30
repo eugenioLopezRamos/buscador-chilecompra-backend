@@ -34,7 +34,7 @@ module ResultsHelper
     end
 
     # TODO: refactor this method...
-    def create_user_results_hash
+    def return_grouped_user_results
             #returns JSON of UserResults of current_user grouped by UserResult.name
             # so => {"myresultname": [id1, id2, id3...idN] }
 

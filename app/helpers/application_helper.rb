@@ -7,7 +7,7 @@ module ApplicationHelper
     Cerrada: 6,
     Desierta: 7,
     Adjudicada: 8,
-    Revocada: 18,
+    Revocada: 15, #was 18
     Suspendida: 19
    }
 

@@ -1,12 +1,15 @@
 class SearchesController < ApplicationController
+    include SearchesHelper
+
     before_action :authenticate_user!
+  #  before_action :valid_params?, only: [:create, :update, :destroy]
 
     def show
-       
+      
     end
 
     def create
-         puts "this is searches create, params #{params}"
+      create_search(search_params)
     end
 
     def update
@@ -15,7 +18,19 @@ class SearchesController < ApplicationController
     def destroy
     end
 
-   
+   private
+
+    def search_params
+        params.require(:searches).permit(:organismosPublicosFilter,
+                                         :selectedOrganismoPublico,
+                                         :codigoLicitacion,
+                                         :date,
+                                         :palabrasClave,
+                                         :selectedEstadoLicitacion,
+                                         :rutProveedor
+                                         )
+        params.permit(:searchName)
+    end
 
 
 end
