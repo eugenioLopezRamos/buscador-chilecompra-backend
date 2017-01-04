@@ -5,7 +5,7 @@ module ResultsHelper
         @messages = Hash.new
         results.each do |r|
             begin        
-                new_entry = UserResult.create(user_id: current_user.id, result_id: r)
+                new_entry = UserResult.create(user_id: current_user.id, result_id: r, name: results["name"])
                 #puts successfully recorded ids on successful
                 #and failed ids on failed
                 if new_entry.save

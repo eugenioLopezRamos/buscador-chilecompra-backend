@@ -2,18 +2,14 @@ class ResultsController < ApplicationController
     include ResultsHelper
     
     before_action :authenticate_user!
-#    before_action :valid_params?, only: [:create, :update, :destroy]
+    before_action :valid_ids?, only: [:create, :update, :destroy]
 
     def show
         render json: return_grouped_user_results
     end
 
     def create
-        if valid_ids?(result_params)
-            save_results(result_params)
-        else
-            render json: {"message": {"errors": ["Id(s) inválido(s)"] } }
-        end
+        save_results(result_params)
     end
 
     def destroy
@@ -23,16 +19,18 @@ class ResultsController < ApplicationController
     private
     
     def result_params
-        params.permit(:results => [])
+        params.permit({:results => []}, :name)
     end
 
-    def valid_ids?(ids_array)
-        new_arr = ids_array.map {|id| id.to_i}
-        if new_arr != ids_array
-            return false
+    def valid_ids?
+        new_arr = params["results"].map {|id| id.to_i}
+        if new_arr != params["results"]
+           render json: {"message": {"errors": ["Id(s) inválido(s)"] } }
         else
             return true
         end
+        rescue NoMethodError #happens when |id| is null, for example
+           render json: {"message": {"errors": ["Id(s) inválido(s)"] } }            
     end
 
 end
