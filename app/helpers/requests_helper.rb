@@ -4,10 +4,10 @@
         Time.at(date.to_i/1000).strftime("%Y-%m-%d") #Need to divide the MomentJS date  by 1000 to get the correct one.
     end
 
-    def filter_results(params)
+    def filter_results(parameters)
       @param_data = Hash.new
       #TODO fix deprecated to_hash
-      params.each_pair {|k, v| @param_data[k] = v.to_s} 
+      parameters.each_pair {|k, v| @param_data[k] = v.to_s} 
     #  @param_data.update(params) { |key, value| value.to_s }
    
       if @param_data["organismoPublico"] == "*"
@@ -33,8 +33,13 @@
          @to_send.push(@param_json_routes[key.to_sym]) unless val.blank?
       end
 
-      @query_result = @to_send.reduce(Result) { |prev, curr| prev.send("where", curr) }
+      result = Array.new
 
+      Result.in_batches do |batch|
+        sub_result = @to_send.reduce(batch) {|prev, curr| prev.send("where", curr) }.map{ |obj| obj.to_json }
+        result.concat sub_result
+      end
+      return result
     end
     
 end

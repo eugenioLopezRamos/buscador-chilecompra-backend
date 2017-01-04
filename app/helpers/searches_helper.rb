@@ -19,7 +19,19 @@ module SearchesHelper
     @messages
   end
 
+  def update_search(search)
+    to_update = current_user.searches.find_by(name: search[:name])
+    to_update.update_attributes(value: search[:value], name: search[:name])
+    
+    rescue ActiveRecordError => e
+      @messages["error"] = e 
+  end
 
+  def destroy_search(search)
+    
+
+
+  end
 
   private
   def show_fields
@@ -27,7 +39,7 @@ module SearchesHelper
   end
 
   def hashify
-      #TODO: Document this in detail. TLDR => makes a hash like {"name": [name1, name2, name3...], "value": [{value1...}, {value2...}], "id":[id1, id2, id3...]}
+      #TODO: Document this in detail. TL;DR => makes a hash like {"name": [name1, name2, name3...], "value": [{value1...}, {value2...}], "id":[id1, id2, id3...]}
      ->(*show_fields, start_index, plucked_array, new_hash) {
 
         len = show_fields.flatten.length

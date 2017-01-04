@@ -15,8 +15,7 @@ class RequestsController < ApplicationController
   end
 
   def get_info
-    @results = filter_results(params)
-    render json: @results
+    render json: filter_results(valid_get_info_params?)
   end
 
   private

@@ -11,9 +11,11 @@ class SearchesController < ApplicationController
   end
 
   def update
+    render json: update_search(search_params)
   end
 
   def destroy
+    render json: update_search(to_be_determned)
   end
 
   private
