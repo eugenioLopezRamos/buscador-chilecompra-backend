@@ -1,39 +1,39 @@
 module ResultsHelper
 
-    def save_results(results)
-        
-        @messages = Hash.new
-        results.each do |r|
+    def save_results(data)
+
+        @successful = Hash.new   
+        @failed = Hash.new
+        @not_uniq = Hash.new
+
+        data["results"].each do |r|
             begin        
-                new_entry = UserResult.create(user_id: current_user.id, result_id: r, name: results["name"])
+                new_entry = UserResult.create(user_id: current_user.id, result_id: r, name: data["name"])
                 #puts successfully recorded ids on successful
                 #and failed ids on failed
                 if new_entry.save
-                    @messages[r] = true
+                    @successful[r] = true
                 else
-                    @messages[r] = false
+                    @failed[r] = false
                 end
                 rescue ActiveRecord::RecordNotUnique
-                @messages[r] = false  
+                    @not_uniq[r] = false
             end     
         end
-
-        successful = Array.new
-        failed = Array.new
-
-        @messages.keys.map do |k|
-            if @messages[k]
-                successful.push(k)
-            else
-                failed.push(k)
-            end
-        end
-
-        render json: {"message": {"successful": successful,
-                                    "failed": failed}}
+        #TODO: formatting....
+        render json: {"message": {
+                                  "info": {"guardado con exito": @successful.keys},
+                                  "errors": {
+                                               "repetidos": @not_uniq.keys,
+                                               "errores": @failed.keys
+                                               }
+                                 }
+                      }
+                                              
     end
 
     # TODO: refactor this method...
+    # check if it can be made easier with similar performance by using SQL group by in ActiveRecord
     def return_grouped_user_results
         #returns JSON of UserResults of current_user grouped by UserResult.name
         # so => {"myresultname": [id1, id2, id3...idN] }

@@ -35,8 +35,9 @@
 
       result = Array.new
 
+      #TODO: check if by using pluck I can reduce the footprint of this query 
       Result.in_batches do |batch|
-        sub_result = @to_send.reduce(batch) {|prev, curr| prev.send("where", curr) }.map{ |obj| obj.to_json }
+        sub_result = @to_send.reduce(batch) {|prev, curr| prev.send("where", curr) }.map { |obj| obj.to_json }
         result.concat sub_result
       end
       return result
