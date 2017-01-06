@@ -2,21 +2,28 @@ module SearchesHelper
 
   def show_searches
     searches = current_user.searches.pluck(*show_fields)
-    hashify.(show_fields, 0, searches, Hash.new)
+    hashify.(show_fields, 0, searches, Hash.new).delete_if {|k, v| v == [nil]}
   end
 
 
   def create_search(search)
-    @messages = Hash.new
+    #TODO: just change the hashes to arrays probably.
+    @successful= Hash.new
+    @not_uniq = Hash.new
+    @errors = Hash.new
       begin
         new_search = current_user.searches.create(value: search[:value], name: search[:name])
         if new_search.save
-          @messages["info"] = "Resultado guardado exitosamente"
+          @successful[search[:name]] = true
+        else
+          @errors[search[:name]] = true
         end
       rescue ActiveRecord::RecordNotUnique
-        @messages["error"] = "Nombre de resultado duplicado, por favor elige otro"
+        @not_uniq[search[:name]] = true
       end
-    @messages
+    return {"message": {"info": {"guardado con exito": @successful.keys} ,
+                               "errors": {"repetidos": @not_uniq.keys, "errores": @errors.keys}}
+                  }
   end
 
   def update_search(search)
@@ -28,9 +35,36 @@ module SearchesHelper
   end
 
   def destroy_search(search)
+    id = search[:id]
+
+    search = Search.find_by(user_id: current_user.id, id: id)
+    name = search.name
+    #TODO: This json format is ugly....
+    if search.destroy
+      return {
+              "message": {
+                          "info": {
+                                    "Borrado exitosamente": [name]
+                                    } 
+                          },
+              "searches": show_searches
+              }
+    else
+      return {
+              "message": {
+                          "errors": {
+                                    "Fallido": [name]
+                                    } 
+                          },
+              "searches": show_searches
+
+              }
     
-
-
+    end
+    #TODO: rescue Devise::AuthenticationError (or however it's called)
+    #rescue Devise::AuthError
+    # return {"message": {"errors": {"Error": "Credenciales inválidas, por favor ingresa"}}}
+    #  
   end
 
   private
@@ -59,7 +93,7 @@ module SearchesHelper
         end
         hashify.(show_fields, new_index, plucked_array, new_hash)
      }
-
+      
   end
 
 end

@@ -1,4 +1,4 @@
-module ResultsHelper
+module UserResultsHelper
 
     def save_results(data)
 
@@ -14,10 +14,10 @@ module ResultsHelper
                 if new_entry.save
                     @successful[r] = true
                 else
-                    @failed[r] = false
+                    @failed[r] = true
                 end
                 rescue ActiveRecord::RecordNotUnique
-                    @not_uniq[r] = false
+                    @not_uniq[r] = true
             end     
         end
         #TODO: formatting....
@@ -30,6 +30,25 @@ module ResultsHelper
                                  }
                       }
                                               
+    end
+
+    def destroy_user_result(result)
+        @successful = 0
+        @errors = 0
+        to_destroy = UserResult.where("user_id = ? AND name = ?", current_user.id, result[:name])
+        to_destroy.each do |record|
+          begin
+            record.destroy
+            @successful += 1 
+          rescue ActiveRecord::ActiveRecordError => e
+            @errors += 1
+          end
+        end
+
+       return {"message": {"info": {"eliminados": @successful},
+                           "errors": @errors
+                           },
+               "results": return_grouped_user_results }
     end
 
     # TODO: refactor this method...
@@ -64,5 +83,8 @@ module ResultsHelper
         end
          
     end
+
+
+    
 
 end

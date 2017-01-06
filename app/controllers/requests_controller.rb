@@ -29,8 +29,8 @@ class RequestsController < ApplicationController
             else
               raise ArgumentError, {"mensaje": "Fecha en formato inválido, por favor intentar de nuevo. Formato requerido: DD-MM-AAAA"} 
             end
-        rescue ArgumentError
-          render json: {"mensaje": "Fecha en formato inválido, por favor intentar de nuevo. Formato requerido: DD-MM-AAAA"} 
+        rescue ArgumentError => e
+          render json: e
         end
     end
 

@@ -3,6 +3,8 @@ class SearchesController < ApplicationController
   before_action :authenticate_user!
 
   def show
+
+
     render json: show_searches
   end
 
@@ -15,7 +17,7 @@ class SearchesController < ApplicationController
   end
 
   def destroy
-    render json: update_search(to_be_determned)
+    render json: destroy_search(search_delete_params)
   end
 
   private
@@ -30,6 +32,11 @@ class SearchesController < ApplicationController
                                                 :selectedEstadoLicitacion,
                                                 :rutProveedor]}, 
                                                 :name)
-
   end
+
+  def search_delete_params
+    params.require(:search).permit(:id)
+  end
+
+
 end

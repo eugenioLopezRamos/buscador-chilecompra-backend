@@ -1,26 +1,32 @@
-class ResultsController < ApplicationController
-    include ResultsHelper
+class UserResultsController < ApplicationController
+    include UserResultsHelper
     
     before_action :authenticate_user!
-    before_action :valid_ids?, only: [:create, :update, :destroy]
+    before_action :valid_ids?, only: [:create, :update]
 
     def show
         render json: return_grouped_user_results
     end
 
     def create
-        save_results(result_params)
+        save_results(user_result_params)
     end
 
     def destroy
         #destruirlos por nombre = "" where user_id = current_user ?
+        render json: destroy_user_result(user_result_delete_params)
     end
 
     private
     
-    def result_params
+    def user_result_params
         params.permit({:results => []}, :name)
     end
+
+    def user_result_delete_params
+        params.require(:results).permit(:name)
+    end
+
 
     def valid_ids?
         new_arr = params["results"].map {|id| id.to_i}
