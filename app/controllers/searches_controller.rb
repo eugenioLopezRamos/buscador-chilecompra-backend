@@ -3,8 +3,6 @@ class SearchesController < ApplicationController
   before_action :authenticate_user!
 
   def show
-
-
     render json: show_searches
   end
 
@@ -13,7 +11,7 @@ class SearchesController < ApplicationController
   end
 
   def update
-    render json: update_search(search_params)
+    render json: update_search(search_update_params)
   end
 
   def destroy
@@ -30,8 +28,21 @@ class SearchesController < ApplicationController
                                                 :date,
                                                 :palabrasClave,
                                                 :selectedEstadoLicitacion,
-                                                :rutProveedor]}, 
-                                                :name)
+                                                :rutProveedor]
+                                                }, 
+                                       :name)
+  end
+
+  def search_update_params
+    params.require(:search).permit({:newValues => [:date,
+                                                   :rutProveedor,
+                                                   :palabrasClave,
+                                                   :codigoLicitacion,
+                                                   :organismosPublicosFilter,
+                                                   :selectedEstadoLicitacion,
+                                                   :selectedOrganismoPublico]
+                                                   }, 
+                                    :searchId, :searchName)
   end
 
   def search_delete_params
