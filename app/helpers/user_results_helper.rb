@@ -1,5 +1,46 @@
 module UserResultsHelper
 
+    # TODO: refactor this method...
+    # check if it can be made easier with similar performance by using SQL group by in ActiveRecord
+    def return_grouped_user_results
+        #returns JSON of UserResults of current_user grouped by UserResult.name
+        # so => {"myresultname": [id1, id2, id3...idN] }
+
+        #get all the Results associated with current_user, as an array
+        # a result is ["name", "id"], so @names will be [name1, name2, name3....]
+        @resp = current_user.results.pluck("name", "id")
+
+        #gets only each unique name, which we will use to group
+        @names = @resp.map {|result| result[0]}.uniq
+
+        #Make @names.length amount of arrays, where each array[n] has the results corresponding to @names[n]
+        @each_name_array = @names.map do |name|
+            @resp.select { |value| value[0] == name}
+        end
+
+        #As each name_results_arrays is an array of results ["nameXXXX", "1111", "nameYYYY", "1234"...]
+        #map each array, then map each subarray and return subarray[1] (that is, the id of the name: id pair)
+        @resp2 = @each_name_array.map do |array|
+            array.map {|subarray| subarray[1]}
+        end
+        # So, this returns all the ids corresponding to each name (@resp2[n] are the results corresponding to @names[n])
+
+        #make a hash where each item of @names is a key and each array of @resp2 (its ids) are the value
+        @names.each_with_index.reduce(Hash.new) do |prev, (curr, index)| 
+            prev[curr] = @resp2[index.to_i]
+            prev
+        end
+    end
+
+    def return_user_result_values(name)
+        #returns an array with ids [2, 7, 18, ..., N]
+        user_results = current_user.results.where("name = ?", name).pluck("result_id")
+        #find all results with ids in user_results                  
+        Result.where(id: user_results).map {|element| element.to_json}
+    end
+
+
+
     def save_results(data)
 
         @successful = Hash.new   
@@ -51,38 +92,6 @@ module UserResultsHelper
                "results": return_grouped_user_results }
     end
 
-    # TODO: refactor this method...
-    # check if it can be made easier with similar performance by using SQL group by in ActiveRecord
-    def return_grouped_user_results
-        #returns JSON of UserResults of current_user grouped by UserResult.name
-        # so => {"myresultname": [id1, id2, id3...idN] }
-
-        #get all the Results associated with current_user, as an array
-        # a result is ["name", "id"], so @names will be [name1, name2, name3....]
-        @resp = current_user.results.pluck("name", "id")
-
-        #gets only each unique name, which we will use to group
-        @names = @resp.map {|result| result[0]}.uniq
-
-        #Make @names.length amount of arrays, where each array[n] has the results corresponding to @names[n]
-        @each_name_array = @names.map do |name|
-            @resp.select { |value| value[0] == name}
-        end
-
-        #As each name_results_arrays is an array of results ["nameXXXX", "1111", "nameYYYY", "1234"...]
-        #map each array, then map each subarray and return subarray[1] (that is, the id of the name: id pair)
-        @resp2 = @each_name_array.map do |array|
-            array.map {|subarray| subarray[1]}
-        end
-        # So, this returns all the ids corresponding to each name (@resp2[n] are the results corresponding to @names[n])
-
-        #make a hash where each item of @names is a key and each array of @resp2 (its ids) are the value
-        @names.each_with_index.reduce(Hash.new) do |prev, (curr, index)| 
-            prev[curr] = @resp2[index.to_i]
-            prev
-        end
-         
-    end
 
 
     

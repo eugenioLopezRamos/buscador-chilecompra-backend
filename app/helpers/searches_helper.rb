@@ -30,7 +30,12 @@ module SearchesHelper
 
     to_update = current_user.searches.find_by(name: search[:searchName])
     to_update.update_attributes(value: search[:newValues], name: search[:searchName])
-    show_searches
+    return {
+            "message": {
+              "info": {"Modificado exitosamente": [ search[:searchName] ] }
+            },   
+            "searches": show_searches,
+            }
 
     rescue ActiveRecord::ActiveRecordError => e
       @messages["error"] = e

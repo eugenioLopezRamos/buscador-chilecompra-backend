@@ -4,6 +4,11 @@ class RequestsController < ApplicationController
   before_action :valid_entity_params?, only: :get_entity_data
   before_action :authenticate_request!, only: :show_hello
 
+
+  def get_info
+    render json: filter_results(valid_get_info_params?)
+  end
+
   def get_misc_info
     #This will be replaced too.
     mod = ApplicationController::ApplicationHelper
@@ -12,10 +17,6 @@ class RequestsController < ApplicationController
    
       render json: requested_info
     end
-  end
-
-  def get_info
-    render json: filter_results(valid_get_info_params?)
   end
 
   private

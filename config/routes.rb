@@ -10,14 +10,19 @@ Rails.application.routes.draw do
  # get '/get_chilecompra_data', to: "requests#get_chilecompra_data"
  
   #this one gets results from the DB. Will replace get_chilecompra_data
+  #TODO: bad name, too general. change here and in frontend
   get '/get_info', to: "requests#get_info"
 
 
   #CRUD for user_results
+  #TODO: resources: user_results, or however it's done.
   get '/results', to: "user_results#show"
   post '/results', to: "user_results#create"
   put '/results', to: "user_results#update"
   delete '/results', to: "user_results#destroy"
+
+  #A bit of a special case, so I'll leave it near /results
+  get '/user_results', to: "user_results#show_stored_results_values"
 
   #CRUD search queries
   get '/searches', to: "searches#show"
