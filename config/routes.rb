@@ -25,6 +25,7 @@ Rails.application.routes.draw do
   delete '/results', to: "user_results#destroy"
 
   #A bit of a special case, so I'll leave it near /results
+  #TODO: change this route...
   get '/user_results', to: "user_results#show_stored_results_values"
 
   #CRUD search queries

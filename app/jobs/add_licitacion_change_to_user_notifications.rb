@@ -1,9 +1,10 @@
 class AddNotificationChangeToUserNotifications
 
-  def self.perform
+  def self.perform(users)
 
+    
 
   end
 
-  
+
 end
