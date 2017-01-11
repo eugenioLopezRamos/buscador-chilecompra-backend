@@ -16,6 +16,9 @@ Rails.application.routes.draw do
 
   #CRUD for user_results
   #TODO: resources: user_results, or however it's done.
+
+  #Tambien se puede cambiar a algo como /results => requests#get_info (reemplazando el requests controller)
+  # y luego /results/user, to: user_results#show para hacerlo mas consistente
   get '/results', to: "user_results#show"
   post '/results', to: "user_results#create"
   put '/results', to: "user_results#update"

@@ -36,7 +36,7 @@ module UserResultsHelper
         #returns an array with ids [2, 7, 18, ..., N]
         user_results = current_user.results.where("name = ?", name).pluck("result_id")
         #find all results with ids in user_results                  
-        Result.where(id: user_results).map {|element| element.to_json}
+        Result.where(id: user_results).map { |element| element.to_json}
     end
 
 

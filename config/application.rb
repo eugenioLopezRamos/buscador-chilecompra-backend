@@ -29,5 +29,7 @@ module Cc
   	config.action_controller.action_on_unpermitted_parameters = :raise
     config.time_zone = 'America/Santiago'
     config.active_record.default_timezone = :local
+    config.autoload_paths << "#{Rails.root}/lib"
+    config.eager_load_paths << "#{Rails.root}/lib"
   end
 end
