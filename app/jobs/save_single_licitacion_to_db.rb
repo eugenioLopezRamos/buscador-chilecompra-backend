@@ -13,7 +13,7 @@ class SaveSingleLicitacionToDB
 
         if result.save
             File.open("#{Rails.root}/log/save_to_db.log", "a+"){|f| f << "Exito: Licitacion #{datos_lic[0]['CodigoExterno']} a las #{Time.now()} \n" }
-            if result.value != previous_last_result.value #If the value of the licitacion changed....
+            if previous_last_result && result.value != previous_last_result.value #If the licitacion existed and its value has changed...
                 #get users subscribed to the result, who'll be notified of the change
                 users = users_subscribed_to previous_last_result.id
                 # send this to a job queue so it gets added to user's notifications and added to the email newsletter send queue
@@ -27,7 +27,7 @@ class SaveSingleLicitacionToDB
         end
     end
 
-    def users_subscribed_to result_id
+    def self.users_subscribed_to result_id
         #get all users that have a result saved that includes the one that was modified
         UserResult.in_batches.reduce(Array.new) do |accumulator, current|
             #get the user_ids of users with the result_id saved

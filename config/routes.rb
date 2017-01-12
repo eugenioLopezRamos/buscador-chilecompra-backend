@@ -16,17 +16,24 @@ Rails.application.routes.draw do
 
   #CRUD for user_results
   #TODO: resources: user_results, or however it's done.
-
   #Tambien se puede cambiar a algo como /results => requests#get_info (reemplazando el requests controller)
   # y luego /results/user, to: user_results#show para hacerlo mas consistente
+
   get '/results', to: "user_results#show"
   post '/results', to: "user_results#create"
   put '/results', to: "user_results#update"
   delete '/results', to: "user_results#destroy"
+    #subscriptions
+  get '/results/subscriptions', to: "user_result#show_subscriptions" #Get all results that a user is subscribed to
+  post '/results/subscriptions', to: "user_result#create_subscription" #Create a new one
+  put '/results/subscriptions', to: "user_result#update_subscription" #Modify
+  delete '/results/subscriptions', to: "user_result#destroy_subscription"
+
 
   #A bit of a special case, so I'll leave it near /results
   #TODO: change this route...
   get '/user_results', to: "user_results#show_stored_results_values"
+
 
   #CRUD search queries
   get '/searches', to: "searches#show"

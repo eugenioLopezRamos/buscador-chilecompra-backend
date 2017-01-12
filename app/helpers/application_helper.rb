@@ -1,5 +1,14 @@
 module ApplicationHelper
 
+
+  def json_message_to_frontend(info: nil, errors: nil)
+    hsh = {"message": {"info": info, "errors": errors}}
+    message = hsh[:message]
+    #delete nil value keys
+    message.delete_if {|key, value| message[key].nil? }
+    hsh
+  end
+
   def self.estados_licitacion
     {
     Todos: "",
