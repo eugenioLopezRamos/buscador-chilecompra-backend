@@ -14,12 +14,11 @@ class User < ActiveRecord::Base
     LicitacionChangeMailer.send_notification_email(self, licitacion).deliver_now
   end
 
-
   ######## STORED RESULT METHODS
   def stored_results
     UserResult.where(user_id: self.id, stored_as_group: true).pluck("stored_group_name")
   end
-
+  #TODO: This is wrong
   def has_stored_result? result_id
     result = UserResult.where(user_id: self.id, result_id: result_id)
     !result.empty? && result.stored_as_group
@@ -31,35 +30,55 @@ class User < ActiveRecord::Base
     Result.where(id: ids)
   end
 
-  def store_results(result_ids, name)
+  def create_stored_results(result_ids, name)
     @successful = Hash.new   
     @failed = Hash.new
-
+    @not_uniq = Hash.new
+    #TODO: clean up + document this decently... TLDR create a record. If it already exists (ActiveRecord::RecordNotUnique), update the existing record.
+    # If updating is falsy, raise ActiveRecordError add the result to the failed hash
     result_ids.each do |result|
-      new_entry = UserResult.create(user_id: self.id, stored_group_name: name, stored_as_group: true)
-      if new_entry.save
-        @successful[result] = true
-      end
-      rescue ActiveRecord::RecordNotUnique
-        #if update_attributes returns false/nil, raise ActiveRecordError. This should happen when the result isn't changed/the stored_group_name/user_id combo already exists
-        if !UserResult.where(user_id: self.id, result_id: result_id).update_attributes(stored_group_name: result_name, stored_as_group: true)
-          raise ActiveRecordError  
-          #only gets executed if the update_attributes is successful
+      begin
+        new_entry = UserResult.create(user_id: self.id, stored_group_name: name, stored_as_group: true)
+        if new_entry.save
           @successful[result] = true
         end
-      rescue ActiveRecord::ActiveRecordError
-        @failed[result] = true
+        rescue ActiveRecord::RecordNotUnique
+          #if update_attributes returns false/nil, raise ActiveRecordError. This should happen when the result isn't changed/the stored_group_name/user_id combo already exists
+          begin
+            if !UserResult.where(user_id: self.id, result_id: result_id).update_attributes(stored_group_name: name, stored_as_group: true)
+              raise ActiveRecordError
+              #only gets executed if the update_attributes is successful
+              @successful[result] = true
+            end  
+            rescue ActiveRecord::ActiveRecordError
+              @not_uniq[result] = true
+          end
+      end
     end
-    {successful: @successful, failed: @failed}
+    {successful: @successful, failed: @failed, not_unique: @not_uniq}
   end
 
 
 
-  def update_stored_result(result_id, name)
-    UserResult.where(user_id: self.id, result_id: result_id).update_attribute(stored_group_name: name)
+  def update_stored_result(name, new_name)
+    @successful = Array.new
+    @failed = Array.new
+
+    UserResult.where(user_id: self.id, stored_group_name: name).in_batches do |batch|
+      batch.each do |result|
+        begin
+          if result.update_attribute(:stored_group_name, new_name)
+            @successful.push result
+          end
+        rescue ActiveRecordError
+          @failed.push result
+        end
+      end
+    end
+    {"Guardado con exito": @successful, "Fallido": @failed}
   end
 
-  def unstore_result result_name
+  def delete_stored_result result_name
     UserResult.where(user_id: self.id, stored_group_name: result_name).update_attributes(stored_as_group: false, stored_group_name: "")
   end
 

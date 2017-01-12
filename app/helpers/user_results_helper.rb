@@ -41,13 +41,30 @@ module UserResultsHelper
         Result.where(id: user_results).map { |element| element.to_json}
     end
 
-    def create_user_result parameters
+    def create_stored_result parameters
       @result_ids = parameters[:results]
       @name = parameters[:name]
       #returns a hash with info about what happened
       message = current_user.store_results(@result_ids, @name)
       json_message_to_frontend(info: message[:successful], errors: message[:failed])
     end
+
+    def update_stored_result parameters
+      @result_id = parameters[:update_subscription][:result_id]
+      @name = parameters[:update_subscription][:name]
+      
+      current_user.update_stored_result(@result_id, @name)
+    end
+
+    def delete_stored_result name
+      current_user.delete_stored_result name
+    end
+
+
+
+
+
+
 
 
 
