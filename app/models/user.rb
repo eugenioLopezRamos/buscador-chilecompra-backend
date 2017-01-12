@@ -79,7 +79,22 @@ class User < ActiveRecord::Base
   end
 
   def delete_stored_result result_name
-    UserResult.where(user_id: self.id, stored_group_name: result_name).update_attributes(stored_as_group: false, stored_group_name: "")
+    @successful = Array.new
+    @failed = Array.new
+
+    UserResult.where(user_id: self.id, stored_group_name: result_name).in_batches do |batch|
+
+      batch.each do |result| 
+        begin
+        if result.update_attributes(stored_as_group: false, stored_group_name: "") }
+          @successful.push result
+        end
+        rescue ActiveRecordError
+          @failed.push result
+        end
+      end
+    end
+    {"Removido con exito": @successful, "Fallido": @failed}
   end
 
 ###################################
