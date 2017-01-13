@@ -29,15 +29,17 @@
                            }
       #buscar palabras clave lo hare despues creo, si no, es posible que me demore demasiado( o quizas deba hacer benchmarks?)
 
-      @param_data.each_pair do |key, val|
-         @to_send.push(@param_json_routes[key.to_sym]) unless val.blank?
+      @param_data.each_pair do |key, value|
+         @to_send.push(@param_json_routes[key.to_sym]) unless value.blank?
       end
 
       result = Array.new
 
+#esto se puede hacer mas rapido con un where del parametro 0 y luego send los demas sobre ese subconjunto y concatenarlos
       #TODO: check if by using pluck I can reduce the footprint of this query 
       Result.in_batches do |batch|
-        sub_result = @to_send.reduce(batch) {|prev, curr| prev.send("where", curr) }.map { |obj| obj.to_json }
+        sub_result = @to_send.reduce(batch) {|prev, curr| prev.send("where", curr) }
+                             .map { |obj| obj.to_json }
         result.concat sub_result
       end
       return result

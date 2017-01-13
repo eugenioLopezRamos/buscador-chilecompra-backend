@@ -37,15 +37,16 @@ class User < ActiveRecord::Base
     #TODO: clean up + document this decently... TLDR create a record. If it already exists (ActiveRecord::RecordNotUnique), update the existing record.
     # If updating is falsy, raise ActiveRecordError add the result to the failed hash
     result_ids.each do |result|
+     # binding.pry
       begin
-        new_entry = UserResult.create(user_id: self.id, stored_group_name: name, stored_as_group: true)
+        new_entry = UserResult.create(user_id: self.id, stored_group_name: name, stored_as_group: true, result_id: result)
         if new_entry.save
           @successful[result] = true
         end
         rescue ActiveRecord::RecordNotUnique
           #if update_attributes returns false/nil, raise ActiveRecordError. This should happen when the result isn't changed/the stored_group_name/user_id combo already exists
           begin
-            if !UserResult.where(user_id: self.id, result_id: result_id).update_attributes(stored_group_name: name, stored_as_group: true)
+            if !UserResult.where(user_id: self.id, result_id: result).update_attributes(stored_group_name: name, stored_as_group: true)
               raise ActiveRecordError
               #only gets executed if the update_attributes is successful
               @successful[result] = true
@@ -55,7 +56,7 @@ class User < ActiveRecord::Base
           end
       end
     end
-    {successful: @successful, failed: @failed, not_unique: @not_uniq}
+    return {info: {"Guardado con éxito": @successful.keys}, errors: {"Fallido": @failed.keys, "Duplicados": @not_uniq.keys} } 
   end
 
 
@@ -86,7 +87,7 @@ class User < ActiveRecord::Base
 
       batch.each do |result| 
         begin
-        if result.update_attributes(stored_as_group: false, stored_group_name: "") }
+        if result.update_attributes(stored_as_group: false, stored_group_name: "")
           @successful.push result
         end
         rescue ActiveRecordError
@@ -126,5 +127,6 @@ class User < ActiveRecord::Base
   end
 
   ##########################
+
 
 end

@@ -20,7 +20,7 @@ Rails.application.routes.draw do
   # y luego /results/user, to: user_results#show para hacerlo mas consistente
 
   get '/results', to: "user_results#show"
-  post '/results', to: "user_results#create"
+  post '/results', to: "user_results#create_stored_result"
   put '/results', to: "user_results#update"
   delete '/results', to: "user_results#destroy"
     #subscriptions

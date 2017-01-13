@@ -14,7 +14,12 @@ class UserResultsController < ApplicationController
     end
 
     def create_stored_result
-      render json: create_stored_result(user_result_params)
+      @stored_result_name = user_result_params[:name]
+      @stored_result_ids = user_result_params[:results]
+
+      @message = current_user.create_stored_results @stored_result_ids, @stored_result_name
+
+      render json: json_message_to_frontend(info: @message[:info], errors: @message[:errors])
     end
 
     def update_stored_result

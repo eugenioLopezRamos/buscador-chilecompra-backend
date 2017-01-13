@@ -7,7 +7,7 @@ module UserResultsHelper
     def return_grouped_user_results
         #returns JSON of UserResults of current_user grouped by UserResult.name
         # so => {"myresultname": [id1, id2, id3...idN] }
-
+        @response = Hash.new
         #get all the Results associated with current_user, as an array
         # a result is ["name", "id"], so @names will be [name1, name2, name3....]
         @resp = current_user.results.pluck("stored_group_name", "id")
@@ -15,23 +15,31 @@ module UserResultsHelper
         #gets only each unique name, which we will use to group
         @names = @resp.map {|result| result[0]}.uniq
 
-        #Make @names.length amount of arrays, where each array[n] has the results corresponding to @names[n]
-        @each_name_array = @names.map do |name|
-            @resp.select { |value| value[0] == name}
+        # #Make @names.length amount of arrays, where each array[n] has the results corresponding to @names[n]
+        # @each_name_array = @names.map do |name|
+        #     @resp.select { |value| value[0] == name}
+        # end
+
+        # #As each name_results_arrays is an array of results ["nameXXXX", "result_id_1", "nameYYYY", "result_id1234"...]
+        # #map each array, then map each subarray and return subarray[1] (that is, the id of the name: id pair)
+        # @resp2 = @each_name_array.map do |array|
+        #     array.map {|subarray| subarray[1]}
+        # end
+        # # So, this returns all the ids corresponding to each name (@resp2[n] are the results corresponding to @names[n])
+
+        # #make a hash where each item of @names is a key and each array of @resp2 (its ids) are the value
+        # @names.each_with_index.reduce(Hash.new) do |prev, (curr, index)| 
+        #     prev[curr] = @resp2[index.to_i]
+        #     prev
+        # end
+
+        @names.map do |name|
+          @response[name] = @resp.select {|value| value[0] === name}
+                                 .map {|value| value[1]}
         end
 
-        #As each name_results_arrays is an array of results ["nameXXXX", "1111", "nameYYYY", "1234"...]
-        #map each array, then map each subarray and return subarray[1] (that is, the id of the name: id pair)
-        @resp2 = @each_name_array.map do |array|
-            array.map {|subarray| subarray[1]}
-        end
-        # So, this returns all the ids corresponding to each name (@resp2[n] are the results corresponding to @names[n])
+        @response
 
-        #make a hash where each item of @names is a key and each array of @resp2 (its ids) are the value
-        @names.each_with_index.reduce(Hash.new) do |prev, (curr, index)| 
-            prev[curr] = @resp2[index.to_i]
-            prev
-        end
     end
 
     def return_user_result_values(name)
@@ -41,13 +49,13 @@ module UserResultsHelper
         Result.where(id: user_results).map { |element| element.to_json}
     end
 
-    def create_stored_result parameters
-      @result_ids = parameters[:results]
-      @name = parameters[:name]
-      #returns a hash with info about what happened
-      message = current_user.store_results(@result_ids, @name)
-      json_message_to_frontend(info: message[:successful], errors: message[:failed])
-    end
+    # def create_stored_result(parameters)
+    #   @result_ids = parameters[:results]
+    #   @name = parameters[:name]
+    #   #returns a hash with info about what happened
+    #   @message = current_user.store_results(@result_ids, @name)
+    #   json_message_to_frontend(info: @message[:successful], errors: @message[:failed])
+    # end
 
     def update_stored_result parameters
       @result_id = parameters[:update_subscription][:result_id]
@@ -59,6 +67,7 @@ module UserResultsHelper
     def delete_stored_result name
       current_user.delete_stored_result name
     end
+
 
 
 

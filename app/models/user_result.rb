@@ -3,6 +3,7 @@ class UserResult < ApplicationRecord
   belongs_to :result
 
   before_create :set_now_as_name_if_nil
+  #TODO: este after_update está malo, verificar (al crear, los borra inmediatamente)
   after_update :delete_if_unused
 
   private
