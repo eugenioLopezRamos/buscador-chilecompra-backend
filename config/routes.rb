@@ -19,15 +19,15 @@ Rails.application.routes.draw do
   #Tambien se puede cambiar a algo como /results => requests#get_info (reemplazando el requests controller)
   # y luego /results/user, to: user_results#show para hacerlo mas consistente
 
-  get '/results', to: "user_results#show"
+ # get '/results', to: redirect('/results/subscriptions')
   post '/results', to: "user_results#create_stored_result"
   put '/results', to: "user_results#update"
   delete '/results', to: "user_results#destroy"
     #subscriptions
-  get '/results/subscriptions', to: "user_result#show_subscriptions" #Get all results that a user is subscribed to
-  post '/results/subscriptions', to: "user_result#create_subscription" #Create a new one
-  put '/results/subscriptions', to: "user_result#update_subscription" #Modify
-  delete '/results/subscriptions', to: "user_result#destroy_subscription"
+  get '/results/subscriptions', to: "user_results#show" #Get all results that a user is subscribed to
+  post '/results/subscriptions', to: "user_results#create" #Create a new one
+  put '/results/subscriptions', to: "user_results#update" #Modify
+  delete '/results/subscriptions', to: "user_results#destroy"
 
 
   #A bit of a special case, so I'll leave it near /results

@@ -122,14 +122,14 @@ module UserResultsHelper
                "results": return_grouped_user_results }
     end
 
-    def create_subscription(parameters)
-      @result = parameters[:create_subscription][:result_id]
-      @name = parameters[:create_subscription][:name]
-      #if the user has stored the result, modify it (set subscribed => true and subscription_name => @name)
-      if current_user.has_stored_result? @result
-        action = "subscribe_to_result"
-        return attempt_subscription(action, @result, @name)
-      end
+    def create_subscription(subscription_info)
+      @result = subscription_info[:result_id]
+      @name = subscription_info[:name]
+      # #if the user has stored the result, modify it (set subscribed => true and subscription_name => @name)
+      # if current_user.has_stored_result? @result
+      #   action = "subscribe_to_result"
+      #   return attempt_subscription(action, @result, @name)
+      # end
       #else, if user hasn't stored the result, create it and subscribe to it
       action = "create_and_subscribe_to_result"
       return attempt_subscription(action, @result, @name)
