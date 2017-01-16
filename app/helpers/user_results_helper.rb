@@ -135,49 +135,18 @@ module UserResultsHelper
       return attempt_subscription(action, @result, @name)
     end
 
-    def update_subscription(parameters)
-      @result = parameters[:create_subscription][:result_id]
-      @name = parameters[:create_subscription][:name]
+    # def update_subscription(subscription_info)
+    #   @name = subscription_info[:name]
 
-      if current_user.update_result_subscription(@result, @name)
-        return json_message_to_frontend(error: "Error al actualizar la suscripción")#{"message": {"error": "Error al actualizar la suscripción"}}
-      end
+    #   if current_user.update_result_subscription(@name)
+    #     return json_message_to_frontend(error: "Error al actualizar la suscripción")#{"message": {"error": "Error al actualizar la suscripción"}}
+    #   end
 
-      return json_message_to_frontend(error: "Error al actualizar la suscripción")
+    #   return json_message_to_frontend(error: "Error al actualizar la suscripción")
 
-      rescue ActiveRecord::ActiveRecordError
-        return json_message_to_frontend(errors: "Error al actualizar la suscripción")
-    end
-
-    def cancel_subscription(parameters)
-      @result = parameters[:cancel_subscription][:result_id]
-
-      if current_user.cancel_result_subscription @result_id
-        return json_message_to_frontend(errors: "Suscripción cancelada exitosamente")
-      end
-
-      return json_message_to_frontend(errors: "No se pudo cancelar la suscripción")
-
-      rescue ActiveRecord::ActiveRecordError
-        return json_message_to_frontend(errors: "Error al cancelar la suscripción")
-    end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    #   rescue ActiveRecord::ActiveRecordError
+    #     return json_message_to_frontend(errors: "Error al actualizar la suscripción")
+    # end
 
     private
 

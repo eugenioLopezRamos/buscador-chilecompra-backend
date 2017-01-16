@@ -16,16 +16,27 @@ class User < ActiveRecord::Base
 
 ######## SUBSCRIPTION METHODS
   def subscriptions
-    @results_array = Array.new
-
+    @results_hash = Hash.new
     UserResult.where(user_id: self.id, subscribed: true)
-      .pluck(:subscription_name, :result_id).each do |sub|
-        current_result_hash = Hash.new
-        current_result_hash[sub[0]] = sub[1]
-        @results_array.push(current_result_hash) 
-    end
+      .pluck(:subscription_name, :result_id)
+      .map do |result|
 
-    @results_array
+        @results_hash[result[0]] = result[1]
+
+      end
+
+    @results_hash
+  end
+
+  def subscription_history(result_id)
+    # results_ids = UserResult.where(user_id: self.id, subscribed: true, subscription_name: result_name).pluck("result_id")
+    
+    # results_ids.each do |version|
+
+    #   Result.where  
+
+    # end
+
   end
 
   def subscribed_to_result?(result_id)
@@ -41,12 +52,18 @@ class User < ActiveRecord::Base
     UserResult.create(user_id: self.id, result_id: result_id, subscribed: true, subscription_name: name)
   end
 
-  def update_result_subscription(result_id, name)
-    UserResult.where(user_id: self.id, result_id: result_id).update_attribute(:subscription_name, name)
+  def update_result_subscription(old_name, name)
+    UserResult.where(user_id: self.id, subscription_name: old_name).each do |subscription|
+      subscription.update_attribute(:subscription_name, name)
+    end
   end
 
-  def cancel_result_subscription(result_id)
-    UserResult.where(user_id: self.id, result_id: result_id).update_attributes(subscription_name: "", subscribed: false)
+  def destroy_result_subscription(name)
+    # Do note that [user_id, subscription_name] are unique indexes, so this should only affect one subscription at a time
+    # (and each subscription is only to one result at a time)
+    UserResult.where(user_id: self.id, subscription_name: name).each do |subscription|
+      subscription.update_attributes(subscription_name: "", subscribed: false)
+    end
   end
 
   ##########################
