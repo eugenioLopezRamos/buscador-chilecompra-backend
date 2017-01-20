@@ -20,14 +20,18 @@ Rails.application.routes.draw do
   # y luego /results/user, to: user_results#show para hacerlo mas consistente
 
  # get '/results', to: redirect('/results/subscriptions')
-  post '/results', to: "user_results#create_stored_result"
-  put '/results', to: "user_results#update"
-  delete '/results', to: "user_results#destroy"
+  # post '/results', to: "user_results#create_stored_result"
+  # put '/results', to: "user_results#update"
+  # delete '/results', to: "user_results#destroy"
+
+  #detail for a certain result.
+  get '/results/history', to: "user_results#show_history" #get all the results with a certain CodigoExterno
     #subscriptions
   get '/results/subscriptions', to: "user_results#show" #Get all results that a user is subscribed to
   post '/results/subscriptions', to: "user_results#create" #Create a new one
   put '/results/subscriptions', to: "user_results#update" #Modify
   delete '/results/subscriptions', to: "user_results#destroy"
+
 
 
   #A bit of a special case, so I'll leave it near /results

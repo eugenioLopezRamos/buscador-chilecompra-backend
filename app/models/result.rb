@@ -18,7 +18,8 @@ class Result < ApplicationRecord
 
     def history
         codigo_externo = self.value["Listado"][0]["CodigoExterno"]
-        Result.where("value -> 'Listado' -> 0 -> 'CodigoExterno' = ?", codigo_externo.to_json).order(:created_at)
+        Result.where("value -> 'Listado' -> 0 -> 'CodigoExterno' = ?", codigo_externo.to_json)
+              .order(:created_at)
     end
 
 end

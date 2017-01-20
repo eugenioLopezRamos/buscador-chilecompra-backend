@@ -22,30 +22,25 @@ class RequestsController < ApplicationController
   private
 
     def verify_correct_date(date)
-        begin
-            Date.parse(date)
-            date.split("-")
-            if Date.valid_date? date[0].to_i, date[1].to_i, date[2].to_i
-              return date
-            else
-              raise ArgumentError, {"mensaje": "Fecha en formato inválido, por favor intentar de nuevo. Formato requerido: DD-MM-AAAA"} 
-            end
-        rescue ArgumentError => e
-          render json: e
+      
+        Date.parse(date)
+        date.split("-")
+        if Date.valid_date? date[0].to_i, date[1].to_i, date[2].to_i
+          return date
         end
+        raise ArgumentError, "Fecha en formato inválido, por favor intentar de nuevo. Formato requerido: DD-MM-AAAA"
+        rescue ArgumentError => except
+          render json: json_message_to_frontend(error: except)
     end
 
-
     def valid_get_misc_info_params?(params)
-      begin 
-        if ["estados_licitacion", "organismos_publicos"].include?(params)
-          return true
-        else
-          raise ArgumentError
-        end
+
+      if ["estados_licitacion", "organismos_publicos"].include?(params)
+        return true
       end
-      rescue ArgumentError
-        render json: {"mensaje": "Parametros invalidos"}
+      raise ArgumentError, "Parametros invalidos"
+      rescue ArgumentError => except
+        render json: json_message_to_frontend(error: except)
     end
 
 
