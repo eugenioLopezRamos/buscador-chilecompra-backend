@@ -39,12 +39,12 @@ class User < ActiveRecord::Base
     #Returns the id of the results with CodigoExterno == @codigo_externo
     @user_subscriptions_codigos_externos = self.subscriptions.values.select {|value| @codigo_externo_all_ids.include? value}
 
-    # If there is more than zero, the same CodigoExterno is already subscribed to!
+    # If there are more than zero, the same CodigoExterno is already subscribed to!
     if @user_subscriptions_codigos_externos.length > 0
          
       @nombre_suscripcion = self.subscriptions.key(@user_subscriptions_codigos_externos[0])
-      #TODO: Fix in controller too
-      raise ArgumentError, "Ya estas suscrito a la licitacion codigo #{@codigo_externo} (Nombre suscripción: #{@nombre_suscripcion})"
+      #TODO: Fix in controller too (Use a more appropiate error, ActiveRecord::RecordInvalid doesnt work as expected)
+      raise ArgumentError, "Ya estás suscrito a la licitacion de código externo #{@codigo_externo} (Nombre suscripción: #{@nombre_suscripcion})"
     else
       UserResult.create(user_id: self.id, result_id: result_id, subscribed: true, subscription_name: name)
     end
