@@ -1,5 +1,7 @@
 Rails.application.routes.draw do
-  mount_devise_token_auth_for 'User', at: 'auth', controllers: {registrations: 'registrations'}
+  mount_devise_token_auth_for 'User', at: 'auth', controllers: {registrations: 'registrations', 
+                                                                sessions: 'sessions',
+                                                                token_validations: 'token_validations'}
   #mount Resque::Server, at: "/resque" #Mounts the sinatra app for the frontend
 
 
@@ -36,7 +38,7 @@ Rails.application.routes.draw do
 
   #A bit of a special case, so I'll leave it near /results
   #TODO: change this route...
-  get '/user_results', to: "user_results#show_stored_results_values"
+  #get '/user_results', to: "user_results#show_stored_results_values"
 
 
   #CRUD search queries
@@ -44,5 +46,8 @@ Rails.application.routes.draw do
   post '/searches', to: "searches#create"
   put '/searches', to: "searches#update"
   delete '/searches', to: "searches#destroy"
+
+  #CRUD notifications
+  get '/notifications', to: "notifications#show"
 
 end

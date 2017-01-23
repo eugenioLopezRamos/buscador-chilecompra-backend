@@ -1,9 +1,9 @@
 class SearchesController < ApplicationController
   include SearchesHelper
-  before_action :authenticate_user!
+ # before_action :authenticate_user!
 
   def show
-    render json: show_searches
+    render json: show_searches(current_user)
   end
 
   def create

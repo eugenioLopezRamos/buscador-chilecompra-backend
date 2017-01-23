@@ -15,7 +15,6 @@ class UserResultsController < ApplicationController
       render json: json_message_to_frontend(info: "Suscripción guardada exitosamente")
       #TODO: Fix in model too.
       rescue ArgumentError => message
-        puts "MESSAGE #{message}"
         render json: json_message_to_frontend(errors: message)
       rescue ActiveRecord::RecordNotUnique
         render json: json_message_to_frontend(errors: "Error, ya está suscrito a este resultado y/o nombre ya existe")

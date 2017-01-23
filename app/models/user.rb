@@ -4,14 +4,32 @@ class User < ActiveRecord::Base
           :recoverable, :rememberable, :trackable, :validatable,
           :omniauthable,:confirmable #No confirm success url for now
   include DeviseTokenAuth::Concerns::User
+  include SearchesHelper
 
   has_many :searches
   has_many :user_results, :dependent => :delete_all
   has_many :results, :through => :user_results
-  has_many :notificaciones
+  has_many :notifications, :dependent => :delete_all
 
   def send_licitacion_change_email(licitacion)
-    LicitacionChangeMailer.send_notification_email(self, licitacion).deliver_now
+    # cada X tiempo (definible por el usuario, minimo intervalo de 1 hr), voy a ejecutar un job
+    # en que los usuarios asignados a ese intervalo se revisa si tienen notificaciones pendientes, y 
+    # en caso de tenerlas, se les envia un email con TODAS
+   # LicitacionChangeMailer.send_notification_email(self, licitacion).deliver_now
+  end
+
+  def get_all_related_data
+      # binding.pry
+    @this_user = self.as_json
+    @this_user[:searches] = show_searches(self)
+
+
+
+    @this_user[:subscriptions] = self.subscriptions
+    @this_user[:notifications] = self.notifications
+ 
+    @this_user
+
   end
 
 ######## SUBSCRIPTION METHODS
@@ -25,6 +43,17 @@ class User < ActiveRecord::Base
       end
 
     @results_hash
+  end
+
+  def subscriptions_by_codigo_externo
+
+    @subscriptions_by_codigo_externo = Hash.new
+    self.subscriptions.each_pair do |name, result_id|
+      result = Result.find(result_id).codigo_externo
+      @subscriptions_by_codigo_externo[name] = result
+    end
+
+    @subscriptions_by_codigo_externo
   end
 
   def subscribed_to_result?(result_id)
@@ -63,5 +92,25 @@ class User < ActiveRecord::Base
       subscription.update_attributes(subscription_name: "", subscribed: false)
     end
   end
+
+  def show_notifications
+    @notif_hash = Hash.new
+    notifications = self.notifications.pluck("id", "message")
+    notifications.each do |notif|
+      @notif_hash[notif[0]] = notif[1]
+    end
+      @notif_hash
+  end
+
+  def destroy_notification(notification_id)
+    Notification.find(notification_id).destroy
+  end
+
+  def destroy_all_notifications
+    Notification.where(user_id: self.id).each do |notif|
+      notif.destroy
+    end
+  end
+
 
 end

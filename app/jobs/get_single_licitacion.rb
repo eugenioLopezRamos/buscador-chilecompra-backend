@@ -19,8 +19,8 @@ class GetSingleLicitacion
         @compare_lic = @lic.deep_dup
         @compare_lic.delete_if {|key| key == "FechaCreacion"}
 
-        if @compare_lic == @latest_current_result
-          #  Resque.enqueue(CreateResultChangeNotification, @lic_codigo_externo)
+        if @compare_lic !== @latest_current_result
+          Resque.enqueue(AddResultChangeToUserNotifications, @lic_codigo_externo)
         end
 
 

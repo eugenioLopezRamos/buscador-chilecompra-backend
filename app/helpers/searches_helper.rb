@@ -1,7 +1,7 @@
 module SearchesHelper
 
-  def show_searches
-    searches = current_user.searches.pluck(*show_fields)
+  def show_searches(user)
+    searches = user.searches.pluck(*show_fields)
     hashify.(show_fields, 0, searches, Hash.new).delete_if {|k, v| v == [nil]}
   end
 
