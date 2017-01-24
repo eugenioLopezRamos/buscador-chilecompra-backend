@@ -1,11 +1,12 @@
 class AddResultChangeToUserNotifications
+ @queue = :notificaciones
 
   def self.perform(codigo_externo)
     @users_to_notify = get_users_to_notify(codigo_externo)
     create_users_notification(@users_to_notify)
   end
 
-  def get_users_to_notify(codigo_externo)
+  def self.get_users_to_notify(codigo_externo)
 
     users_to_notify = Array.new
     User.in_batches do |batch|
@@ -19,7 +20,7 @@ class AddResultChangeToUserNotifications
 
   end
 
-  def create_users_notification(users)
+  def self.create_users_notification(users)
 
     users.each do |user_id|
       notification = Notification.create(user_id: user_id, message: "Cambios en la licitación #{codigo_externo}")
