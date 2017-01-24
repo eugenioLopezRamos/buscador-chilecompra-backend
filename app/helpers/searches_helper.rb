@@ -46,26 +46,17 @@ module SearchesHelper
 
     search = Search.find_by(user_id: current_user.id, id: id)
     name = search.name
-    #TODO: This json format is ugly....
-    if search.destroy
-      return {
-              "message": {
-                          "info": {
-                                    "Borrado exitosamente": [name]
-                                    } 
-                          },
-              "searches": show_searches
-              }
-    else
-      return {
-              "message": {
-                          "errors": {
-                                    "Fallido": [name]
-                                    } 
-                          },
-              "searches": show_searches
 
-              }
+    if search.destroy
+      return json_message_to_frontend(
+                                      info: {"Borrado exitosamente": [name]}, 
+                                      extra: {searches: show_searches(current_user)}
+                                      )
+    else
+      return json_message_to_frontend(
+                                      errors:{"Fallido": [name]},
+                                      extra: {searches: show_searches(current_user)}
+                                      )
     
     end
     #TODO: rescue Devise::AuthenticationError (or however it's called)
