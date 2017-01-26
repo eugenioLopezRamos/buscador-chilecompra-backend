@@ -1,5 +1,5 @@
  module RequestsHelper
-
+   require 'json'
     def transform_date_format(date)
         Time.at(date.to_i/1000).strftime("%Y-%m-%d") #Need to divide the MomentJS date  by 1000 to get the correct one.
     end
@@ -35,14 +35,16 @@
 
       result = Array.new
 
-#esto se puede hacer mas rapido con un where del parametro 0 y luego send los demas sobre ese subconjunto y concatenarlos
+#esto se puede hacer mas rapido con un where del parametro 0 y luego send los demas sobre ese subconjunto y concatenarlos?
       #TODO: check if by using pluck I can reduce the footprint of this query 
       Result.in_batches do |batch|
         sub_result = @to_send.reduce(batch) {|prev, curr| prev.send("where", curr) }
-                             .map { |obj| obj.to_json }
+                                                              .map { |obj| obj.as_json}
         result.concat sub_result
       end
-      return result
+      #fast_generate disables checking  for circles (I assume that's circular references? It mentions infinite looping in case an
+      #object has one)
+      render plain: JSON.fast_generate(result), content-type: "application/json"
     end
-    
+
 end

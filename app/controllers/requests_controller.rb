@@ -6,7 +6,7 @@ class RequestsController < ApplicationController
 
 
   def get_info
-    render json: filter_results(valid_get_info_params?)
+    filter_results(valid_get_info_params?)
   end
 
   def get_misc_info
