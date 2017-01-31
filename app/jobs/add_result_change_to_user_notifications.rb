@@ -3,7 +3,11 @@ class AddResultChangeToUserNotifications
 
   def self.perform(codigo_externo)
     @users_to_notify = get_users_to_notify(codigo_externo)
-    create_users_notification(@users_to_notify)
+
+    if @users_to_notify.length > 0
+      create_users_notification(@users_to_notify, codigo_externo)
+    end
+
   end
 
   def self.get_users_to_notify(codigo_externo)
@@ -20,7 +24,7 @@ class AddResultChangeToUserNotifications
 
   end
 
-  def self.create_users_notification(users)
+  def self.create_users_notification(users, codigo_externo)
 
     users.each do |user_id|
       notification = Notification.create(user_id: user_id, message: "Cambios en la licitación #{codigo_externo}")

@@ -44,7 +44,7 @@
       end
       #fast_generate disables checking  for circles (I assume that's circular references? It mentions infinite looping in case an
       #object has one)
-      render plain: JSON.fast_generate(result), content-type: "application/json"
+      render plain: JSON.fast_generate(result), content_type: "application/json"
     end
 
 end
