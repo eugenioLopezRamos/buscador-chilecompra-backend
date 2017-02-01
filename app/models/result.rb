@@ -1,21 +1,38 @@
 class Result < ApplicationRecord
-
+    #Name of the Redis set for unique codigo_externo s
+    CODIGOS_EXTERNOS_SET = :codigos_externos
+    
     validates :value, presence: true
     has_many :user_results, :dependent => :delete_all
     has_many :user, :through => :user_results
     
-    def self.all_unique_codigo_externo
-        conn = ActiveRecord::Base.connection
-        #a tuple = key value pair
-        tuples = conn.execute('SELECT DISTINCT "results"."value"::json#>>\'{Listado,0,CodigoExterno}\' FROM "results"')
+    def self.get_all_unique_codigo_externo_from_db
+        connection = ActiveRecord::Base.connection
+        #a tuple = key value pair such as {"\"column\"": "\"111-AAA-BBB\""}
+        # tuples = array of all unique CodigoExternos 
+        tuples = connection.execute('SELECT DISTINCT "results"."value"::json#>>\'{Listado,0,CodigoExterno}\' FROM "results"')
         codigos = Array.new
+
         tuples.each do |tuple|
             tuple.each_pair do |key, value|
                 codigos.push value
             end
         end
         codigos
+    end
 
+    def self.get_all_unique_codigo_externo(force_db: false)
+        cached_codigos_externos = Redis.current.smembers(CODIGOS_EXTERNOS_SET)
+
+        return cached_codigos_externos unless cached_codigos_externos.empty? || force_db == true
+        return self.get_all_unique_codigo_externo_from_db
+    end
+    
+    def self.set_all_unique_codigo_externo_to_redis
+        codigos = self.get_all_unique_codigo_externo_from_db
+        codigos.each do |codigo|
+            Redis.current.SADD(CODIGOS_EXTERNOS_SET, codigo)
+        end
     end
 
     def history
@@ -27,5 +44,81 @@ class Result < ApplicationRecord
     def codigo_externo
         self.value["Listado"][0]["CodigoExterno"]
     end
+
+    def self.last_per_codigo_externo
+        codigos = self.get_all_unique_codigo_externo
+        last_codigos = Array.new
+        codigos.each do |codigo|
+            last_codigos.push(Result.where("value -> 'Listado' -> 0 ->> 'CodigoExterno' = ?", codigo).last)
+        end
+        last_codigos
+    end
+
+    def self.transform_date_format(date)
+        Time.at(date.to_i/1000).strftime("%Y-%m-%d") #Need to divide the MomentJS date  by 1000 to get the correct one.
+    end
+
+    def self.latest_entry_per_codigo_externo(date)
+
+        day_in_ms = 24*60*60*1000
+        use_date = self.transform_date_format(date).to_s
+        next_day_ms = date.to_i + day_in_ms
+        next_day = transform_date_format(next_day_ms)
+
+
+
+
+        connection = ActiveRecord::Base.connection
+        result_ids = Array.new
+
+        # Gets results id by codigo externo where updated_at is the greatest
+        #(In simpler words, gets the last DB record entry per Codigo Externo)
+        unique = connection.execute("SELECT id FROM (
+            SELECT id, updated_at,
+                dense_rank() OVER (
+                    PARTITION BY value -> 'Listado' -> 0 -> 'CodigoExterno'
+                    ORDER BY updated_at DESC
+                    ) as by_updated_at
+            FROM results
+            WHERE updated_at <= '#{use_date}'
+        ) as q
+        WHERE by_updated_at < 2")
+
+        unique.each do |hash|
+            hash.each_pair {|key, value| result_ids.push value }
+        end
+
+        result_ids
+    end
+# res = Result.where("value -> 'Listado' -> 0 ->> 'CodigoExterno = ?", "1019-96-LE16")
+#res.where("updated_at >= ?", "2016-12-23").each {|elem| puts elem.value["Listado"][0]["Estado"] }
+
+# SELECT depname, empno, salary, enroll_date
+# FROM
+#   (SELECT depname, empno, salary, enroll_date,
+#           rank() OVER (PARTITION BY depname ORDER BY salary DESC, empno) AS pos
+#      FROM empsalary
+#   ) AS ss
+# WHERE pos < 3;
+
+# Gets results id by codigo externo where updated_at is the greatest
+# (In simple words, gets the last DB record entry per Codigo Externo)
+# connection.execute("SELECT id FROM (
+#     SELECT id, updated_at,
+#         dense_rank() OVER (
+#             PARTITION BY value -> 'Listado' -> 0 -> 'CodigoExterno'
+#             ORDER BY updated_at
+#             ) as by_updated_at
+#     FROM results
+# ) as q
+# WHERE by_updated_at < 2")
+
+
+#connection.execute("SELECT id FROM (SELECT id, updated_at, dense_rank() OVER (PARTITION BY value -> 'Listado' -> 0 -> 'CodigoExterno' ORDER BY updated_at) as by_updated_at FROM results) as q WHERE by_updated_at < 2")
+
+
+
+
+
 
 end

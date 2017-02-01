@@ -39,16 +39,16 @@
                           rutProveedor: ["value -> 'Listado' -> 0 -> 'Items' -> 'Listado' -> 0 -> 'Adjudicacion' ->> 'RutProveedor' = ? ", @param_data['rutProveedor']],
                           
                           }
-    if !@param_data['selectedDate'].blank?
-      selected_day_unix_epoch = @param_data['selectedDate']
-      #add_one_day_unix_epoch = @param_data['selectedDate'] + day_in_milliseconds
-      next_day_unix_epoch = selected_day_unix_epoch.to_i + day_in_milliseconds
+    # if !@param_data['selectedDate'].blank?
+    #   selected_day_unix_epoch = @param_data['selectedDate']
+    #   #add_one_day_unix_epoch = @param_data['selectedDate'] + day_in_milliseconds
+    #   next_day_unix_epoch = selected_day_unix_epoch.to_i + day_in_milliseconds
 
-      selected_day = transform_date_format(selected_day_unix_epoch)
-      next_day = transform_date_format(next_day_unix_epoch)
+    #   selected_day = transform_date_format(selected_day_unix_epoch)
+    #   next_day = transform_date_format(next_day_unix_epoch)
 
-      @param_json_routes[:selectedDate] = ["value ->> 'FechaCreacion' > ? AND value ->> 'FechaCreacion' < ?", selected_day, next_day]
-    end
+    #   @param_json_routes[:selectedDate] = ["value ->> 'FechaCreacion' > ? AND value ->> 'FechaCreacion' < ?", selected_day, next_day]
+    # end
     #buscar palabras clave lo hare despues creo, si no, es posible que me demore demasiado( o quizas deba hacer benchmarks?)
 
     @param_data.each_pair do |key, value|
@@ -57,15 +57,57 @@
 
     result = Array.new
 
-    #TODO: check if by using pluck I can reduce the footprint of this query 
-    Result.in_batches do |batch|
-      sub_result = @to_send.reduce(batch) {|prev, curr| prev.send("where", curr) }
-                                                            .map { |obj| obj.as_json}
-      result.concat sub_result
-    end
+    #TODO: Probably can send this to redis too
+    latest_result_ids_per_codigo_externo = Result.latest_entry_per_codigo_externo(@param_data['selectedDate']).sort {|a,z| a <=> z }
+
+    slice_results = 
+      ->(start_index, slice_length){
+
+          return unless start_index <= latest_result_ids_per_codigo_externo.length
+
+          ids_chunk = latest_result_ids_per_codigo_externo.slice(start_index, slice_length)
+
+          query_result = Result.where(id: ids_chunk)
+          
+          sub_result = @to_send.reduce(query_result) {|prev, curr| prev.send("where", curr) }
+                                                                .map { |obj| obj.as_json}
+          result.concat sub_result
+  
+        
+          new_index = start_index + slice_length
+          slice_results.(new_index, slice_length)
+
+      }
+
+    slice_results.(0, 13000)
+
+
+
+    # latest_results_per_codigo_externo = Result.where(id: latest_result_ids_per_codigo_externo)
+
+    # latest_results_per_codigo_externo
+    
+    # latest_results_per_codigo_externo.in_batches do |batch|
+    #   sub_result = @to_send.reduce(batch) {|prev, curr| prev.send("where", curr) }
+    #                                                         .map { |obj| obj.as_json}
+    #   result.concat sub_result
+    # end
+
+    #latest_results_per_codigo_externo.each do |element|
+      #sub_result = @to_send.reduce(latest_results_per_codigo_externo) {|prev, curr| prev.send("where", curr) }
+     #                                                       .map { |obj| obj.as_json}
+    #  result.concat sub_result
+    #end
+
+
+
     #fast_generate disables checking  for circles (I assume that's circular references? It mentions infinite looping in case an
     #object has one)
     render plain: JSON.fast_generate(result), content_type: "application/json"
+  end
+
+  def results_by_slice
+
   end
 
 
