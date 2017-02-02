@@ -18,10 +18,14 @@ module ApplicationHelper
     hsh
   end
 
-  def is_number?(string)
-    Float(string) 
+  def is_integer?(string)
+    Integer(string) 
     rescue ArgumentError
       false
+  end
+
+  def is_boolean?(value)
+    [true, "true", false, "false"].include? value
   end
 
   def self.estados_licitacion

@@ -54,35 +54,37 @@ class Result < ApplicationRecord
         last_codigos
     end
 
-    def self.transform_date_format(date)
-        Time.at(date.to_i/1000).strftime("%Y-%m-%d") #Need to divide the MomentJS date  by 1000 to get the correct one.
-    end
+    # def self.transform_date_format(date)
+    #     Time.at(date.to_i/1000).strftime("%Y-%m-%d") #Need to divide the MomentJS date  by 1000 to get the correct one.
+    # end
 
-    def self.latest_entry_per_codigo_externo(date)
+    def self.latest_entry_per_codigo_externo(start_day, end_day)
 
-        day_in_ms = 24*60*60*1000
-        use_date = self.transform_date_format(date).to_s
-        next_day_ms = date.to_i + day_in_ms
-        next_day = transform_date_format(next_day_ms)
-
-
-
+        # day_in_ms = 24*60*60*1000
+        # use_date = self.transform_date_format(date).to_s
+        # next_day_ms = date.to_i + day_in_ms
+        # next_day = transform_date_format(next_day_ms)
 
         connection = ActiveRecord::Base.connection
         result_ids = Array.new
 
         # Gets results id by codigo externo where updated_at is the greatest
-        #(In simpler words, gets the last DB record entry per Codigo Externo)
-        unique = connection.execute("SELECT id FROM (
+        #(In simpler words, gets the last DB record entry per Codigo Externo between dates  start_day("YYYY-MM-DD"), end_day) 
+        
+        #TODO: See if its possible to structure this query in a way that is cacheable with redis
+        unique = connection.execute(
+        "SELECT id FROM (
             SELECT id, updated_at,
                 dense_rank() OVER (
                     PARTITION BY value -> 'Listado' -> 0 -> 'CodigoExterno'
                     ORDER BY updated_at DESC
                     ) as by_updated_at
             FROM results
-            WHERE updated_at <= '#{use_date}'
+            WHERE updated_at > '#{start_day}'
+            AND updated_at <= '#{end_day}'
         ) as q
-        WHERE by_updated_at < 2")
+        WHERE by_updated_at < 2"
+        )
 
         unique.each do |hash|
             hash.each_pair {|key, value| result_ids.push value }
@@ -90,6 +92,22 @@ class Result < ApplicationRecord
 
         result_ids
     end
+
+
+        #     "SELECT id, updated_at, value -> \'Listado\' -> 0 -> \'CodigoExterno\' as codigo_externo, by_updated_at FROM (
+        #     SELECT id, updated_at, value,
+        #         dense_rank() OVER (
+        #             PARTITION BY value -> 'Listado' -> 0 -> 'CodigoExterno'
+        #             ORDER BY updated_at DESC
+        #             ) as by_updated_at
+        #     FROM results
+        # ) as qkey
+        # "
+        # )
+
+ #   def self.set_latest_entry_per_codigo_externo_to_redis
+
+
 # res = Result.where("value -> 'Listado' -> 0 ->> 'CodigoExterno = ?", "1019-96-LE16")
 #res.where("updated_at >= ?", "2016-12-23").each {|elem| puts elem.value["Listado"][0]["Estado"] }
 
