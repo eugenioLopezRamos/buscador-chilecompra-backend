@@ -18,6 +18,12 @@ module ApplicationHelper
     hsh
   end
 
+  def is_number?(string)
+    Float(string) 
+    rescue ArgumentError
+      false
+  end
+
   def self.estados_licitacion
     {
     Todos: "",

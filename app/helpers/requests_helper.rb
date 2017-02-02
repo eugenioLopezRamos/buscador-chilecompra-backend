@@ -27,6 +27,10 @@
 
     if @param_data["estadoLicitacion"] == "*"
       @param_data["estadoLicitacion"] = ""
+    end
+
+    if @param_data["offset"].empty?
+      @param_data["offset"] = 0
     end 
     
     @to_send = Array.new
@@ -37,7 +41,7 @@
                           estadoLicitacion: ["value -> 'Listado' -> 0 ->> 'CodigoEstado' = ? ", @param_data['estadoLicitacion']],
                           organismoPublico: ["value -> 'Listado' -> 0 -> 'Comprador' ->> 'CodigoOrganismo' = ? ", @param_data['organismoPublico']],
                           rutProveedor: ["value -> 'Listado' -> 0 -> 'Items' -> 'Listado' -> 0 -> 'Adjudicacion' ->> 'RutProveedor' = ? ", @param_data['rutProveedor']],
-                          
+                          selectedDate: ["value ->> 'FechaCreacion' <= ?", transform_date_format(@param_data["selectedDate"])]
                           }
     # if !@param_data['selectedDate'].blank?
     #   selected_day_unix_epoch = @param_data['selectedDate']
@@ -59,27 +63,37 @@
 
     #TODO: Probably can send this to redis too
     latest_result_ids_per_codigo_externo = Result.latest_entry_per_codigo_externo(@param_data['selectedDate']).sort {|a,z| a <=> z }
+    latest_results_per_ids = Result.where(id: latest_result_ids_per_codigo_externo)
 
-    slice_results = 
-      ->(start_index, slice_length){
+    total_results_amount = @to_send.reduce(latest_results_per_ids){|prev, curr| prev.send("where", curr) }.count
 
-          return unless start_index <= latest_result_ids_per_codigo_externo.length
+    sub_result = @to_send.reduce(latest_results_per_ids){|prev, curr| prev.send("where", curr) }
+                                          .limit(200)
+                                          .offset(0)
+                                          .order(created_at: :desc)
+                                          .map { |obj| obj.as_json}
+    result.concat sub_result
 
-          ids_chunk = latest_result_ids_per_codigo_externo.slice(start_index, slice_length)
+    # slice_results = 
+    #   ->(start_index, slice_length){
 
-          query_result = Result.where(id: ids_chunk)
+    #       return unless start_index <= latest_result_ids_per_codigo_externo.length
+
+    #       ids_chunk = latest_result_ids_per_codigo_externo.slice(start_index, slice_length)
+
+    #       query_result = Result.where(id: ids_chunk)
           
-          sub_result = @to_send.reduce(query_result) {|prev, curr| prev.send("where", curr) }
-                                                                .map { |obj| obj.as_json}
-          result.concat sub_result
+    #       sub_result = @to_send.reduce(query_result) {|prev, curr| prev.send("where", curr) }
+    #                                                             .map { |obj| obj.as_json}
+    #       result.concat sub_result
   
         
-          new_index = start_index + slice_length
-          slice_results.(new_index, slice_length)
+    #       new_index = start_index + slice_length
+    #       slice_results.(new_index, slice_length)
 
-      }
+    #   }
 
-    slice_results.(0, 13000)
+    # slice_results.(0, 1000)
 
 
 
@@ -103,17 +117,10 @@
 
     #fast_generate disables checking  for circles (I assume that's circular references? It mentions infinite looping in case an
     #object has one)
-    render plain: JSON.fast_generate(result), content_type: "application/json"
+    # result = Array
+    # new should be => {results: [...], count: "200"}
+    render plain: JSON.fast_generate({values: result, count: total_results_amount}), content_type: "application/json"
   end
 
-  def results_by_slice
-
-  end
-
-
-
-  def use_date_range(date)
-
-  end
 
 end
