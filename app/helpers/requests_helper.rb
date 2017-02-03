@@ -24,8 +24,9 @@
     end_date = determine_dates(@param_data)[:end_date]
 
     latest_results_per_ids = get_latest_results_per_ids(start_date, end_date)
+    offset = @param_data["offset"]
 
-    result = get_result_from_query(latest_results_per_ids, @to_send, limit)
+    result = get_result_from_query(latest_results_per_ids, @to_send, offset, limit)
     total_results_amount = get_total_results_amount(latest_results_per_ids, @to_send)
     # limit is just limit!
 
@@ -74,11 +75,11 @@
     Result.where(id: latest_result_ids_per_codigo_externo)
   end
 
-  def get_result_from_query(results, query_array, limit)
+  def get_result_from_query(results, query_array, offset, limit)
     query_result = Array.new
     sub_result = query_array.reduce(results){|prev, curr| prev.send("where", curr) }
                                           .limit(limit)
-                                          .offset(@param_data["offset"])
+                                          .offset(offset)
                                           .order(created_at: :desc)
                                           .map { |obj| obj.as_json}
     query_result.concat sub_result
@@ -98,7 +99,7 @@
 
     dates = {start_date: default_start_date,
              end_date: default_end_date}
-    #If alwaysFromToday == "true" then we use today for BOTH dates
+    #If alwaysFromToday == "true" then we use defaults for BOTH dates
     if parameters["alwaysFromToday"] == "true"
       return dates
     end
@@ -109,9 +110,6 @@
     end
 
     start_date = transform_date_format(parameters["startDate"])
-     # rescue ArgumentError
-     #   start_date = transform_date_format(Time.zone.now.to_i * 1000)
-
     end_date_next_day = parameters["endDate"].to_i + day_in_milliseconds
 
     end_date = transform_date_format(end_date_next_day)
@@ -120,12 +118,12 @@
   end
 
   def get_json_param_routes(param_data)
-    param_json_routes = {
-                        codigoLicitacion: ["value -> 'Listado' -> 0 ->> 'CodigoExterno' = ? ", param_data['codigoLicitacion']],
-                        estadoLicitacion: ["value -> 'Listado' -> 0 ->> 'CodigoEstado' = ? ", param_data['estadoLicitacion']],
-                        organismoPublico: ["value -> 'Listado' -> 0 -> 'Comprador' ->> 'CodigoOrganismo' = ? ", param_data['organismoPublico']],
-                        rutProveedor: ["value -> 'Listado' -> 0 -> 'Items' -> 'Listado' -> 0 -> 'Adjudicacion' ->> 'RutProveedor' = ? ", param_data['rutProveedor']]
-                        }
+    {
+      codigoLicitacion: ["value -> 'Listado' -> 0 ->> 'CodigoExterno' = ? ", param_data['codigoLicitacion']],
+      estadoLicitacion: ["value -> 'Listado' -> 0 ->> 'CodigoEstado' = ? ", param_data['estadoLicitacion']],
+      organismoPublico: ["value -> 'Listado' -> 0 -> 'Comprador' ->> 'CodigoOrganismo' = ? ", param_data['organismoPublico']],
+      rutProveedor: ["value -> 'Listado' -> 0 -> 'Items' -> 'Listado' -> 0 -> 'Adjudicacion' ->> 'RutProveedor' = ? ", param_data['rutProveedor']]
+    }
   end
 
 end

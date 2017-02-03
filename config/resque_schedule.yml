@@ -1,3 +1,9 @@
+cache_licitaciones_data-8:
+  cron: 0 8 * * *
+  class: "CacheLicitacionesData"
+  queue: "licitaciones"
+  description: "Caches organismos_publicos and estados_licitacion to Redis (as hashes)"
+  
 get_licitaciones-8:
   cron: 0 8 * * *
   class: "GetLicitaciones"

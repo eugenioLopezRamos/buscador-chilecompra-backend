@@ -25,7 +25,7 @@ class Result < ApplicationRecord
         cached_codigos_externos = Redis.current.smembers(CODIGOS_EXTERNOS_SET)
 
         return cached_codigos_externos unless cached_codigos_externos.empty? || force_db == true
-        return self.get_all_unique_codigo_externo_from_db
+        self.get_all_unique_codigo_externo_from_db
     end
     
     def self.set_all_unique_codigo_externo_to_redis
@@ -54,22 +54,13 @@ class Result < ApplicationRecord
         last_codigos
     end
 
-    # def self.transform_date_format(date)
-    #     Time.at(date.to_i/1000).strftime("%Y-%m-%d") #Need to divide the MomentJS date  by 1000 to get the correct one.
-    # end
-
     def self.latest_entry_per_codigo_externo(start_day, end_day)
-
-        # day_in_ms = 24*60*60*1000
-        # use_date = self.transform_date_format(date).to_s
-        # next_day_ms = date.to_i + day_in_ms
-        # next_day = transform_date_format(next_day_ms)
 
         connection = ActiveRecord::Base.connection
         result_ids = Array.new
 
         # Gets results id by codigo externo where updated_at is the greatest
-        #(In simpler words, gets the last DB record entry per Codigo Externo between dates  start_day("YYYY-MM-DD"), end_day) 
+        # (In simpler words, gets the last DB record entry per Codigo Externo between dates  start_day("YYYY-MM-DD"), end_day) 
         
         #TODO: See if its possible to structure this query in a way that is cacheable with redis
         unique = connection.execute(
@@ -92,51 +83,5 @@ class Result < ApplicationRecord
 
         result_ids
     end
-
-
-        #     "SELECT id, updated_at, value -> \'Listado\' -> 0 -> \'CodigoExterno\' as codigo_externo, by_updated_at FROM (
-        #     SELECT id, updated_at, value,
-        #         dense_rank() OVER (
-        #             PARTITION BY value -> 'Listado' -> 0 -> 'CodigoExterno'
-        #             ORDER BY updated_at DESC
-        #             ) as by_updated_at
-        #     FROM results
-        # ) as qkey
-        # "
-        # )
-
- #   def self.set_latest_entry_per_codigo_externo_to_redis
-
-
-# res = Result.where("value -> 'Listado' -> 0 ->> 'CodigoExterno = ?", "1019-96-LE16")
-#res.where("updated_at >= ?", "2016-12-23").each {|elem| puts elem.value["Listado"][0]["Estado"] }
-
-# SELECT depname, empno, salary, enroll_date
-# FROM
-#   (SELECT depname, empno, salary, enroll_date,
-#           rank() OVER (PARTITION BY depname ORDER BY salary DESC, empno) AS pos
-#      FROM empsalary
-#   ) AS ss
-# WHERE pos < 3;
-
-# Gets results id by codigo externo where updated_at is the greatest
-# (In simple words, gets the last DB record entry per Codigo Externo)
-# connection.execute("SELECT id FROM (
-#     SELECT id, updated_at,
-#         dense_rank() OVER (
-#             PARTITION BY value -> 'Listado' -> 0 -> 'CodigoExterno'
-#             ORDER BY updated_at
-#             ) as by_updated_at
-#     FROM results
-# ) as q
-# WHERE by_updated_at < 2")
-
-
-#connection.execute("SELECT id FROM (SELECT id, updated_at, dense_rank() OVER (PARTITION BY value -> 'Listado' -> 0 -> 'CodigoExterno' ORDER BY updated_at) as by_updated_at FROM results) as q WHERE by_updated_at < 2")
-
-
-
-
-
 
 end
