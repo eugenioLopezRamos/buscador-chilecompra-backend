@@ -2,10 +2,9 @@ class RequestsController < ApplicationController
   include RequestsHelper
   require 'json'
   require 'redis'
-  
+
   before_action :valid_get_info_params?, only: :get_info
   before_action :valid_get_misc_info_params?, only: :get_misc_info
-  before_action :valid_entity_params?, only: :get_entity_data
   before_action :authenticate_request!, only: :show_hello
 
   def initialize
@@ -28,10 +27,9 @@ class RequestsController < ApplicationController
   end
 
   def get_misc_info
-      #Make this a single request...
+      #TODO: Make this a single request on the front end and a .each do block here
       if ["estados_licitacion", "organismos_publicos"].include?(params[:info])
-        render json: Redis.current.hgetall(params[:info])
-        return
+        return render json: Redis.current.hgetall(params[:info])
       end
 
       raise ArgumentError, "Parametros invalidos"
@@ -42,7 +40,7 @@ class RequestsController < ApplicationController
   private
 
     def verify_correct_date_format(*dates)
-        # date = unix epoch format
+        # dates = unix epoch format
         dates.each do |date|
           if !is_integer?(date)
             raise ArgumentError, "Fecha en formato inválido, por favor intentar de nuevo."

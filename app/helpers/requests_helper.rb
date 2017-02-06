@@ -24,13 +24,17 @@
     end_date = determine_dates(@param_data)[:end_date]
 
     latest_results_per_ids = get_latest_results_per_ids(start_date, end_date)
-    offset = @param_data["offset"]
+
+    total_results_amount = get_total_results_amount(latest_results_per_ids, @to_send)
+
+    offset = calculate_offset(@param_data["offset"], total_results_amount, limit)
+  #  binding.pry
 
     result = get_result_from_query(latest_results_per_ids, @to_send, offset, limit)
-    total_results_amount = get_total_results_amount(latest_results_per_ids, @to_send)
+
     # limit is just limit!
 
-    {values: result, count: total_results_amount, limit: limit}
+    {values: result, count: total_results_amount, limit: limit, offset: offset}
 
   end
 
@@ -125,5 +129,19 @@
       rutProveedor: ["value -> 'Listado' -> 0 -> 'Items' -> 'Listado' -> 0 -> 'Adjudicacion' ->> 'RutProveedor' = ? ", param_data['rutProveedor']]
     }
   end
+
+  def calculate_offset(offset, results_amount, limit)
+    if offset.to_i < 0
+      return 0
+    end
+    if offset.to_i >= results_amount
+     # these are integers, so the decimals are dropped -> becomes the last chunk of results
+     new_offset = results_amount / limit
+     new_offset = new_offset * limit
+     return new_offset
+    end
+    return offset.to_i
+  end
+
 
 end
