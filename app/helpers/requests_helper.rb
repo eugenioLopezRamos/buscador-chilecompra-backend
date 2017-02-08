@@ -166,48 +166,40 @@
   def create_order_by(order_by)
 
     #order_by = {fields: [...], order: "descending || ascending" }
-    
-    #order_by_query = Array.new
-
 
     fields = order_by["fields"].map do |element|
                 if is_integer? element
-                  element.to_i
+                  element.to_s
                 else
                   "'#{element.to_s}'"
                 end
              end
 
+    if fields.length == 1
+      return "value ->> " + fields[0]
+    elsif fields.length == 2
+      return "value -> " + fields[0] + " ->> " + fields[1]
+    elsif fields.length === 3
+      return "value -> " + fields[0] + " -> " + fields[1] + " ->> " + fields[2]
+    else
+      route = fields.slice(0, fields.length - 2).join(" -> ")
+      desired_value = fields.slice(fields.length - 1, 1)[0]
+      full_route = "value -> " + route + " ->> " + desired_value
+      order_by_query = full_route
+
+      if order_by["order"] === "descending"
+        order_by_query = order_by_query + "DESC"
+      end
+
+      if order_by["order"] === "ascending"
+        order_by_query = order_by_query + " ASC"
+      end
+
+      order_by_query
+    end
    
 
 
-    route = fields.slice(0, fields.length - 2)
-
-    if route.nil? || route.empty?
-      route = fields.slice(0, 1)
-    end
-
-    route = route.join(" -> ")
-
-    desired_value = ""# fields.slice(fields.length - 1, 1).join(" ->> ")
- 
-
-
-    full_route = "value ->> " + route + desired_value
-
-    order_by_query = full_route
-
-    if order_by["order"] === "descending"
-      order_by_query = order_by_query + " DESC"
-    end
-
-    if order_by["order"] === "ascending"
-
-      order_by_query = order_by_query + " ASC"
-
-    end
-
-    order_by_query
 
   end
 
