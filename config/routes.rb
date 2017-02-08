@@ -13,7 +13,7 @@ Rails.application.routes.draw do
  
   #this one gets results from the DB. Will replace get_chilecompra_data
   #TODO: bad name, too general. change here and in frontend
-  get '/get_info', to: "requests#get_info"
+  post '/get_info', to: "requests#get_info"
 
 
   #CRUD for user_results

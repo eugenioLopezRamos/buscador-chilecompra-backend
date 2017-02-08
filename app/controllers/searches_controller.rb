@@ -28,8 +28,9 @@ class SearchesController < ApplicationController
                                                 :date,
                                                 :palabrasClave,
                                                 :selectedEstadoLicitacion,
-                                                :rutProveedor]
-                                                }, 
+                                                :rutProveedor
+                                                ]
+                                      }, 
                                        :name)
   end
 

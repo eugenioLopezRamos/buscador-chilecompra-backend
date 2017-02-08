@@ -28,13 +28,29 @@
     total_results_amount = get_total_results_amount(latest_results_per_ids, @to_send)
 
     offset = calculate_offset(@param_data["offset"], total_results_amount, limit)
+#    order_by = calculate_order_by(@param_data[:order_by])
   #  binding.pry
 
-    result = get_result_from_query(latest_results_per_ids, @to_send, offset, limit)
+    sorting = create_order_by(@param_data["order_by"])
+
+    result = get_result_from_query(latest_results_per_ids, @to_send, offset, limit, sorting)
+    #filtered_result = search_by_palabras_clave(@param_data[:palabrasClave])
+   
+    
+    sorted_result = result#apply_order_by(result, @param_data["order_by"]) #result.sort {|a, z| a["value"]["Listado"][0]["Nombre"] <=> z["value"]["Listado"][0]["Nombre"]}
+  # binding.pry
+
+
+    #result.sort_by {|element| element["Listado"]}
+
+   # order_by = @param_data["order_by"]
 
     # limit is just limit!
+    # binding.pry
 
-    {values: result, count: total_results_amount, limit: limit, offset: offset}
+
+
+    {values: sorted_result, count: total_results_amount, limit: limit, offset: offset}
 
   end
 
@@ -51,10 +67,11 @@
       param_data["estadoLicitacion"] = ""
     end
 
-    if param_data["offset"].nil? || param_data["offset"].empty?
+    if !param_data["offset"]#.nil? || param_data["offset"].empty?
       param_data["offset"] = 0
     end
-
+    #see what to do wth order_by....
+    param_data["order_by"] = parameters["order_by"]
     param_data
   end
 
@@ -79,13 +96,16 @@
     Result.where(id: latest_result_ids_per_codigo_externo)
   end
 
-  def get_result_from_query(results, query_array, offset, limit)
+  def get_result_from_query(results, query_array, offset, limit, sorting)
+    #TODO: clean this up, mostly leftovers from before
     query_result = Array.new
     sub_result = query_array.reduce(results){|prev, curr| prev.send("where", curr) }
                                           .limit(limit)
                                           .offset(offset)
-                                          .order(created_at: :desc)
+                                          .order(sorting)
                                           .map { |obj| obj.as_json}
+                                          #.order(created_at: :desc)
+                                          
     query_result.concat sub_result
   end
 
@@ -141,6 +161,54 @@
      return new_offset
     end
     return offset.to_i
+  end
+
+  def create_order_by(order_by)
+
+    #order_by = {fields: [...], order: "descending || ascending" }
+    
+    #order_by_query = Array.new
+
+
+    fields = order_by["fields"].map do |element|
+                if is_integer? element
+                  element.to_i
+                else
+                  "'#{element.to_s}'"
+                end
+             end
+
+   
+
+
+    route = fields.slice(0, fields.length - 2)
+
+    if route.nil? || route.empty?
+      route = fields.slice(0, 1)
+    end
+
+    route = route.join(" -> ")
+
+    desired_value = ""# fields.slice(fields.length - 1, 1).join(" ->> ")
+ 
+
+
+    full_route = "value ->> " + route + desired_value
+
+    order_by_query = full_route
+
+    if order_by["order"] === "descending"
+      order_by_query = order_by_query + " DESC"
+    end
+
+    if order_by["order"] === "ascending"
+
+      order_by_query = order_by_query + " ASC"
+
+    end
+
+    order_by_query
+
   end
 
 

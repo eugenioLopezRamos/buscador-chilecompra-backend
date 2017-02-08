@@ -61,7 +61,7 @@ class RequestsController < ApplicationController
 
     def verify_valid_offset_format(offset)
       offset_value = offset
-      if offset_value.nil? || offset_value.empty?
+      if !offset_value #|| offset_value.empty?
         offset_value = 0
       end
      
@@ -82,18 +82,27 @@ class RequestsController < ApplicationController
       true
     end
 
+    def verify_valid_order(value)
+      if ["descending", "ascending"].include? value
+        return true
+      end
+      raise ArgumentError, "Orden debe ser 'ascending' (menor a mayor) o 'descending' (mayor a menor)"
+    end
+
 
     def valid_get_info_params?
-      
       params.permit(
                     :codigoLicitacion, :estadoLicitacion, 
                     :organismoPublico, :palabrasClave, 
                     :rutProveedor,
                     :startDate, :alwaysFromToday,
                     :endDate, :alwaysToToday,
-                    :offset
+                    :offset, 
+                    :order_by => [
+                                :order,
+                                :fields => [[]]
+                                ]
                     )
-
     end
 
     def valid_get_misc_info_params?

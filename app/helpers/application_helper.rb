@@ -22,6 +22,8 @@ module ApplicationHelper
     Integer(string) 
     rescue ArgumentError
       false
+    rescue TypeError
+      false
   end
 
   def is_boolean?(value)
