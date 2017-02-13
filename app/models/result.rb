@@ -79,8 +79,8 @@ class Result < ApplicationRecord
                     ORDER BY updated_at DESC
                     ) as by_updated_at
             FROM results
-            WHERE updated_at > #{start}
-            AND updated_at <= #{finish}
+            WHERE updated_at > '#{start}'
+            AND updated_at <= '#{finish}'
         ) as q
         WHERE by_updated_at < 2"
         )
