@@ -49,5 +49,6 @@ Rails.application.routes.draw do
 
   #CRUD notifications
   get '/notifications', to: "notifications#show"
+  delete '/notifications', to: "notifications#destroy"
 
 end

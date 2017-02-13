@@ -68,6 +68,9 @@ class Result < ApplicationRecord
         # add a call to .sanitize_sql_for_conditions
         # Like this: ActiveRecord::Base.send(:sanitize_sql_for_conditions, 'I"m" a cool guy')
         # => "I\"m\" a cool guy"
+        start = self.send(:sanitize_sql_for_conditions, start_day)
+        finish = self.send(:sanitize_sql_for_conditions, end_day)
+
         unique = connection.execute(
         "SELECT id FROM (
             SELECT id, updated_at,
@@ -76,8 +79,8 @@ class Result < ApplicationRecord
                     ORDER BY updated_at DESC
                     ) as by_updated_at
             FROM results
-            WHERE updated_at > '#{start_day}'
-            AND updated_at <= '#{end_day}'
+            WHERE updated_at > #{start}
+            AND updated_at <= #{finish}
         ) as q
         WHERE by_updated_at < 2"
         )

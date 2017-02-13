@@ -97,6 +97,9 @@ class User < ActiveRecord::Base
     @notif_hash = Hash.new
     notifications = self.notifications.pluck("id", "message")
     notifications.each do |notif|
+      #notif[0] = the id, notif[1] = the message
+      # so it returns a hash {notification_id: "notification message"} such as
+      # {8: "Cambios en la licitacion 111-222-AAAA"}
       @notif_hash[notif[0]] = notif[1]
     end
       @notif_hash
