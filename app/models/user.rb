@@ -19,7 +19,7 @@ class User < ActiveRecord::Base
   end
 
   def get_all_related_data
-      # binding.pry
+      
     @this_user = self.as_json
     @this_user[:searches] = show_searches(self)
 

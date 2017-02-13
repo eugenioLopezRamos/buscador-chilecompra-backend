@@ -3,7 +3,7 @@ class SearchesController < ApplicationController
  # before_action :authenticate_user!
 
   def show
-    render json: show_searches(current_user)
+    render json: {searches: show_searches(current_user)}
   end
 
   def create
@@ -22,27 +22,45 @@ class SearchesController < ApplicationController
 
   def search_params
       params.require(:search).permit({:value => [
-                                                :organismosPublicosFilter,
-                                                :selectedOrganismoPublico,
-                                                :codigoLicitacion,
-                                                :date,
-                                                :palabrasClave,
-                                                :selectedEstadoLicitacion,
-                                                :rutProveedor
+                                                 :startDate,
+                                                 :alwaysFromToday,
+                                                 :endDate,
+                                                 :alwaysToToday,
+                                                 :selectedEstadoLicitacion,
+                                                 :organismosPublicosFilter,
+                                                 :selectedOrganismoPublico,
+                                                 :rutProveedor,
+                                                 :codigoLicitacion,
+                                                 :palabrasClave,
+                                                 :offset,
+                                                 :order_by => [
+                                                              :order,
+                                                              :fields => [[]]
+                                                              ]
                                                 ]
                                       }, 
                                        :name)
   end
 
   def search_update_params
-    params.require(:search).permit({:newValues => [:date,
-                                                   :rutProveedor,
-                                                   :palabrasClave,
-                                                   :codigoLicitacion,
-                                                   :organismosPublicosFilter,
+
+    params.require(:search).permit({:newValues => [
+                                                   :startDate,
+                                                   :alwaysFromToday,
+                                                   :endDate,
+                                                   :alwaysToToday,
                                                    :selectedEstadoLicitacion,
-                                                   :selectedOrganismoPublico]
-                                                   }, 
+                                                   :organismosPublicosFilter,
+                                                   :selectedOrganismoPublico,
+                                                   :rutProveedor,
+                                                   :codigoLicitacion,
+                                                   :palabrasClave,
+                                                   :order_by => [
+                                                                 :order,
+                                                                 :fields => [[]]
+                                                                 ]
+                                                   ]
+                                    }, 
                                     :searchId, :searchName)
   end
 

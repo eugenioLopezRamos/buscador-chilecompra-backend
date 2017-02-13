@@ -63,6 +63,11 @@ class Result < ApplicationRecord
         # (In simpler words, gets the last DB record entry per Codigo Externo between dates  start_day("YYYY-MM-DD"), end_day) 
         
         #TODO: See if its possible to structure this query in a way that is cacheable with redis
+        #TODO: Although the parameters are checked before_action for the correct format
+        # (date must be UNIX epoch format, so an integer) its probably a good idea to 
+        # add a call to .sanitize_sql_for_conditions
+        # Like this: ActiveRecord::Base.send(:sanitize_sql_for_conditions, 'I"m" a cool guy')
+        # => "I\"m\" a cool guy"
         unique = connection.execute(
         "SELECT id FROM (
             SELECT id, updated_at,

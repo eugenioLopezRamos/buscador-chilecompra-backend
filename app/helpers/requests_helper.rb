@@ -99,10 +99,14 @@
   def get_result_from_query(results, query_array, offset, limit, sorting)
     #TODO: clean this up, mostly leftovers from before
     query_result = Array.new
+
+    # here I get the latest, even if no modifications where made so I might end up with a codigoLicitacion
+    # that was entered @ 9AM 'missing' since it will only show the latest(for example, at 11 AM)
+    
     sub_result = query_array.reduce(results){|prev, curr| prev.send("where", curr) }
-                                          .limit(limit)
-                                          .offset(offset)
                                           .order(sorting)
+                                          .offset(offset)
+                                          .limit(limit)
                                           .map { |obj| obj.as_json}
                                           #.order(created_at: :desc)
                                           
@@ -166,39 +170,43 @@
   def create_order_by(order_by)
 
     #order_by = {fields: [...], order: "descending || ascending" }
+    if order_by["fields"].empty?
+      fields = RequestsController::DEFAULT_ORDER_BY_FIELD
+    else
+      fields = order_by["fields"].map do |element|
+                  if is_integer? element
+                    element.to_s
+                  else
+                    "'#{element.to_s}'"
+                  end
+              end
+    end
 
-    fields = order_by["fields"].map do |element|
-                if is_integer? element
-                  element.to_s
-                else
-                  "'#{element.to_s}'"
-                end
-             end
+    #TODO: Refactor this....         
 
     if fields.length == 1
-      return "value ->> " + fields[0]
+      order_by_query = "value ->> " + fields[0]
     elsif fields.length == 2
-      return "value -> " + fields[0] + " ->> " + fields[1]
+      order_by_query = "value -> " + fields[0] + " ->> " + fields[1]
     elsif fields.length === 3
-      return "value -> " + fields[0] + " -> " + fields[1] + " ->> " + fields[2]
+      order_by_query = "value -> " + fields[0] + " -> " + fields[1] + " ->> " + fields[2]
     else
       route = fields.slice(0, fields.length - 2).join(" -> ")
       desired_value = fields.slice(fields.length - 1, 1)[0]
       full_route = "value -> " + route + " ->> " + desired_value
       order_by_query = full_route
 
-      if order_by["order"] === "descending"
-        order_by_query = order_by_query + "DESC"
-      end
-
-      if order_by["order"] === "ascending"
-        order_by_query = order_by_query + " ASC"
-      end
-
-      order_by_query
     end
-   
+  
+    if order_by["order"] == "descending"
+      order_by_query = order_by_query + " DESC"
+    end
 
+    if order_by["order"] == "ascending"
+      order_by_query = order_by_query + " ASC"
+    end
+  #  binding.pry
+    order_by_query
 
 
   end

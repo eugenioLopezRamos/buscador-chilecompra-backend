@@ -2,6 +2,7 @@ class RequestsController < ApplicationController
   include RequestsHelper
   require 'json'
   require 'redis'
+  DEFAULT_ORDER_BY_FIELD = ["\'Listado\'", "\'0\'", "\'CodigoExterno\'"]
 
   before_action :valid_get_info_params?, only: :get_info
   before_action :valid_get_misc_info_params?, only: :get_misc_info

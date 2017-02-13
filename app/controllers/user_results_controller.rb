@@ -9,10 +9,12 @@ class UserResultsController < ApplicationController
     end
 
     def create
+      #TODO: move validation to before_action 
       @result_id = valid_create_result_subscription_params[:result_id]
       @name = valid_create_result_subscription_params[:name]
       current_user.subscribe_to_result(@result_id, @name)
-      render json: json_message_to_frontend(info: "Suscripción guardada exitosamente")
+      new_subscriptions = current_user.subscriptions
+      render json: json_message_to_frontend(info: "Suscripción guardada exitosamente", extra: {subscriptions: new_subscriptions})
       #TODO: Fix in model too.
       rescue ArgumentError => message
         render json: json_message_to_frontend(errors: message)
@@ -26,8 +28,9 @@ class UserResultsController < ApplicationController
       @old_name = valid_update_result_subscription_params[:old_name]
 
       if current_user.update_result_subscription(@old_name, @name)
-        @message = json_message_to_frontend(info: "Actualizado exitosamente")
-        @message[:subscriptions] = current_user.subscriptions
+        @message = json_message_to_frontend(info: "Actualizado exitosamente",
+                                            extra: {subscriptions: current_user.subscriptions})
+       # @message[:subscriptions] = current_user.subscriptions
         return render json: @message
       end
 
@@ -53,8 +56,14 @@ class UserResultsController < ApplicationController
     end
 
     def show_history
-      @id = valid_result_history_params
+      #Looks for up a result by id, then calls its :history method
+      # which brings up all the database entries WITH THE SAME CODIGOEXTERNO
+      # chronologically (that is, ASC in SQL terms) and sends them to the json_message_to_frontend
+      # which then does the comparison and presents the results to the end user
+      @id = valid_result_history_params.to_i
+      #binding.pry
       @result = Result.find(@id)
+     
       render json: @result.history
     end
 
@@ -74,17 +83,13 @@ class UserResultsController < ApplicationController
     end
 
     def valid_result_history_params
-      # "asdas".to_i.to_s = ("0" != "asdas")  => raise
-      # "1asdas".to_i.to_s = ("1" != "1asdas") => raise
-      # "asdas1".to_i.to_s = ("0" != "asdas1") => raise
-      # "1asdas1".to_i.to_s = ("1" != "1asdas1") => raise
-      if params[:id].to_i.to_s != params[:id]
-        raise ArgumentError.new(json_message_to_frontend(errors: "Id de resultado debe ser un número entero"))
+      if !is_integer? params[:id]
+        raise ArgumentError, "Id de resultado debe ser un número entero"
       end
       params.require(:id)
 
       rescue ArgumentError => e
-        render json: e
+        render json: json_message_to_frontend(errors: e)
     end
 
 
