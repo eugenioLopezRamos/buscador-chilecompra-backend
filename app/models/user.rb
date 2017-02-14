@@ -10,12 +10,11 @@ class User < ActiveRecord::Base
   has_many :user_results, :dependent => :delete_all
   has_many :results, :through => :user_results
   has_many :notifications, :dependent => :delete_all
+  after_create :add_user_to_mailing_list
 
-  def send_licitacion_change_email(licitacion)
-    # cada X tiempo (definible por el usuario, minimo intervalo de 1 hr), voy a ejecutar un job
-    # en que los usuarios asignados a ese intervalo se revisa si tienen notificaciones pendientes, y 
-    # en caso de tenerlas, se les envia un email con TODAS
-   # LicitacionChangeMailer.send_notification_email(self, licitacion).deliver_now
+  def send_licitacion_change_email(message)
+   # Message is a string with \n as line delimiters, which mark each individual message
+   LicitacionChangeMailer.send_notification_email(self, message).deliver_later
   end
 
   def get_all_related_data
@@ -109,6 +108,14 @@ class User < ActiveRecord::Base
     Notification.where(user_id: self.id).each do |notif|
       notif.destroy
     end
+  end
+
+  private
+
+  def add_user_to_mailing_list
+
+    AddToMailingList.perform(self)
+
   end
 
 

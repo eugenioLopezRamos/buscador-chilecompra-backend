@@ -6,7 +6,7 @@ class SaveSingleLicitacionToDB
     append_log_save_attempt(datos_lic[0]['CodigoExterno'])    
 
     result = Result.create(value: licitacion)
-    codigo_externo = @lic["Listado"][0]["CodigoExterno"]
+    codigo_externo = licitacion["Listado"][0]["CodigoExterno"]
 
     @latest_current_result_value = Result.where("value -> 'Listado' -> 0 ->> 'CodigoExterno' = ?", codigo_externo).last.value
     #TODO: Make it so If licitacion is unchanged, instead of creating a new record, update the "updated_at"
