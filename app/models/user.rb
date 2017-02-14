@@ -22,12 +22,8 @@ class User < ActiveRecord::Base
       
     @this_user = self.as_json
     @this_user[:searches] = show_searches(self)
-
-
-
     @this_user[:subscriptions] = self.subscriptions
     @this_user[:notifications] = self.notifications
- 
     @this_user
 
   end

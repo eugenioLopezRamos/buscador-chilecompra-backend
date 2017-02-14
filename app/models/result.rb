@@ -64,12 +64,12 @@ class Result < ApplicationRecord
         
         #TODO: See if its possible to structure this query in a way that is cacheable with redis
         #TODO: Although the parameters are checked before_action for the correct format
-        # (date must be UNIX epoch format, so an integer) its probably a good idea to 
-        # add a call to .sanitize_sql_for_conditions
-        # Like this: ActiveRecord::Base.send(:sanitize_sql_for_conditions, 'I"m" a cool guy')
-        # => "I\"m\" a cool guy"
-        start = self.send(:sanitize_sql_for_conditions, start_day)
-        finish = self.send(:sanitize_sql_for_conditions, end_day)
+        # (date must be UNIX epoch format, so an integer and transformation to string is done where
+        # after checking that what we received is an int) its probably a good idea to 
+        # add a call to .quote
+        # Like this: ActiveRecord::Base.connection.quote(value)
+        start = connection.quote(start_day)
+        finish = connection.quote(end_day)
 
         unique = connection.execute(
         "SELECT id FROM (
@@ -79,8 +79,8 @@ class Result < ApplicationRecord
                     ORDER BY updated_at DESC
                     ) as by_updated_at
             FROM results
-            WHERE updated_at > '#{start}'
-            AND updated_at <= '#{finish}'
+            WHERE updated_at > #{start}
+            AND updated_at <= #{finish}
         ) as q
         WHERE by_updated_at < 2"
         )

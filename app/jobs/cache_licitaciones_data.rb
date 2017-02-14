@@ -14,7 +14,7 @@ class CacheLicitacionesData
   def self.cache_organismos_publicos
     uri = URI("http://api.mercadopublico.cl/servicios/v1/Publico/Empresas/BuscarComprador?ticket=#{ENV['CC_TOKEN']}")
     #this is an array of hashes
-    parsed_json_response = JSON.send(:parse, Net::HTTP.get(uri))["listaEmpresas"]
+    parsed_json_response = JSON.parse(Net::HTTP.get(uri))["listaEmpresas"]
     
     response_hash = Hash.new
     parsed_json_response.reduce(response_hash) do |accumulator, current|

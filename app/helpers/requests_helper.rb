@@ -159,7 +159,7 @@
       return 0
     end
     if offset.to_i >= results_amount
-     # these are integers, so the decimals are dropped -> becomes the last chunk of results
+     # these are integers, so the decimals are truncated -> becomes the last chunk of results
      new_offset = results_amount / limit
      new_offset = new_offset * limit
      return new_offset
