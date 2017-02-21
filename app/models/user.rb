@@ -1,5 +1,11 @@
 class User < ActiveRecord::Base
   # Include default devise modules.
+
+  #TODO: Change devise messages....
+  #TODO: Make the user confirm email address before making it valid.
+  #TODO: Make devise not return user data to the client when registering,
+  #be it successfully or unsuccessfully
+  
   devise :database_authenticatable, :registerable,
           :recoverable, :rememberable, :trackable, :validatable,
           :omniauthable,:confirmable #No confirm success url for now
@@ -113,8 +119,8 @@ class User < ActiveRecord::Base
   private
 
   def add_user_to_mailing_list
-
-    AddToMailingList.perform(self)
+    #TODO: Implement this job
+    #AddToMailingList.perform(self)
 
   end
 

@@ -17,6 +17,7 @@ class RequestsController < ApplicationController
     verify_correct_date_format(params[:startDate], params[:endDate])
     verify_valid_always_from?(params[:alwaysFromToday], params[:alwaysToToday])
     verify_valid_offset_format(params[:offset])
+    #TODO: add verify_valid_order here
 
     result = filter_results(params, @result_limit_amount)
 
@@ -84,6 +85,8 @@ class RequestsController < ApplicationController
     end
 
     def verify_valid_order(value)
+      #TODO: Check the [:fields] value for 
+      # valid data (eg. check against an example object)
       if ["descending", "ascending"].include? value
         return true
       end
@@ -101,7 +104,7 @@ class RequestsController < ApplicationController
                     :offset, 
                     :order_by => [
                                 :order,
-                                :fields => [[]]
+                                :fields => []
                                 ]
                     )
     end
