@@ -18,9 +18,10 @@ class UserResultsController < ApplicationController
       render json: json_message_to_frontend(info: "Suscripción guardada exitosamente", extra: {subscriptions: new_subscriptions})
       #TODO: Fix in model too.
       rescue ArgumentError => message
-        render json: json_message_to_frontend(errors: message)
+        render json: json_message_to_frontend(errors: message), status: 422
       rescue ActiveRecord::RecordNotUnique
         render json: json_message_to_frontend(errors: "Error, ya está suscrito a este resultado y/o nombre ya existe")
+      
     end
 
     def update
@@ -31,14 +32,13 @@ class UserResultsController < ApplicationController
       if current_user.update_result_subscription(@old_name, @name)
         @message = json_message_to_frontend(info: "Actualizado exitosamente",
                                             extra: {subscriptions: current_user.subscriptions})
-       # @message[:subscriptions] = current_user.subscriptions
         return render json: @message
       end
 
-      render json: json_message_to_frontend(error: "Lo sentimos, hubo un error. Por favor inténtalo nuevamente")
+      render json: json_message_to_frontend(errors: "Lo sentimos, hubo un error. Por favor inténtalo nuevamente")
 
       rescue ActiveRecord::RecordNotUnique
-        render json: json_message_to_frontend(error: "Error, este nombre ya existe")
+        render json: json_message_to_frontend(errors: "Error, este nombre ya existe"), status: 422
     end
 
     def destroy
@@ -50,10 +50,10 @@ class UserResultsController < ApplicationController
         return render json: @message
       end
 
-      render json: json_message_to_frontend(errors: "No se pudo cancelar la suscripción")
+      render json: json_message_to_frontend(errors: "No se pudo cancelar la suscripción"), status: 422
 
       rescue ActiveRecord::ActiveRecordError
-        render json: json_message_to_frontend(errors: "Error al cancelar la suscripción")
+        render json: json_message_to_frontend(errors: "Error al cancelar la suscripción"), status: 422
     end
 
     def show_history

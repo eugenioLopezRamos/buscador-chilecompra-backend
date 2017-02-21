@@ -35,7 +35,7 @@ class SearchesController < ApplicationController
                                                  :offset,
                                                  :order_by => [
                                                               :order,
-                                                              :fields => [[]]
+                                                              :fields => []
                                                               ]
                                                 ]
                                       }, 
@@ -55,9 +55,10 @@ class SearchesController < ApplicationController
                                                    :rutProveedor,
                                                    :codigoLicitacion,
                                                    :palabrasClave,
+                                                   :offset,
                                                    :order_by => [
                                                                  :order,
-                                                                 :fields => [[]]
+                                                                 :fields => []
                                                                  ]
                                                    ]
                                     }, 

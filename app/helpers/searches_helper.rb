@@ -37,7 +37,7 @@ module SearchesHelper
             "message": {
               "info": {"Modificado exitosamente": [ search[:searchName] ] }
             },   
-            "searches": show_searches,
+            "searches": show_searches(current_user),
             }
 
     rescue ActiveRecord::ActiveRecordError => e
