@@ -2,6 +2,7 @@ class UserResultsController < ApplicationController
     include UserResultsHelper
 
     before_action :authenticate_user!
+
     #before_action :valid_ids?, only: [:create, :update, :create_stored_result]
 
     def show
@@ -61,7 +62,7 @@ class UserResultsController < ApplicationController
       # chronologically (that is, ASC in SQL terms) and sends them to the json_message_to_frontend
       # which then does the comparison and presents the results to the end user
       @id = valid_result_history_params.to_i
-      #binding.pry
+
       @result = Result.find(@id)
      
       render json: @result.history
@@ -91,7 +92,6 @@ class UserResultsController < ApplicationController
       rescue ArgumentError => e
         render json: json_message_to_frontend(errors: e)
     end
-
 
     # def valid_ids?
     #   new_arr = params["results"].map {|id| id.to_i}

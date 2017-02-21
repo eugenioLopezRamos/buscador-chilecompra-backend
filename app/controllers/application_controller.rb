@@ -4,7 +4,14 @@ class ApplicationController < ActionController::API
 
   before_action :configure_permitted_parameters, if: :devise_controller?
 
+
   protected
+  #devise_token_auth doesn't seem to use custom failure apps like devise does.
+  def authenticate_user!
+    unless current_user
+      return render json: json_message_to_frontend(errors: "Acceso denegado. Por favor ingresa."), status: 401
+    end
+  end
 
   def configure_permitted_parameters
     devise_parameter_sanitizer.permit(:sign_up, keys: [:name])
