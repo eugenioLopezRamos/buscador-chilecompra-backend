@@ -28,27 +28,9 @@
     total_results_amount = get_total_results_amount(latest_results_per_ids, @to_send)
 
     offset = calculate_offset(@param_data["offset"], total_results_amount, limit)
-#    order_by = calculate_order_by(@param_data[:order_by])
-  #  binding.pry
-
     sorting = create_order_by(@param_data["order_by"])
 
-    result = get_result_from_query(latest_results_per_ids, @to_send, offset, limit, sorting)
-    #filtered_result = search_by_palabras_clave(@param_data[:palabrasClave])
-   
-    
-    sorted_result = result#apply_order_by(result, @param_data["order_by"]) #result.sort {|a, z| a["value"]["Listado"][0]["Nombre"] <=> z["value"]["Listado"][0]["Nombre"]}
-  # binding.pry
-
-
-    #result.sort_by {|element| element["Listado"]}
-
-   # order_by = @param_data["order_by"]
-
-    # limit is just limit!
-    # binding.pry
-
-
+    sorted_result = get_result_from_query(latest_results_per_ids, @to_send, offset, limit, sorting)
 
     {values: sorted_result, count: total_results_amount, limit: limit, offset: offset}
 

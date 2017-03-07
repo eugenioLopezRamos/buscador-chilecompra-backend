@@ -5,6 +5,35 @@ require 'rails/test_help'
 class ActiveSupport::TestCase
   # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
   fixtures :all
+  def sign_in_example_user
+      # We login the user and return the headers since we need those to access the routes that use 
+      # authenticate_user!
+      post '/auth/sign_in', params: {email: "example@example.com", password: "password"}
+
+      token = @response.headers["access-token"]
+      expiry = @response.headers["expiry"]
+      client = @response.headers["client"]
+      assert_response 200
+
+      headers = {
+                "access-token" => token,
+                "token-type" => "Bearer",
+                "client" => client,
+                "uid" => @user.uid,
+                "expiry" => expiry,
+                "Content-Type": "application/json",
+                "accept": "application/json"
+              }
+      
+  end
+
 
   # Add more helper methods to be used by all tests here...
 end
+
+class ActionController::TestCase
+  include ApplicationHelper
+  include Devise::Test::ControllerHelpers
+end
+
+

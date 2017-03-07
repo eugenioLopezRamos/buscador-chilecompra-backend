@@ -6,7 +6,7 @@ class RequestsController < ApplicationController
 
   before_action :valid_get_info_params?, only: :get_info
   before_action :valid_get_misc_info_params?, only: :get_misc_info
-  before_action :authenticate_request!, only: :show_hello
+  before_action :authenticate_user!
 
   def initialize
     @result_limit_amount = 200
@@ -25,7 +25,7 @@ class RequestsController < ApplicationController
     render plain: JSON.fast_generate(result), content_type: "application/json"
 
     rescue ArgumentError => except
-          render json: json_message_to_frontend(errors: except)
+        render json: json_message_to_frontend(errors: except), status: 422
   end
 
   def get_misc_info
@@ -34,9 +34,10 @@ class RequestsController < ApplicationController
         return render json: Redis.current.hgetall(params[:info])
       end
 
-      raise ArgumentError, "Parametros invalidos"
+      raise ArgumentError, "Parámetros inválidos"
       rescue ArgumentError => except
-        render json: json_message_to_frontend(errors: except)
+        render json: json_message_to_frontend(errors: except), status: 422
+
   end
 
   private
@@ -95,6 +96,7 @@ class RequestsController < ApplicationController
 
 
     def valid_get_info_params?
+      #TODO: Make these required
       params.permit(
                     :codigoLicitacion, :estadoLicitacion, 
                     :organismoPublico, :palabrasClave, 
@@ -107,10 +109,15 @@ class RequestsController < ApplicationController
                                 :fields => []
                                 ]
                     )
+    rescue ActionController::UnpermittedParameters
+      render json: json_message_to_frontend(errors: "Parámetros inválidos"), status: 422
     end
 
     def valid_get_misc_info_params?
       params.require(:info)
+
+      rescue ActionController::ParameterMissing
+        render json: json_message_to_frontend(errors: "Parámetros inválidos"), status: 422
     end
 
   

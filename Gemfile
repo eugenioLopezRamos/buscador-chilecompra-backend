@@ -23,7 +23,7 @@ gem 'resque', '1.26.0'
 #Use resque scheduler for scheduling background jobs.
 gem 'resque-scheduler'
 
-#Use resque-pool to managing pools of workers
+#Use resque-pool for managing pools of workers
 gem 'resque-pool'
 
 #Use god to manage processes
@@ -69,7 +69,7 @@ group :development do
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
   gem 'spring-watcher-listen', '~> 2.0.0'
-
+  gem 'seed_dump'
   # Use capistrano for deployment
   gem 'capistrano',         require: false
   gem 'capistrano-rvm',     require: false

@@ -1,6 +1,6 @@
 class SearchesController < ApplicationController
   include SearchesHelper
- # before_action :authenticate_user!
+  before_action :authenticate_user!
 
   def show
     render json: {searches: show_searches(current_user)}
