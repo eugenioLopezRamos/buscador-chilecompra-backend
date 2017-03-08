@@ -2,7 +2,10 @@ class UserResultsController < ApplicationController
     include UserResultsHelper
 
     before_action :authenticate_user!
-
+    before_action :valid_create_result_subscription_params, only: :create
+    before_action :valid_update_result_subscription_params, only: :update
+    before_action :valid_destroy_result_subscription_params, only: :destroy
+    before_action :valid_result_history_params, only: :show_history
     #before_action :valid_ids?, only: [:create, :update, :create_stored_result]
 
     def show
@@ -45,9 +48,8 @@ class UserResultsController < ApplicationController
       @result = valid_destroy_result_subscription_params[:name]
 
       if current_user.destroy_result_subscription @result
-        @message = json_message_to_frontend(info: "Suscripción cancelada exitosamente")
-        @message[:subscriptions] = current_user.subscriptions
-        return render json: @message
+        return render json: json_message_to_frontend(info: "Suscripción cancelada exitosamente",
+                                            extra: {subscriptions: current_user.subscriptions})
       end
 
       render json: json_message_to_frontend(errors: "No se pudo cancelar la suscripción"), status: 422
@@ -75,36 +77,33 @@ class UserResultsController < ApplicationController
 
     def valid_create_result_subscription_params
       params.require(:create_subscription).permit(:name, :result_id)
+      rescue ActionController::UnpermittedParameters
+        render json: json_message_to_frontend(errors: "Parámetros inválidos"), status: 422
+      
     end
 
     def valid_update_result_subscription_params
       params.require(:update_subscription).permit(:old_name, :name)
+      rescue ActionController::UnpermittedParameters
+        render json: json_message_to_frontend(errors: "Parámetros inválidos"), status: 422
     end
 
     def valid_destroy_result_subscription_params
       params.require(:destroy_subscription).permit(:name)
+      rescue ActionController::UnpermittedParameters
+        render json: json_message_to_frontend(errors: "Parámetros inválidos"), status: 422
     end
 
     def valid_result_history_params
       if !is_integer? params[:id]
         raise ArgumentError, "Id de resultado debe ser un número entero"
       end
-      params.require(:id)
+      params.permit(:id).require(:id)
 
       rescue ArgumentError => e
         render json: json_message_to_frontend(errors: e)
+      rescue ActionController::UnpermittedParameters
+        render json: json_message_to_frontend(errors: "Parámetros inválidos"), status: 422
     end
-
-    # def valid_ids?
-    #   new_arr = params["results"].map {|id| id.to_i}
-    #   if new_arr != params["results"]
-    #     render json: {"message": {"errors": ["Id(s) inválido(s)"] } }
-    #   else
-    #       return true
-
-    #   end
-    #   rescue NoMethodError #happens when |id| is null, for example
-    #     render json: {"message": {"errors": ["Id(s) inválido(s)"] } }            
-    # end
 
 end

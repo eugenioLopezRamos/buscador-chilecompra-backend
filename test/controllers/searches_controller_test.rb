@@ -20,7 +20,7 @@ include ApplicationHelper
 
 
   test "Creates searches correctly" do
-
+    
     create_search_params = {
       search: {
         value: {
