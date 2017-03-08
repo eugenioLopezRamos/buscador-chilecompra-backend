@@ -79,20 +79,18 @@
   end
 
   def get_result_from_query(results, query_array, offset, limit, sorting)
-    #TODO: clean this up, mostly leftovers from before
-    query_result = Array.new
+
 
     # here I get the latest, even if no modifications where made so I might end up with a codigoLicitacion
     # that was entered @ 9AM 'missing' since it will only show the latest(for example, at 11 AM)
     
-    sub_result = query_array.reduce(results){|prev, curr| prev.send("where", curr) }
+    query_array.reduce(results){|prev, curr| prev.send("where", curr) }
                                           .order(sorting)
                                           .offset(offset)
                                           .limit(limit)
                                           .map { |obj| obj.as_json}
-                                          #.order(created_at: :desc)
-                                          
-    query_result.concat sub_result
+                                       
+                    
   end
 
 

@@ -24,9 +24,6 @@ module SearchesHelper
     return json_message_to_frontend(info: {"guardado con éxito": @successful.keys},
                                     errors: {"repetidos": @not_uniq.keys, "errores": @errors.keys },
                                     extra: {searches: show_searches(current_user)} ) 
-    #{"message": {"info": {"guardado con exito": @successful.keys} ,
-    #                           "errors": {"repetidos": @not_uniq.keys, "errores": @errors.keys}}
-     #             }
   end
 
   def update_search(search)

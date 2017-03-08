@@ -8,13 +8,13 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
 
   def setup
     @user = User.first
+    @headers = sign_in_example_user
   end
 
   test "When account update fails, get a customized error message" do
-    
-    headers = sign_in_example_user
+
     old_name = @user.name
-    put '/auth/', params: {current_password: "wrongpassword", name: "AnotherName"}.to_json, headers: headers
+    put '/auth/', params: {current_password: "wrongpassword", name: "AnotherName"}.to_json, headers:  @headers
     
     expected_response = {message: {errors:  "No se pudo actualizar. Ingresaste tu contraseña?"}}
     assert_response 422
