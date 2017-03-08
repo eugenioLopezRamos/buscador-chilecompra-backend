@@ -1,6 +1,9 @@
 class SearchesController < ApplicationController
   include SearchesHelper
   before_action :authenticate_user!
+  before_action :search_params, only: :create
+  before_action :search_update_params, only: :update
+  before_action :search_delete_params, only: :destroy
 
   def show
     render json: {searches: show_searches(current_user)}
@@ -40,6 +43,8 @@ class SearchesController < ApplicationController
                                                 ]
                                       }, 
                                        :name)
+    rescue ActionController::UnpermittedParameters
+      return render json: json_message_to_frontend(errors: "Parámetros inválidos"), status: 422
   end
 
   def search_update_params
@@ -63,10 +68,14 @@ class SearchesController < ApplicationController
                                                    ]
                                     }, 
                                     :searchId, :searchName)
+    rescue ActionController::UnpermittedParameters
+      return render json: json_message_to_frontend(errors: "Parámetros inválidos"), status: 422
   end
 
   def search_delete_params
     params.require(:search).permit(:id)
+    rescue ActionController::UnpermittedParameters
+      return render json: json_message_to_frontend(errors: "Parámetros inválidos"), status: 422
   end
 
 

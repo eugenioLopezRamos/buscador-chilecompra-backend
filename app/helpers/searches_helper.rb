@@ -27,7 +27,7 @@ module SearchesHelper
   end
 
   def update_search(search)
-
+    #TODO: make this use json_message_to_frontend
     to_update = current_user.searches.find_by(name: search[:searchName])
     to_update.update_attributes(value: search[:newValues], name: search[:searchName])
     return {

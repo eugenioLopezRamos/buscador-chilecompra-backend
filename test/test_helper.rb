@@ -18,7 +18,8 @@ class ActiveSupport::TestCase
       token = @response.headers["access-token"]
       expiry = @response.headers["expiry"]
       client = @response.headers["client"]
-      assert_response 200
+      #Otherwise you might get a different number of assertions on each test
+      #assert_response 200
 
       headers = {
                 "access-token" => token,
