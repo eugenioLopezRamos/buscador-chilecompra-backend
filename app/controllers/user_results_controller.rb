@@ -77,20 +77,20 @@ class UserResultsController < ApplicationController
 
     def valid_create_result_subscription_params
       params.require(:create_subscription).permit(:name, :result_id)
-      rescue ActionController::UnpermittedParameters
+      rescue ActionController::UnpermittedParameters, ActionController::ParameterMissing
         render json: json_message_to_frontend(errors: "Parámetros inválidos"), status: 422
       
     end
 
     def valid_update_result_subscription_params
       params.require(:update_subscription).permit(:old_name, :name)
-      rescue ActionController::UnpermittedParameters
+      rescue ActionController::UnpermittedParameters, ActionController::ParameterMissing
         render json: json_message_to_frontend(errors: "Parámetros inválidos"), status: 422
     end
 
     def valid_destroy_result_subscription_params
       params.require(:destroy_subscription).permit(:name)
-      rescue ActionController::UnpermittedParameters
+      rescue ActionController::UnpermittedParameters, ActionController::ParameterMissing
         render json: json_message_to_frontend(errors: "Parámetros inválidos"), status: 422
     end
 
@@ -102,7 +102,7 @@ class UserResultsController < ApplicationController
 
       rescue ArgumentError => e
         render json: json_message_to_frontend(errors: e)
-      rescue ActionController::UnpermittedParameters
+      rescue ActionController::UnpermittedParameters, ActionController::ParameterMissing
         render json: json_message_to_frontend(errors: "Parámetros inválidos"), status: 422
     end
 

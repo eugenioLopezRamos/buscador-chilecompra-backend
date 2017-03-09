@@ -54,6 +54,10 @@ class Result < ApplicationRecord
         last_codigos
     end
 
+    def self.all_with_codigo_externo(codigo_externo)
+        Result.where("value -> 'Listado' -> 0 ->> 'CodigoExterno' = ?", codigo_externo)
+    end
+
     def self.latest_entry_per_codigo_externo(start_day, end_day)
 
         connection = ActiveRecord::Base.connection

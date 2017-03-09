@@ -109,14 +109,14 @@ class RequestsController < ApplicationController
                                 :fields => []
                                 ]
                     )
-    rescue ActionController::UnpermittedParameters
+    rescue ActionController::UnpermittedParameters, ActionController::ParameterMissing
       render json: json_message_to_frontend(errors: "Parámetros inválidos"), status: 422
     end
 
     def valid_get_misc_info_params?
       params.require(:info)
 
-      rescue ActionController::ParameterMissing
+      rescue ActionController::ParameterMissing, ActionController::ParameterMissing
         render json: json_message_to_frontend(errors: "Parámetros inválidos"), status: 422
     end
 

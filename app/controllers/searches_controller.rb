@@ -43,7 +43,7 @@ class SearchesController < ApplicationController
                                                 ]
                                       }, 
                                        :name)
-    rescue ActionController::UnpermittedParameters
+    rescue ActionController::UnpermittedParameters, ActionController::ParameterMissing
       return render json: json_message_to_frontend(errors: "Parámetros inválidos"), status: 422
   end
 
@@ -68,7 +68,7 @@ class SearchesController < ApplicationController
                                                    ]
                                     }, 
                                     :searchId, :searchName)
-    rescue ActionController::UnpermittedParameters
+    rescue ActionController::UnpermittedParameters, ActionController::ParameterMissing
       return render json: json_message_to_frontend(errors: "Parámetros inválidos"), status: 422
   end
 
