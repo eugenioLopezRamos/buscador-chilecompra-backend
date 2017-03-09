@@ -3,6 +3,11 @@ class Notification < ApplicationRecord
   #add actions here instead of just creating htem on the controller/job
 
   def self.show_notifications_of(user)
+
+    if !user
+      return "Usuario inválido"
+    end
+
     @notif_hash = Hash.new
     notifications = user.notifications.pluck("id", "message")
     notifications.each do |notif|
@@ -16,6 +21,7 @@ class Notification < ApplicationRecord
 
 
   def self.delete_notification_of_user(user_id, notification_id)
+
     notification = self.where(id: notification_id, user_id: user_id)
 
     if notification.empty?
@@ -26,7 +32,13 @@ class Notification < ApplicationRecord
   end
 
   def self.delete_all_notifications_of_user(user_id)
-    Notification.where(user_id: user_id).each do |notif|
+    notifications = Notification.where(user_id: user_id)
+    
+    if notifications.empty?
+      raise ActiveRecord::RecordNotFound
+    end
+  
+    notifications.each do |notif|
       notif.destroy
     end
   end

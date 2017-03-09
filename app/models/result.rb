@@ -72,8 +72,11 @@ class Result < ApplicationRecord
         # after checking that what we received is an int) its probably a good idea to 
         # add a call to .quote
         # Like this: ActiveRecord::Base.connection.quote(value)
+
+        #TODO: See if its convenient to use ApplicationHelper#is_integer? here
         start = connection.quote(start_day)
         finish = connection.quote(end_day)
+ 
 
         unique = connection.execute(
         "SELECT id FROM (
