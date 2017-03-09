@@ -17,8 +17,8 @@ class UserResult < ApplicationRecord
   end
 
   def self.user_subscribed_to?(user, result_id)
-    result = self.where(user_id: user.id, result_id: result_id)
-    !result.empty? && result.suscribed 
+    result = self.where(user_id: user.id, result_id: result_id).first
+    !result.nil? && result.subscribed 
   end
 
   def self.subscriptions_by_codigo_externo_of(user)
@@ -32,11 +32,13 @@ class UserResult < ApplicationRecord
     @subscriptions_by_codigo_externo
   end
 
+
   def self.update_subscription_of(user, old_name, new_name)
     self.where(user_id: user.id, subscription_name: old_name).each do |subscription|
       subscription.update_attribute(:subscription_name, new_name)
     end
   end
+
 
   def self.subscribe_user_to_result(user, result_id, name)
     # Search if the user is already subscribed to result_id

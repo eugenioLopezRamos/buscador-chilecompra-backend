@@ -7,6 +7,6 @@ class Search < ApplicationRecord
 
   private
   def set_now_as_name_if_nil
-    self.name = Time.now unless self.name
+    self.name = Time.zone.now unless self.name
   end
 end

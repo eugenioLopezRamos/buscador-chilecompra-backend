@@ -27,18 +27,15 @@ module SearchesHelper
   end
 
   def update_search(search)
-    #TODO: make this use json_message_to_frontend
-    to_update = current_user.searches.find_by(name: search[:searchName])
-    to_update.update_attributes(value: search[:newValues], name: search[:searchName])
-    return {
-            "message": {
-              "info": {"Modificado exitosamente": [ search[:searchName] ] }
-            },   
-            "searches": show_searches(current_user),
-            }
+    current_user.searches
+                .find_by(name: search[:searchName])
+                .update_attributes(value: search[:newValues], name: search[:searchName])
+    
+    return json_message_to_frontend(info:{"Modificado exitosamente": [search[:searchName]]},
+                                    extra: {searches: show_searches(current_user)})
 
-    rescue ActiveRecord::ActiveRecordError => e
-      @messages["error"] = e
+    rescue ActiveRecord::ActiveRecordError
+      return json_message_to_frontend(errors: "Error al guardar cambios, por favor intentalo de nuevo"), status: 500
   end
 
   def destroy_search(search)
@@ -56,13 +53,9 @@ module SearchesHelper
       return json_message_to_frontend(
                                       errors:{"Fallido": [name]},
                                       extra: {searches: show_searches(current_user)}
-                                      )
-    
+                                      ), status: 500
+  
     end
-    #TODO: rescue Devise::AuthenticationError (or however it's called)
-    #rescue Devise::AuthError
-    # return {"message": {"errors": {"Error": "Credenciales inválidas, por favor ingresa"}}}
-    #  
   end
 
   private
