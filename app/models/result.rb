@@ -10,7 +10,7 @@ class Result < ApplicationRecord
         connection = ActiveRecord::Base.connection
         #a tuple = key value pair such as {"\"column\"": "\"111-AAA-BBB\""}
         # tuples = array of all unique CodigoExternos 
-        tuples = connection.execute('SELECT DISTINCT "results"."value"::json#>>\'{Listado,0,CodigoExterno}\' FROM "results"')
+        tuples = connection.execute('SELECT DISTINCT "results"."value"::json#>>\'{Listado,0,CodigoExterno}\' as "codigo_externo" FROM "results"')
         codigos = Array.new
 
         tuples.each do |tuple|
