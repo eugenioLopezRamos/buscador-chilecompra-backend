@@ -9,7 +9,7 @@
     hours * minutes * seconds * thousand
   end
 
-  
+  #TODO: move away from here!
   def transform_date_format(date)
       Time.at(date.to_i/1000).strftime("%Y-%m-%d") #Need to divide the MomentJS date  by 1000 to get the correct one.
   end

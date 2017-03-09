@@ -10,7 +10,7 @@ class Result < ApplicationRecord
         connection = ActiveRecord::Base.connection
         #a tuple = key value pair such as {"\"column\"": "\"111-AAA-BBB\""}
         # tuples = array of all unique CodigoExternos 
-        tuples = connection.execute('SELECT DISTINCT "results"."value"::json#>>\'{Listado,0,CodigoExterno}\' as "codigo_externo" FROM "results"')
+        tuples = connection.execute('SELECT DISTINCT "results"."value"::json#>>\'{Listado,0,CodigoExterno}\' AS "codigo_externo" FROM "results"')
         codigos = Array.new
 
         tuples.each do |tuple|
@@ -36,8 +36,7 @@ class Result < ApplicationRecord
     end
 
     def history
-        codigo_externo = self.value["Listado"][0]["CodigoExterno"]
-        Result.where("value -> 'Listado' -> 0 -> 'CodigoExterno' = ?", codigo_externo.to_json)
+        Result.where("value -> 'Listado' -> 0 -> 'CodigoExterno' = ?", self.codigo_externo.to_json)
               .order(:created_at)
     end
 
@@ -53,11 +52,12 @@ class Result < ApplicationRecord
         end
         last_codigos
     end
-
+    # as of whenever the method is called
     def self.all_with_codigo_externo(codigo_externo)
         Result.where("value -> 'Listado' -> 0 ->> 'CodigoExterno' = ?", codigo_externo)
     end
 
+    # Has a date range
     def self.latest_entry_per_codigo_externo(start_day, end_day)
 
         connection = ActiveRecord::Base.connection

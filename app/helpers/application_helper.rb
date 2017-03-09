@@ -17,6 +17,10 @@ module ApplicationHelper
 
     hsh
   end
+  
+  def transform_date_format(date)
+      Time.at(date.to_i/1000).strftime("%Y-%m-%d") #Need to divide the MomentJS date  by 1000 to get the correct one.
+  end
 
   def is_integer?(string)
     Integer(string) 
