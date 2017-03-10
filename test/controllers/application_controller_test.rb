@@ -1,8 +1,8 @@
 require 'test_helper'
+#TODO: Is it better to move/split all of these controller tests to integration? seems like a mostly cosmetic change
 
 class ApplicationControllerTest < ActionDispatch::IntegrationTest
-
-
+#TODO: remove this, it's tested on the rest of the controllers anyways.
   def setup
     @user = User.first
   end

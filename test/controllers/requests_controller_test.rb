@@ -46,7 +46,7 @@ class RequestsControllerTest < ActionDispatch::IntegrationTest
     # we compare ALL codigo_externos with the response
     all_codigos_externos = Result.last_per_codigo_externo
                                  .sort {|a, z| a <=> z}
-                                 .map{|result| Result.find(result.id).value["Listado"][0]["CodigoExterno"]}
+                                 .map{|result| Result.find(result.id).codigo_externo}
                                  .slice(offset, limit)
     #and here, the Id
     all_ids = Result.all.map {|result| result.id}.sort {|a, z| a<=>z}.slice(offset, limit)

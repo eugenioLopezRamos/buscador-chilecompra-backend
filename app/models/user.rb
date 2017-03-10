@@ -38,7 +38,7 @@ class User < ActiveRecord::Base
   end
 
   def subscriptions_by_codigo_externo
-    UserResult.subscription_by_codigo_externo_of(self)
+    UserResult.subscriptions_by_codigo_externo_of(self)
   end
 
   def subscribed_to_result?(result_id)
