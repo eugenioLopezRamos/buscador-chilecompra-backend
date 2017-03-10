@@ -8,6 +8,7 @@ class AddLicitacionChangeToUserNotifications
       create_users_notification(codigo_externo, @users_to_notify)
     end
     #If no more licitaciones need to be saved to DB, then we can send all the notification_emails
+
     if Resque.queue_sizes["licitaciones"] == 0
       # This returns a multikey hash
       messages = Redis.current.hgetall("notification_emails")
@@ -42,7 +43,7 @@ class AddLicitacionChangeToUserNotifications
     current_values = Redis.current.hgetall("notification_emails")
     users.each do |user_id|
       
-      subscription_name = user_id.subscriptions_by_codigo_externo.key(codigo_externo)
+      subscription_name = User.find(user_id).subscriptions_by_codigo_externo.key(codigo_externo)
       message = "Cambios en la suscripción #{subscription_name} (cod.#{codigo_externo})"
       notification = Notification.create(user_id: user_id,
                                          message: message)
