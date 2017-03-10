@@ -11,6 +11,7 @@ class AddLicitacionChangeToUserNotifications
 
     if Resque.queue_sizes["licitaciones"] == 0
       # This returns a multikey hash
+      debugger
       messages = Redis.current.hgetall("notification_emails")
     #To be enabled after setup is done with mailchimp/mandrill or some alternative
     #  Resque.enqueue(LicitacionChangeMailEnqueuer, messages)
