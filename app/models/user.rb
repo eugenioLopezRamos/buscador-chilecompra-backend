@@ -72,8 +72,7 @@ class User < ActiveRecord::Base
   private
 
   def add_user_to_mailing_list
-    #TODO: Implement this job
-    #AddToMailingList.perform(self)
+    #TODO: No need for mailing lists yet.
 
   end
 

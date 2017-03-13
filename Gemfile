@@ -32,6 +32,8 @@ gem 'god'
 #use sinatra. The version that comes with resque is 1.0.0 which uses rack 1.xx. Rails 5 uses Rack 2.0.0.
 gem 'sinatra', github: 'sinatra/sinatra'
 
+#mailgun for transactional emails
+gem 'mailgun-ruby', '~>1.1.4'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 # gem 'jbuilder', '~> 2.5'
 
