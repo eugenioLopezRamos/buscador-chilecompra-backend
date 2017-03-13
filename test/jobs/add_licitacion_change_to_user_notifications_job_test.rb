@@ -55,14 +55,14 @@ class AddLicitacionChangeToUserNotificationsJobTest < ActiveJob::TestCase
 
 #TODO: Check enqueueing
   test "Correctly performs the job when there are still licitaciones to get" do
-    #Yes, there is a bit of testing duplication here but I think it's worth it since
-    #we should do it anyways since #perform is the most important method
+    #Yes, there is a bit of testing duplication here but I think 
+    #we should do it anyways because #perform is the most important method
+    #(and we need to test that LicitacionChangeMailEnqueuer gets enqueued)
     #Another option would be to simply collapse all testing in this test
-    #since the other methods are simply helpers
+    #since the other methods are just helpers
 
-   # Redis.current.DEL("notification_emails")
-
-   # assert_equal Hash.new, Redis.current.hgetall("notification_emails")
+    Redis.current.DEL("notification_emails")
+    assert_equal Hash.new, Redis.current.hgetall("notification_emails")
 
     if !@user.subscribed_to_result? @result.id
       @user.subscribe_to_result(@result.id, "mock")
@@ -76,6 +76,8 @@ class AddLicitacionChangeToUserNotificationsJobTest < ActiveJob::TestCase
       @class.perform(@codigo_externo)
     end
 
+    assert_not_queued LicitacionChangeMailEnqueuer
+
     users = @class.get_users_to_notify(@codigo_externo)
     #Name of the subscription we're informing the user about
     sub_name = User.find(users.first).subscriptions_by_codigo_externo.key(@codigo_externo)
@@ -83,85 +85,31 @@ class AddLicitacionChangeToUserNotificationsJobTest < ActiveJob::TestCase
     expected_message = "Cambios en la suscripción #{sub_name} (cod.#{@codigo_externo})"
     #key:value pair to be added to Redis.current "notification_emails" hash
     expected_result = {"#{users.first.to_s}": expected_message + "\n"}
-
     assert_equal expected_result.as_json, Redis.current.hgetall("notification_emails")
-
-   # assert_equal 1, Resque.size("licitaciones")
-
-    #Destroy the mock job
-  #  Resque::Job.destroy(:licitaciones, 'MockJob')
-   # assert_equal 0, Resque.queue_sizes["licitaciones"]
   end
 
   test "Correctly performs the job when no licitaciones are left to get" do
 
-    # #If there are jobs, move them to a temp queue that has no workers assigned 
-    # #to be restored after testing
-    # #(useful in case you have the actual jobs running on dev and run the tests,
-    # # you can test this successfully and not lose your jobs)
-    
-    #   #clear the mock queue
-    # Resque.redis.del "queue:#{"mockqueue"}"
+    Redis.current.DEL("notification_emails")
+    assert_equal Hash.new, Redis.current.hgetall("notification_emails")
 
+    if !@user.subscribed_to_result? @result.id
+      @user.subscribe_to_result(@result.id, "mock")
+    end
 
-    # Resque::Job.create(:licitaciones, 'MockJob')
-    # Resque::Job.create(:licitaciones, 'MockJob')
-    # Resque::Job.create(:licitaciones, 'MockJob')
-    # Resque::Job.create(:licitaciones, 'MockJob')
+    assert_difference ['Notification.count', 'Redis.current.hgetall("notification_emails").values.length'], 1 do
+      @class.perform(@codigo_externo)
+    end
 
-    # if Resque.queue_sizes["licitaciones"] != 0
-    #   old_jobs = []
-    #   while(Resque.queue_sizes["licitaciones"] > 0) do
-    #     position = Resque.queue_sizes["licitaciones"] - 1
-    #     job = Resque.pop(:licitaciones)
-    #     old_jobs[position] = job
-    #   end
-    #   old_jobs.each do |job|
-    #     Resque::Job.create(:mockqueue, job)
-    #   end
-    # end 
-
-    # Redis.current.DEL("notification_emails")
-
-    # assert_equal Hash.new, Redis.current.hgetall("notification_emails")
-
-    # if !@user.subscribed_to_result? @result.id
-    #   @user.subscribe_to_result(@result.id, "mock")
-    # end
-
-    # assert_difference 'Notification.count', 1 do
-    #   @class.perform(@codigo_externo)
-    # end
-
-    # users = @class.get_users_to_notify(@codigo_externo)
-    # #Name of the subscription we're informing the user about
-    # sub_name = User.find(users.first).subscriptions_by_codigo_externo.key(@codigo_externo)
-    # #Message to be added to the redis hash
-    # expected_message = "Cambios en la suscripción #{sub_name} (cod.#{@codigo_externo})"
-    # #key:value pair to be added to Redis.current "notification_emails" hash
-    # expected_result = {"#{users.first.to_s}": expected_message + "\n"}
-
-    # assert_equal expected_result.as_json, Redis.current.hgetall("notification_emails")
-
-    # assert_equal 4, Resque.queue_sizes["mockqueue"]
-
-    # if Resque.queue_sizes["mockqueue"] != 0
-    #   old_jobs = []
-    #   while(Resque.queue_sizes["mockqueue"] > 0) do
-    #     position = Resque.queue_sizes["mockqueue"] - 1
-    #     job = Resque.pop(:mockqueue)
-    #     old_jobs[position] = job
-    #   end
-    #   old_jobs.each do |job|
-    #     Resque::Job.create(:licitaciones, job)
-    #   end
-    #   #clear the mock queue
-    # Resque.redis.del "queue:#{"mockqueue"}"
-    # end
-
-
-    # assert_equal 0, Resque.queue_sizes["mockqueue"]
-    # assert_equal 4, Resque.queue_sizes["licitaciones"]
+    users = @class.get_users_to_notify(@codigo_externo)
+    #Name of the subscription we're informing the user about
+    sub_name = User.find(users.first).subscriptions_by_codigo_externo.key(@codigo_externo)
+    #Message to be added to the redis hash
+    expected_message = "Cambios en la suscripción #{sub_name} (cod.#{@codigo_externo})"
+    #key:value pair to be added to Redis.current "notification_emails" hash
+    expected_result = {"#{users.first.to_s}": expected_message + "\n"}
+    assert_equal expected_result.as_json, Redis.current.hgetall("notification_emails")
+    assert_queued LicitacionChangeMailEnqueuer
 
   end
 

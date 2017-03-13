@@ -9,12 +9,13 @@ class AddLicitacionChangeToUserNotifications
     end
     #If no more licitaciones need to be saved to DB, then we can send all the notification_emails
 
-    if Resque.queue_sizes["licitaciones"] == 0
+    if Resque.queues[:licitaciones].length == 0
       # This returns a multikey hash
-      debugger
+    #  debugger
       messages = Redis.current.hgetall("notification_emails")
     #To be enabled after setup is done with mailchimp/mandrill or some alternative
-    #  Resque.enqueue(LicitacionChangeMailEnqueuer, messages)
+      Resque.enqueue(LicitacionChangeMailEnqueuer, messages)
+     # @should_send_message = true
     end
   end
 
