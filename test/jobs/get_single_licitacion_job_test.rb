@@ -1,6 +1,5 @@
 require 'test_helper'
-#debugger
-require "#{Rails.root}/test/jobs/get_single_licitacion_mock.rb"
+require "#{Rails.root}/test/mocks/get_single_licitacion_mock.rb"
   
 class GetSingleLicitacionJobTest < ActiveJob::TestCase
   include GetSingleLicitacionMock
@@ -29,7 +28,6 @@ class GetSingleLicitacionJobTest < ActiveJob::TestCase
 
     @job.perform(@codigos[1], @uri)
     assert_queued(SaveSingleLicitacionToDB, [@response2])
-
 
   end
 

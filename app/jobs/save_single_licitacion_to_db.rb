@@ -2,19 +2,27 @@ class SaveSingleLicitacionToDB
   @queue = :save_to_db
 
   def self.perform(licitacion)
+
     datos_lic = licitacion["Listado"]
     append_log_save_attempt(datos_lic[0]['CodigoExterno'])    
+    
 
-    result = Result.create(value: licitacion)
     codigo_externo = licitacion["Listado"][0]["CodigoExterno"]
 
-    @latest_current_result_value = Result.where("value -> 'Listado' -> 0 ->> 'CodigoExterno' = ?", codigo_externo).last.value
+    @previously_latest_result_value = nil
+    if !Result.where("value -> 'Listado' -> 0 ->> 'CodigoExterno' = ?", codigo_externo).last.nil? 
+      @previously_latest_result_value = Result.where("value -> 'Listado' -> 0 ->> 'CodigoExterno' = ?", codigo_externo).last.value
+    end
+
+    result = Result.create(value: licitacion)
     #TODO: Make it so If licitacion is unchanged, instead of creating a new record, update the "updated_at"
-    # column on the current record
+    # column on the current record?
+
     if result.save
       append_log_save_success(datos_lic[0]['CodigoExterno'])
-      if @latest_current_result
-        check_if_unchanged(@latest_current_result_value, licitacion, codigo_externo)
+      #if @previously_latest_result_value = nil -> can't have been subscribed -> no notifs to create
+      if !@previously_latest_result_value.nil?
+        check_if_unchanged(licitacion, @previously_latest_result_value, codigo_externo)
       end
 
     else 

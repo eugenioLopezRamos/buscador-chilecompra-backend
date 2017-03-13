@@ -7,6 +7,7 @@ require 'resque_unit'
 require 'fakeredis/minitest'
 require 'webmock/minitest'
 
+
 class ActiveSupport::TestCase
   # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
   #fixtures :all
