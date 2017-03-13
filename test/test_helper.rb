@@ -4,13 +4,12 @@ require 'rails/test_help'
 require "minitest/reporters"
 Minitest::Reporters.use!
 require 'resque_unit'
-
+require 'fakeredis/minitest'
+require 'webmock/minitest'
 
 class ActiveSupport::TestCase
   # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
   #fixtures :all
-
-
   def sign_in_example_user
       # We login the user and return the headers since we need those to access the routes that use 
       # authenticate_user!
