@@ -16,7 +16,6 @@ class GetLicitacionesJobTest < ActiveJob::TestCase
         FechaCierre:"2017-03-20T15:40:00",
         Nombre:"SUMINISTRO DE LEÑA PARA VIALIDAD CHILE CHICO"
       }
-
     ]
     @mock_chilecompra_response = {
       "Cantidad": 2,
@@ -24,8 +23,6 @@ class GetLicitacionesJobTest < ActiveJob::TestCase
       "Version": "v1",
       "Listado": @mock_lista_licitaciones
     }
-
-
   end
 
 
@@ -34,7 +31,7 @@ class GetLicitacionesJobTest < ActiveJob::TestCase
 
     stub_request(:get, licitaciones_del_dia_uri)
       .to_return(body: @mock_chilecompra_response.to_json, status: 200)
-    #debugger
+
     @job.perform
 
     assert_queued(SaveBatchToDB, [@mock_chilecompra_response])
