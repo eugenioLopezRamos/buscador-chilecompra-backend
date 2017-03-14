@@ -2,18 +2,27 @@ class AddLicitacionChangeToUserNotifications
  @queue = :notificaciones
 
   def self.perform(codigo_externo)
+    # Resque_unit has a slightly different API, it uses symbols instead of 
+    # strings like the real resque. TODO: Fix this somehow....
+    licitaciones_queue = "licitaciones"
+
+    if Rails.env == "test"
+      licitaciones_queue = licitaciones_queue.to_sym
+    end
+
     @users_to_notify = get_users_to_notify(codigo_externo)
 
     if @users_to_notify.length > 0
       create_users_notification(codigo_externo, @users_to_notify)
-    end
-    #If no more licitaciones need to be saved to DB, then we can send all the notification_emails
 
-    if Resque.queues[:licitaciones].length == 0
-      # This returns a multikey hash
-      messages = Redis.current.hgetall("notification_emails")
-    #To be enabled after setup is done with mailchimp/mandrill or some alternative
-      Resque.enqueue(LicitacionChangeMailEnqueuer, messages)
+      #If no more licitaciones need to be saved to DB, then we can send all the notification_emails
+      if Resque.size(licitaciones_queue) == 0
+        # This returns a multikey hash with structure:
+        #{user_id0: "message1blablah\n message2\n", userid1: "message3\n message4\n" }
+        messages = Redis.current.hgetall("notification_emails")
+        #Then we enqueue the creation of emails so they can be sent through mailgun
+        Resque.enqueue(LicitacionChangeMailEnqueuer, messages)
+      end  
     end
   end
 

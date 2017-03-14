@@ -16,7 +16,6 @@ class User < ActiveRecord::Base
   has_many :user_results, :dependent => :delete_all
   has_many :results, :through => :user_results
   has_many :notifications, :dependent => :delete_all
-  after_create :add_user_to_mailing_list
 
   def send_licitacion_change_email(message)
    # Message is a string with \n as line delimiters, which mark each individual message

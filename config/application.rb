@@ -31,5 +31,6 @@ module Cc
     config.active_record.default_timezone = :local
     config.autoload_paths << "#{Rails.root}/lib"
     config.eager_load_paths << "#{Rails.root}/lib"
+    config.active_job.queue_adapter = :resque
   end
 end

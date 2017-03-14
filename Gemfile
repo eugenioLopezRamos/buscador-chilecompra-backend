@@ -33,6 +33,7 @@ gem 'god'
 gem 'sinatra', github: 'sinatra/sinatra'
 
 #mailgun for transactional emails
+
 gem 'mailgun-ruby', '~>1.1.4'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 # gem 'jbuilder', '~> 2.5'

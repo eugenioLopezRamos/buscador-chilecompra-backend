@@ -21,16 +21,19 @@ class SaveSingleLicitacionToDbJobTest < ActiveJob::TestCase
 
     #Modifies the licitacion slightly, so it creates a notif
 
-    original_licitacion = GetSingleLicitacionMock.response1.deep_dup
-    original_licitacion[:Listado][0][:Nombre] = "mockname"
+    modified_licitacion = GetSingleLicitacionMock.response1.deep_dup
+    modified_licitacion[:Listado][0][:Nombre] = "mockname"
  
     assert_difference 'Result.count', 1 do
-      @job.perform(original_licitacion.as_json)
+      @job.perform(modified_licitacion.as_json)
     end
 
-    assert_equal original_licitacion.as_json, Result.last.value
+    assert_equal modified_licitacion.as_json, Result.last.value
     assert_queued(AddLicitacionChangeToUserNotifications, [@codigo_externo_lic])
 
+    #Clears the entered Results so we don't need to reset the test DB each time
+    Result.last.destroy
+    Result.last.destroy
   end
 
 
