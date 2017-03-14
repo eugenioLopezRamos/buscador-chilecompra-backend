@@ -32,7 +32,12 @@ Rails.application.configure do
   # Tell Action Mailer not to deliver emails to the real world.
   # The :test delivery method accumulates sent emails in the
   # ActionMailer::Base.deliveries array.
-  config.action_mailer.delivery_method = :test
+ # config.action_mailer.delivery_method = :test
+  config.action_mailer.delivery_method = :mailgun
+  config.action_mailer.mailgun_settings = {
+    api_key: "#{ENV['MAILGUN_API_KEY']}",
+    domain:"#{ENV['MAIL_DOMAIN']}"
+  }
 
   # Print deprecation notices to the stderr.
   config.active_support.deprecation = :stderr

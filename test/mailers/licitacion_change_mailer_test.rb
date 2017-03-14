@@ -9,15 +9,8 @@ class LicitacionChangeMailerTest < ActionMailer::TestCase
   end
 
   test "send_notification_email forms the email correctly" do
-
-    mail = @class.send_notification_email(@user, @message)
-    subject = "Buscador Chilecompra - Cambio en estado de licitacion"
-    assert_equal [@user.email], mail.to
-    assert_match "Message1", mail.body.encoded
-    assert_match "Message2", mail.body.encoded
-    assert_match "Message three is special", mail.body.encoded
-    assert_includes mail.subject, subject
-
+    WebMock.allow_net_connect!
+    mail = @class.new.send_notification_email(@user, @message)
   end
 
 

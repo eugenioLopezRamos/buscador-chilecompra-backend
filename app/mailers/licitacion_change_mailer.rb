@@ -1,6 +1,8 @@
 class LicitacionChangeMailer < ApplicationMailer
 
   def send_notification_email(user, message)
+    #You need to enable ENV['MY_MAIL'] in mailgun or use a 
+    #verified domain to be able to send the emails
     @user = user
     @name = @user.name
     @greeting = "Hola!"
