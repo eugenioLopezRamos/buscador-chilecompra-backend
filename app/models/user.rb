@@ -19,7 +19,7 @@ class User < ActiveRecord::Base
 
   def send_licitacion_change_email(message)
    # Message is a string with \n as line delimiters, which mark each individual message
-   LicitacionChangeMailer.send_notification_email(self, message).deliver_later
+   MailerController.new.send_notification_email(self, message)
   end
 
   def get_all_related_data
