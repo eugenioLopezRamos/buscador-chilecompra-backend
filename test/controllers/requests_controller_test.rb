@@ -26,6 +26,7 @@ class RequestsControllerTest < ActionDispatch::IntegrationTest
                         alwaysFromToday: false,
                         alwaysToToday: false,
                         endDate: Time.zone.now().to_i * 1000,
+                        palabrasClave: "SERVICIO DE MOVILIZACION",
                         offset: 0,
                         order_by: {
                                    fields: [],

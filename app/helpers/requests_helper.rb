@@ -30,7 +30,11 @@
     offset = calculate_offset(@param_data["offset"], total_results_amount, limit)
     sorting = create_order_by(@param_data["order_by"])
 
-    sorted_result = get_result_from_query(latest_results_per_ids, @to_send, offset, limit, sorting)
+    filtered_by_palabras_clave = filter_by_palabras_clave(latest_results_per_ids, @param_data["palabrasClave"])
+    
+    sorted_result = get_result_from_query(filtered_by_palabras_clave, @to_send, offset, limit, sorting)# get_result_from_query(latest_results_per_ids, @to_send, offset, limit, sorting)
+
+
 
 #search by similarity example (raw sql)
 #a = conn.execute('SELECT * FROM "searches" WHERE similarity("name", \'13feb\') > 0.2')
@@ -42,7 +46,7 @@
 
 # conn.execute('SELECT * FROM (SELECT DISTINCT "results"."value"::json#>>\'{Listado,0,CodigoExterno}\' AS "codigo_externo" FROM "results") AS "codigos_externos" WHERE similarity("codigos_externos"."codigo_externo", \'1001-22-LE16\') > 0.7 ')
 
-
+# conn.execute('SELECT * FROM "results" WHERE similarity("value"::json#>>\'{Listado,0,Nombre}\', \'Barreras de\') > 0.7')
     {values: sorted_result, count: total_results_amount, limit: limit, offset: offset}
 
   end
@@ -159,6 +163,7 @@
   end
 
   def create_order_by(order_by)
+    #TODO: Check if vulnerable to sql injection
 
     #order_by = {fields: [...], order: "descending || ascending" }
     if order_by["fields"].empty?
@@ -196,9 +201,55 @@
     if order_by["order"] == "ascending"
       order_by_query = order_by_query + " ASC"
     end
-  #  binding.pry
     order_by_query
+  end
 
+  def filter_by_palabras_clave(results, palabras_clave)
+    if palabras_clave.nil?
+      return results
+    end
+
+    #palabras_clave = palabras.select {|palabra| !palabra.empty?}
+
+   # response = []
+    palabras_clave_array = palabras_clave.split(" ")
+    if palabras_clave_array.empty?
+      return results
+    end
+
+    palabras_clave_array = palabras_clave_array.map{|palabra| "%#{palabra}%"}
+
+    palabras_amount = palabras_clave_array.length
+
+    descripcion_query_base = "value -> 'Listado' -> 0 ->> 'Descripcion' LIKE ?"
+    nombre_query_base = "value -> 'Listado' -> 0 ->> 'Nombre' LIKE ?"
+
+    @descripcion_query = descripcion_query_base
+    @nombre_query = nombre_query_base
+
+    if palabras_amount > 1
+      (palabras_amount - 1).times do
+        @descripcion_query = @descripcion_query + " AND " + descripcion_query_base
+      end 
+
+      (palabras_amount - 1).times do
+        @nombre_query = @nombre_query + " AND " + nombre_query_base
+      end 
+    end
+    #debugger
+    results.where("#{@descripcion_query} OR #{@nombre_query}", *palabras_clave_array, *palabras_clave_array)
+
+
+
+    # palabras_clave_array.reduce(result) do |accumulated_result, palabra_clave|
+
+    #  #  query_array.reduce(results){|prev, curr| prev.send("where", curr) }
+
+    #   to_add = results.where("value -> 'Listado' -> 0 ->> 'Nombre' LIKE = ?
+    #                           OR value -> 'Listado' -> 0 ->> 'Descripcion' LIKE = ?", "%#{palabra_clave}%", "%#{palabra_clave}%")
+                      
+    # end
+   # response
 
   end
 
