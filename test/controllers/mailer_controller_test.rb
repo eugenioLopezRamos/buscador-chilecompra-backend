@@ -20,10 +20,8 @@ class MailerControllerTest < ActionDispatch::IntegrationTest
     @kontroller = mail[:klass]
     @mailer = mail[:mailer]
 
-    #gets instance variables
     read_instance_var = ->(name) {@kontroller.instance_variable_get("@#{name}".to_sym)}
 
-    #read instance variables from the MailerController
     user = read_instance_var.call("user")
     name = read_instance_var.call("name")
     greeting = read_instance_var.call("greeting")

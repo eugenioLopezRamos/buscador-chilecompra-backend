@@ -32,6 +32,17 @@
 
     sorted_result = get_result_from_query(latest_results_per_ids, @to_send, offset, limit, sorting)
 
+#search by similarity example (raw sql)
+#a = conn.execute('SELECT * FROM "searches" WHERE similarity("name", \'13feb\') > 0.2')
+# activeRecord version ->
+#Search.where('similarity("name", ?) > 0.2', "13feb")
+
+#ejemplo jsonb
+# conn.execute('SELECT * FROM "results" WHERE similarity("value"::json#>>\'{Listado,0,CodigoExterno}\', \'1001-22-LE16\') > 0.7')
+
+# conn.execute('SELECT * FROM (SELECT DISTINCT "results"."value"::json#>>\'{Listado,0,CodigoExterno}\' AS "codigo_externo" FROM "results") AS "codigos_externos" WHERE similarity("codigos_externos"."codigo_externo", \'1001-22-LE16\') > 0.7 ')
+
+
     {values: sorted_result, count: total_results_amount, limit: limit, offset: offset}
 
   end
