@@ -3,6 +3,7 @@ require 'test_helper'
 class RequestsControllerTest < ActionDispatch::IntegrationTest
     CODIGOS_EXTERNOS_SET = :codigos_externos
     include RequestsHelper
+    include ApplicationHelper
 
   def setup
 
@@ -27,48 +28,137 @@ class RequestsControllerTest < ActionDispatch::IntegrationTest
                                    fields: [],
                                    order: "descending"}
     }
-    post '/get_info', params: get_info_params.to_json, headers: @headers
 
-    parsed_response = JSON.parse(@response.body)
+    run_the_test = ->(get_info_params) {
+      post '/get_info', params: get_info_params.to_json, headers: @headers
 
-    #Assert that the amount of unique codigo_externos is equal to the amount sent in the response's 
-    # "count" key
-    assert_equal Result.last_per_codigo_externo.count, parsed_response["count"]
+      parsed_response = JSON.parse(@response.body)
 
-    offset = get_info_params[:offset]
-    limit = assigns(:result_limit_amount) 
+      #Assert that the amount of unique codigo_externos is equal to the amount sent in the response's 
+      # "count" key
+      assert_equal Result.last_per_codigo_externo.count, parsed_response["count"]
 
-    #Since with those get_info_params you'll get back all of the records (in sets of @result_limit_amount)
-    # we compare ALL codigo_externos with the response
-    all_codigos_externos = Result.last_per_codigo_externo
-                                 .sort {|a, z| a <=> z}
-                                 .map{|result| Result.find(result.id).codigo_externo}
-                                 .slice(offset, limit)
-    #and here, the Id
-    all_ids = Result.all.map {|result| result.id}.sort {|a, z| a<=>z}.slice(offset, limit)
+      offset = get_info_params[:offset] - 1 < 0 ? 0 : get_info_params[:offset]
+      limit = assigns(:result_limit_amount) 
 
-    # The response's codigo_externos
-    parsed_response_codigos_externos = parsed_response["values"].map {|resp| resp["value"]["Listado"][0]["CodigoExterno"]}.sort {|a, z| a <=> z}
-    # And its ids
-    parsed_response_ids = parsed_response["values"].map {|resp| resp["id"]}.sort {|a, z| a<=>z}
+      #Since with those get_info_params you'll get back all of the records (in sets of @result_limit_amount)
+      # we compare ALL codigo_externos with the response
+      all_codigos_externos = Result.last_per_codigo_externo
+                                  .sort {|a, z| a["id"] <=> z["id"]}
+                                  .map{|result| Result.find(result.id).codigo_externo}
+                                  .slice(offset, limit)
+      #and here, the Id
+      all_ids = Result.last_per_codigo_externo
+                          .sort {|a, z| a["id"] <=> z["id"]}
+                          .slice(offset, limit)
+                          .map {|result| result.id}
+                       #.all.map {|result| result.id}
+                       #   .slice(offset, limit)
+                       #   .sort {|a, z| a<=>z}
 
-    #They should be equal
-    assert_equal all_ids, parsed_response_ids
-    assert_equal all_codigos_externos - parsed_response_codigos_externos, []
+            
+      # The response's codigo_externos
+      parsed_response_codigos_externos = parsed_response["values"].map {|resp| resp["value"]["Listado"][0]["CodigoExterno"]}.sort {|a, z| a <=> z}
+      # And its ids
+      parsed_response_ids = parsed_response["values"].map {|resp| resp["id"]}.sort {|a, z| a<=>z}
+
+    # debugger
+      #debugger unless get_info_params[:offset] != 200
+      #does the @result_limit_amount work?
+      assert_equal limit, parsed_response_ids.length
+      #They should be equal
+      assert_equal all_ids, parsed_response_ids
+      assert_equal all_codigos_externos - parsed_response_codigos_externos, []
+    }
+
+    run_the_test.call(get_info_params)
+    get_info_params[:offset] = 200
+    run_the_test.call(get_info_params)
+
+
+    #Then, it should apply the OFFSET correctly
+
+
+   # post '/get_info', params: get_info_params.to_json, headers: @headers
+
+   # parsed_response = JSON.parse(@response.body) 
+
+
+
+
+
   end
+
+  test "Applies offset correctly" do
+
+
+
+
+  end
+
+
 
   test "Correctly filters by dates" do
+    # "FechaCreacion" is the date we downloaded the record from chilecompra
+    
+    #Start date - YYYY-MM-DD format date of the first record from seeds.rb
+    #We multiply the Time.parse date by 1000 since javascript uses ruby_unix_timestamp * 1000
+    # as its timestamps
+    mock_start_date = ActiveRecord::Base.connection.quote(transform_date_format(Time.parse("2017-01-05").to_i * 1000))
+
+    #End date - Since the amount of records in the test db is small, we'll test a range of just 
+    # one day instead of, say, a week or so
+    mock_end_date = ActiveRecord::Base.connection.quote(transform_date_format(Time.parse("2017-01-06").to_i * 1000))
+    offset_amount = 0
 
 
+   get_info_params = {
+                        startDate: Time.parse("2017-01-05").to_i * 1000,
+                        alwaysFromToday: false,
+                        alwaysToToday: false,
+                        endDate: Time.parse("2017-01-06").to_i * 1000,
+                        palabrasClave: "",
+                        offset: 0,
+                        order_by: {
+                                   fields: [],
+                                   order: "descending"}
+    }
+    post '/get_info', params: get_info_params.to_json, headers: @headers
+    assert_response 200
+    parsed_response = JSON.parse @response.body
+  #  debugger
+    expected_response = ActiveRecord::Base.connection.execute('
+                                                       SELECT *
+                                                       FROM "results"
+                                                       WHERE id IN (
+                                                          SELECT id FROM (
+                                                              SELECT id, updated_at,
+                                                                  dense_rank() OVER (
+                                                                      PARTITION BY value -> \'Listado\' -> 0 -> \'CodigoExterno\'
+                                                                      ORDER BY to_date(value ->> \'FechaCreacion\', \'YYYY-MM-DD\') DESC
+                                                                      ) as by_fecha_creacion
+                                                              FROM results
+                                                              WHERE to_date(value ->> \'FechaCreacion\', \'YYYY-MM-DD\') > ' + mock_start_date + '
+                                                              AND to_date(value ->> \'FechaCreacion\', \'YYYY-MM-DD\') <= ' + mock_end_date + '
+                                                          ) as q
+                                                          WHERE by_fecha_creacion < 2
+                                                       )
+                                                       LIMIT 200
+                                                       OFFSET '+ "\'#{offset_amount}\'" + '
+                                                      ')
 
+      expected_result_ids = expected_response.map {|result| result["id"]}
+
+      expected_result_values = expected_response.map {|result| result["value"]}
+
+      parsed_response_ids = parsed_response["values"].map {|result| result["id"]}
+
+      parsed_response_values = parsed_response["values"].map {|result| result["value"]}
+
+      assert_equal expected_result_ids - parsed_response_ids, []
+      assert_equal expected_result_values - expected_result_values, []
 
   end
-
-
-
-
-
-
 
   test "Correctly filters by palabras clave" do
 

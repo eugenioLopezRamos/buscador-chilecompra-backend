@@ -77,19 +77,19 @@ class Result < ApplicationRecord
         start_date = connection.quote(start_day)
         finish_date = connection.quote(end_day)
  
-      #  debugger
+    #    debugger
         unique = connection.execute(
         "SELECT id FROM (
             SELECT id, updated_at,
                 dense_rank() OVER (
                     PARTITION BY value -> 'Listado' -> 0 -> 'CodigoExterno'
-                    ORDER BY updated_at DESC
-                    ) as by_updated_at
+                    ORDER BY to_date(value ->> 'FechaCreacion', 'YYYY-MM-DD') DESC
+                    ) as by_fecha_creacion
             FROM results
-            WHERE updated_at > #{start_date}
-            AND updated_at <= #{finish_date}
+            WHERE to_date(value ->> 'FechaCreacion', 'YYYY-MM-DD') > #{start_date}
+            AND to_date(value ->> 'FechaCreacion', 'YYYY-MM-DD') <= #{finish_date}
         ) as q
-        WHERE by_updated_at < 2"
+        WHERE by_fecha_creacion < 2"
         )
 
         unique.each do |hash|

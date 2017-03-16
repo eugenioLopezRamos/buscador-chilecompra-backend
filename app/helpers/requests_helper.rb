@@ -19,6 +19,8 @@
     @param_data = stringify_param_values(parameters)
     @json_param_routes = get_json_param_routes(@param_data)
     @to_send = prepare_send_chain(@param_data, @json_param_routes)
+#ver to_send no funciona
+
 
     start_date = determine_dates(@param_data)[:start_date]
     end_date = determine_dates(@param_data)[:end_date]
@@ -32,21 +34,8 @@
 
     filtered_by_palabras_clave = filter_by_palabras_clave(latest_results_per_ids, @param_data["palabrasClave"])
     
-    sorted_result = get_result_from_query(filtered_by_palabras_clave, @to_send, offset, limit, sorting)# get_result_from_query(latest_results_per_ids, @to_send, offset, limit, sorting)
+    sorted_result = get_result_from_query(filtered_by_palabras_clave, @to_send, offset, limit, sorting)
 
-
-
-#search by similarity example (raw sql)
-#a = conn.execute('SELECT * FROM "searches" WHERE similarity("name", \'13feb\') > 0.2')
-# activeRecord version ->
-#Search.where('similarity("name", ?) > 0.2', "13feb")
-
-#ejemplo jsonb
-# conn.execute('SELECT * FROM "results" WHERE similarity("value"::json#>>\'{Listado,0,CodigoExterno}\', \'1001-22-LE16\') > 0.7')
-
-# conn.execute('SELECT * FROM (SELECT DISTINCT "results"."value"::json#>>\'{Listado,0,CodigoExterno}\' AS "codigo_externo" FROM "results") AS "codigos_externos" WHERE similarity("codigos_externos"."codigo_externo", \'1001-22-LE16\') > 0.7 ')
-
-# conn.execute('SELECT * FROM "results" WHERE similarity("value"::json#>>\'{Listado,0,Nombre}\', \'Barreras de\') > 0.7')
     {values: sorted_result, count: total_results_amount, limit: limit, offset: offset}
 
   end
@@ -56,11 +45,11 @@
 
     parameters.each_pair {|k, v| param_data[k] = v.to_s} 
 
-    if param_data["organismoPublico"] == "*"
+    if param_data["organismoPublico"] == "*" ||!param_data["OrganismoPublico"]
       param_data["organismoPublico"] = ""
     end
 
-    if param_data["estadoLicitacion"] == "*"
+    if param_data["estadoLicitacion"] == "*" || !param_data["estadoLicitacion"]
       param_data["estadoLicitacion"] = ""
     end
 
@@ -77,7 +66,7 @@
     to_send = Array.new
 
     parameters.each_pair do |key, value|
-        to_send.push(json_routes[key.to_sym]) unless value.blank?
+        to_send.push(json_routes[key.to_sym]) unless value.blank? || json_routes[key.to_sym].nil?
     end
     to_send
 
@@ -99,6 +88,8 @@
     # here I get the latest, even if no modifications where made so I might end up with a codigoLicitacion
     # that was entered @ 9AM 'missing' since it will only show the latest(for example, at 11 AM)
     
+   # offset_val = offset - 1 < 0 ? 0 : offset - 1
+   # debugger unless offset != 200
     query_array.reduce(results){|prev, curr| prev.send("where", curr) }
                                           .order(sorting)
                                           .offset(offset)
