@@ -209,9 +209,6 @@
       return results
     end
 
-    #palabras_clave = palabras.select {|palabra| !palabra.empty?}
-
-   # response = []
     palabras_clave_array = palabras_clave.split(" ")
     if palabras_clave_array.empty?
       return results
@@ -236,20 +233,9 @@
         @nombre_query = @nombre_query + " AND " + nombre_query_base
       end 
     end
-    #debugger
+    
+    #Twice, since its one palabras_clave_array for @descripcion_query and another for @nombre_query
     results.where("#{@descripcion_query} OR #{@nombre_query}", *palabras_clave_array, *palabras_clave_array)
-
-
-
-    # palabras_clave_array.reduce(result) do |accumulated_result, palabra_clave|
-
-    #  #  query_array.reduce(results){|prev, curr| prev.send("where", curr) }
-
-    #   to_add = results.where("value -> 'Listado' -> 0 ->> 'Nombre' LIKE = ?
-    #                           OR value -> 'Listado' -> 0 ->> 'Descripcion' LIKE = ?", "%#{palabra_clave}%", "%#{palabra_clave}%")
-                      
-    # end
-   # response
 
   end
 

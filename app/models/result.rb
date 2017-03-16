@@ -74,10 +74,10 @@ class Result < ApplicationRecord
         # Like this: ActiveRecord::Base.connection.quote(value)
 
         #TODO: See if its convenient to use ApplicationHelper#is_integer? here
-        start = connection.quote(start_day)
-        finish = connection.quote(end_day)
+        start_date = connection.quote(start_day)
+        finish_date = connection.quote(end_day)
  
-
+      #  debugger
         unique = connection.execute(
         "SELECT id FROM (
             SELECT id, updated_at,
@@ -86,8 +86,8 @@ class Result < ApplicationRecord
                     ORDER BY updated_at DESC
                     ) as by_updated_at
             FROM results
-            WHERE updated_at > #{start}
-            AND updated_at <= #{finish}
+            WHERE updated_at > #{start_date}
+            AND updated_at <= #{finish_date}
         ) as q
         WHERE by_updated_at < 2"
         )

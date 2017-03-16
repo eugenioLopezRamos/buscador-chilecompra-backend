@@ -10,14 +10,9 @@ class RequestsControllerTest < ActionDispatch::IntegrationTest
     @first_result = Result.first
     @user = User.first
     @headers = sign_in_example_user
-  #  Rails.application.load_seed
-
-    # Need to setup the Redis cache here!
-      #  debugger
     Result.set_all_unique_codigo_externo_to_redis
-   # CacheLicitacionesData.perform
+    @connection = ActiveRecord::Base.connection
   end
-
 
   test "correctly returns chilecompra data from the database when requested" do
 
@@ -26,7 +21,7 @@ class RequestsControllerTest < ActionDispatch::IntegrationTest
                         alwaysFromToday: false,
                         alwaysToToday: false,
                         endDate: Time.zone.now().to_i * 1000,
-                        palabrasClave: "SERVICIO DE MOVILIZACION",
+                        palabrasClave: "",
                         offset: 0,
                         order_by: {
                                    fields: [],
@@ -61,6 +56,62 @@ class RequestsControllerTest < ActionDispatch::IntegrationTest
     assert_equal all_ids, parsed_response_ids
     assert_equal all_codigos_externos - parsed_response_codigos_externos, []
   end
+
+  test "Correctly filters by dates" do
+
+
+
+
+  end
+
+
+
+
+
+
+
+  test "Correctly filters by palabras clave" do
+
+    get_info_params = {
+                        startDate: 1,
+                        alwaysFromToday: false,
+                        alwaysToToday: false,
+                        endDate: Time.zone.now().to_i * 1000,
+                        palabrasClave: "SERVICIO DE MOVILIZACION",
+                        offset: 0,
+                        order_by: {
+                                   fields: [],
+                                   order: "descending"}
+    }
+
+    post '/get_info', params: get_info_params.to_json, headers: @headers
+
+    assert_response 200
+    parsed_response = JSON.parse(@response.body)
+
+    expected_response = @connection.execute('
+                                             SELECT *
+                                             FROM "results"
+                                             WHERE "value"::json#>>\'{Listado,0,Nombre}\' LIKE ' + "\'%SERVICIO%\' " + 
+                                             'AND "value"::json#>>\'{Listado,0,Nombre}\' LIKE ' + "\'%DE%\' " + 
+                                             'AND "value"::json#>>\'{Listado,0,Nombre}\' LIKE ' + "\'%MOVILIZACION%\' " + 
+                                             '
+                                             OR
+                                              "value"::json#>>\'{Listado,0,Descripcion}\' LIKE ' + "\'%SERVICIO%\' " + 
+                                             'AND "value"::json#>>\'{Listado,0,Descripcion}\' LIKE ' + "\'%DE%\' " + 
+                                             'AND "value"::json#>>\'{Listado,0,Descripcion}\' LIKE ' + "\'%MOVILIZACION%\' "                                            
+                                           )
+    expected_result_ids = expected_response.map {|result| result["id"]}
+    expected_result_values = expected_response.map {|result| JSON.parse(result["value"])}
+    
+    actual_result_ids = parsed_response["values"].map {|result| result["id"]}
+    actual_result_values = parsed_response["values"].map {|result| result["value"]}
+
+
+    assert_equal expected_result_ids, actual_result_ids
+    assert_equal expected_result_values, actual_result_values
+  end
+
 
 
   test "returns error when getting chilecompra data with unpermitted params" do
