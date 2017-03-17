@@ -61,6 +61,8 @@ group :test do
   gem 'resque_unit'
   gem 'fakeredis'
   gem 'webmock'
+  gem 'pry'
+  gem 'pry-doc'
 end
 
 group :development do

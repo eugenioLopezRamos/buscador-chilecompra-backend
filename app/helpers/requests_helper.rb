@@ -90,13 +90,28 @@
     
    # offset_val = offset - 1 < 0 ? 0 : offset - 1
    # debugger unless offset != 200
-    query_array.reduce(results){|prev, curr| prev.send("where", curr) }
-                                          .order(sorting)
-                                          .offset(offset)
-                                          .limit(limit)
-                                          .map { |obj| obj.as_json}
-                                       
-                    
+   #debugger
+   #offset_val = offset == 0 ? 0 : offset + 1 
+
+   if query_array.empty?
+    # if offset_val != 0
+    #   debugger
+    # end
+
+    #es el .order el que me caga...
+
+
+     return results.order(sorting)
+                   .offset(offset)
+                   .limit(limit)
+                   .map {|obj| obj.as_json}
+  end
+
+   val = query_array.reduce(results) {|prev, curr| prev.send("where", curr)}
+                        .order(sorting)
+                        .offset(offset)
+                        .limit(limit)
+                        .map { |obj| obj.as_json}       
   end
 
 

@@ -76,17 +76,17 @@ class Result < ApplicationRecord
         #TODO: See if its convenient to use ApplicationHelper#is_integer? here
         start_date = connection.quote(start_day)
         finish_date = connection.quote(end_day)
- 
+
     #    debugger
         unique = connection.execute(
         "SELECT id FROM (
             SELECT id, updated_at,
                 dense_rank() OVER (
                     PARTITION BY value -> 'Listado' -> 0 -> 'CodigoExterno'
-                    ORDER BY to_date(value ->> 'FechaCreacion', 'YYYY-MM-DD') DESC
+                    ORDER BY value ->> 'FechaCreacion' DESC
                     ) as by_fecha_creacion
             FROM results
-            WHERE to_date(value ->> 'FechaCreacion', 'YYYY-MM-DD') > #{start_date}
+            WHERE to_date(value ->> 'FechaCreacion', 'YYYY-MM-DD') >= #{start_date}
             AND to_date(value ->> 'FechaCreacion', 'YYYY-MM-DD') <= #{finish_date}
         ) as q
         WHERE by_fecha_creacion < 2"
@@ -95,8 +95,32 @@ class Result < ApplicationRecord
         unique.each do |hash|
             hash.each_pair {|key, value| result_ids.push value }
         end
-
         result_ids
     end
 
 end
+# es el order by el que me caga
+# xy = connection.execute("
+#             SELECT id, updated_at,
+#                 dense_rank() OVER (
+#                     PARTITION BY value -> 'Listado' -> 0 -> 'CodigoExterno'
+#                     ORDER BY value ->> 'FechaCreacion' DESC
+#                     ) as by_fecha_creacion
+#             FROM results
+#             ")
+
+# connection.execute(
+#         "SELECT id FROM (
+#             SELECT id, updated_at,
+#                 dense_rank() OVER (
+#                     PARTITION BY value -> 'Listado' -> 0 -> 'CodigoExterno'
+#                     ORDER BY to_date(value ->> 'FechaCreacion', 'YYYY-MM-DD') DESC
+#                     ) as by_fecha_creacion
+#             FROM results
+#             WHERE to_date(value ->> 'FechaCreacion', 'YYYY-MM-DD')::date > #{start_date}
+#             AND to_date(value ->> 'FechaCreacion', 'YYYY-MM-DD')::date <= #{finish_date}
+#         ) as q
+#         WHERE by_fecha_creacion < 2"
+#         )
+
+#         connection.execute("SELECT * FROM results WHERE to_date(value ->> 'FechaCreacion', 'YYYY-MM-DD') > '1969-05-01' AND to_date(value ->> 'FechaCreacion', 'YYYY-MM-DD') <= '2017-01-06'")
