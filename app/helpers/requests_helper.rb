@@ -45,7 +45,7 @@
 
     parameters.each_pair {|k, v| param_data[k] = v.to_s} 
 
-    if param_data["organismoPublico"] == "*" ||!param_data["OrganismoPublico"]
+    if param_data["organismoPublico"] == "*" ||!param_data["organismoPublico"]
       param_data["organismoPublico"] = ""
     end
 
@@ -87,27 +87,15 @@
 
     # here I get the latest, even if no modifications where made so I might end up with a codigoLicitacion
     # that was entered @ 9AM 'missing' since it will only show the latest(for example, at 11 AM)
-    
-   # offset_val = offset - 1 < 0 ? 0 : offset - 1
-   # debugger unless offset != 200
-   #debugger
-   #offset_val = offset == 0 ? 0 : offset + 1 
 
    if query_array.empty?
-    # if offset_val != 0
-    #   debugger
-    # end
-
-    #es el .order el que me caga...
-
-
      return results.order(sorting)
                    .offset(offset)
                    .limit(limit)
                    .map {|obj| obj.as_json}
   end
 
-   val = query_array.reduce(results) {|prev, curr| prev.send("where", curr)}
+   query_array.reduce(results) {|prev, curr| prev.send("where", curr)}
                         .order(sorting)
                         .offset(offset)
                         .limit(limit)
