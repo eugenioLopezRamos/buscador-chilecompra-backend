@@ -16,6 +16,14 @@
 
 
   def filter_results(parameters, limit)
+
+
+    #TEMPORARY
+    ActiveRecord::Base.connection.query_cache.clear
+
+
+
+
     @param_data = stringify_param_values(parameters)
     @json_param_routes = get_json_param_routes(@param_data)
     @to_send = prepare_send_chain(@param_data, @json_param_routes)
@@ -27,14 +35,20 @@
 
     latest_results_per_ids = get_latest_results_per_ids(start_date, end_date)
 
-    total_results_amount = get_total_results_amount(latest_results_per_ids, @to_send)
+    
+   # TODO: Calculating same thing twice...
 
+    filtered_by_palabras_clave = filter_by_palabras_clave(latest_results_per_ids, @param_data["palabrasClave"])
+    total_results_amount = get_total_results_amount(filtered_by_palabras_clave, @to_send)
+    
     offset = calculate_offset(@param_data["offset"], total_results_amount, limit)
     sorting = create_order_by(@param_data["order_by"])
 
-    filtered_by_palabras_clave = filter_by_palabras_clave(latest_results_per_ids, @param_data["palabrasClave"])
+
     
     sorted_result = get_result_from_query(filtered_by_palabras_clave, @to_send, offset, limit, sorting)
+
+
 
     {values: sorted_result, count: total_results_amount, limit: limit, offset: offset}
 
@@ -87,6 +101,13 @@
 
     # here I get the latest, even if no modifications where made so I might end up with a codigoLicitacion
     # that was entered @ 9AM 'missing' since it will only show the latest(for example, at 11 AM)
+
+
+    #  return results.order(sorting)
+    #                .offset(offset)
+    #                .limit(limit)
+    #                .map {|obj| obj.as_json}
+
 
    if query_array.empty?
      return results.order(sorting)
@@ -212,8 +233,8 @@
 
     palabras_amount = palabras_clave_array.length
 
-    descripcion_query_base = "value -> 'Listado' -> 0 ->> 'Descripcion' LIKE ?"
-    nombre_query_base = "value -> 'Listado' -> 0 ->> 'Nombre' LIKE ?"
+    descripcion_query_base = "LOWER(value -> 'Listado' -> 0 ->> 'Descripcion') LIKE LOWER(?)"
+    nombre_query_base = "LOWER(value -> 'Listado' -> 0 ->> 'Nombre') LIKE LOWER(?)"
 
     @descripcion_query = descripcion_query_base
     @nombre_query = nombre_query_base

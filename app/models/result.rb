@@ -36,7 +36,7 @@ class Result < ApplicationRecord
     end
 
     def history
-        Result.where("value -> 'Listado' -> 0 -> 'CodigoExterno' = ?", self.codigo_externo.to_json)
+        Result.where("value -> 'Listado' -> 0 ->> 'CodigoExterno' = ?", self.codigo_externo)
               .order(:created_at)
     end
 
@@ -77,19 +77,23 @@ class Result < ApplicationRecord
         start_date = connection.quote(start_day)
         finish_date = connection.quote(end_day)
 
-    #    debugger
+
+        #f_cast_isots defined in migration
+        # 20170321210651_add_fecha_creacion_index_to_results
         unique = connection.execute(
-        "SELECT id FROM (
+        "
+        SELECT id FROM (
             SELECT id, updated_at,
                 dense_rank() OVER (
                     PARTITION BY value -> 'Listado' -> 0 -> 'CodigoExterno'
                     ORDER BY value ->> 'FechaCreacion' DESC
                     ) as by_fecha_creacion
             FROM results
-            WHERE to_date(value ->> 'FechaCreacion', 'YYYY-MM-DD') >= #{start_date}
-            AND to_date(value ->> 'FechaCreacion', 'YYYY-MM-DD') <= #{finish_date}
+            WHERE f_cast_isots(value ->> 'FechaCreacion'::text) >= #{start_date}
+            AND f_cast_isots(value ->> 'FechaCreacion'::text) <= #{finish_date}
         ) as q
-        WHERE by_fecha_creacion < 2"
+        WHERE by_fecha_creacion < 2
+        "
         )
 
         unique.each do |hash|
@@ -99,28 +103,4 @@ class Result < ApplicationRecord
     end
 
 end
-# es el order by el que me caga
-# xy = connection.execute("
-#             SELECT id, updated_at,
-#                 dense_rank() OVER (
-#                     PARTITION BY value -> 'Listado' -> 0 -> 'CodigoExterno'
-#                     ORDER BY value ->> 'FechaCreacion' DESC
-#                     ) as by_fecha_creacion
-#             FROM results
-#             ")
 
-# connection.execute(
-#         "SELECT id FROM (
-#             SELECT id, updated_at,
-#                 dense_rank() OVER (
-#                     PARTITION BY value -> 'Listado' -> 0 -> 'CodigoExterno'
-#                     ORDER BY to_date(value ->> 'FechaCreacion', 'YYYY-MM-DD') DESC
-#                     ) as by_fecha_creacion
-#             FROM results
-#             WHERE to_date(value ->> 'FechaCreacion', 'YYYY-MM-DD')::date > #{start_date}
-#             AND to_date(value ->> 'FechaCreacion', 'YYYY-MM-DD')::date <= #{finish_date}
-#         ) as q
-#         WHERE by_fecha_creacion < 2"
-#         )
-
-#         connection.execute("SELECT * FROM results WHERE to_date(value ->> 'FechaCreacion', 'YYYY-MM-DD') > '1969-05-01' AND to_date(value ->> 'FechaCreacion', 'YYYY-MM-DD') <= '2017-01-06'")
