@@ -68,6 +68,7 @@ class UserResultsController < ApplicationController
       @result = Result.find(@id)
      
       render json: @result.history
+      
       rescue ActiveRecord::RecordNotFound
         return render json: json_message_to_frontend(errors: "No se encontró dicho registro."), status: 404
     end
