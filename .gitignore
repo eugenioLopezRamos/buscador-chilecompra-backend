@@ -22,7 +22,12 @@
 .misc
 
 
+#nginx
+/config/nginx.conf
+
+
 *.service
+
 
 
 # Ignore Byebug command history file.

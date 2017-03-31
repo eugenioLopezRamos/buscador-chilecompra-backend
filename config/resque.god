@@ -1,5 +1,5 @@
 rails_env = ENV['RAILS_ENV'] || 'development'
-rails_root = '/home/eugenio/workspaces/cc'#ENV['RAILS_ROOT'] || File.dirname(__FILE__) + '/..' #To be modified later, will use another env var
+rails_root = ENV['RAILS_ROOT'] || File.dirname(__FILE__) + '/..'
 #RESQUE POOL
 
 God.watch do |w|

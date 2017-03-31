@@ -1,0 +1,8 @@
+[Unit]
+Description=God monitoring resque-pool & resque-scheduler
+
+[Service]
+User=$DEPLOY_USER
+ExecStart=$GOD_RVM_WRAPPER_ROUTE -c $RESQUE_GOD_CONFIG_ROUTE/resque.god -b -D
+[Install]
+WantedBy=multi-user.target
