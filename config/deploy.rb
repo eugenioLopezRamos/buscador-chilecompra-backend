@@ -1,5 +1,5 @@
 # Change these
-server "#{ENV['CHILECOMPRA_RAILS_SERVER_IP']}", port: 22, roles: [:web, :app, :db], primary: true
+server "#{ENV['CHILECOMPRA_RAILS_SERVER_IP']}", user: "#{ENV['CHILECOMPRA_RAILS_DEPLOY_USER']}", port: 22, roles: [:web, :app, :db], primary: true
 
 set :repo_url,        "#{ENV['CHILECOMPRA_RAILS_REPO']}"
 set :application,     "#{ENV['CHILECOMPRA_RAILS_APP_NAME']}"
@@ -23,6 +23,7 @@ set :puma_preload_app, true
 set :puma_worker_timeout, nil
 set :puma_init_active_record, false  # Change to false when not using ActiveRecord
 
+set :migration_role, :app
 ## Defaults:
 # set :scm,           :git
 # set :branch,        :master
@@ -31,7 +32,7 @@ set :puma_init_active_record, false  # Change to false when not using ActiveReco
 # set :keep_releases, 5
 
 ## Linked Files & Directories (Default None):
-set :linked_files, %w{config/database.yml}
+#set :linked_files, %w{config/database.yml}
 # set :linked_dirs,  %w{bin log tmp/pids tmp/cache tmp/sockets vendor/bundle public/system}
 
 namespace :puma do
