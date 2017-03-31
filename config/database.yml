@@ -41,6 +41,7 @@ test:
 production:
   <<: *default
   username: <%= ENV["CC_API_DB_USERNAME"]%>
+  password: <%= ENV["CC_API_DB_PASSWORD"]%>
   database: db/production
 
 
