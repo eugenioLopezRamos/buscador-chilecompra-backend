@@ -15,7 +15,7 @@ require "capistrano/deploy"
 #   https://github.com/capistrano/rails
 #   https://github.com/capistrano/passenger
 #
-require 'capistrano/rails/migrations'
+#require 'capistrano/rails/migrations'
 require 'capistrano/bundler'
 require 'capistrano/rvm'
 require 'capistrano/puma'
