@@ -23,7 +23,7 @@ set :puma_preload_app, true
 set :puma_worker_timeout, nil
 set :puma_init_active_record, false  # Change to false when not using ActiveRecord
 
-#set :migration_role, :app
+set :migration_role, :app
 ## Defaults:
 # set :scm,           :git
 # set :branch,        :master
