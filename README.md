@@ -22,6 +22,9 @@ Things you may want to cover:
 * Deployment instructions
 
 * ...
+* install Redis (ubuntu -> sudo apt-get install redis-server)
+
+
 
 ** TODO **
 
