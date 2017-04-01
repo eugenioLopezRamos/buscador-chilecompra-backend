@@ -5,7 +5,7 @@
 
   begin
     Result.set_all_unique_codigo_externo_to_redis unless Rails.env == "test"
-  rescue PG::UndefinedTable
+  rescue ActiveRecord::StatementInvalid
     puts "Table is undefined"
   end
 
