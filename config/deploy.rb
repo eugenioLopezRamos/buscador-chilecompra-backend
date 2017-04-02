@@ -1,4 +1,4 @@
-# Change these
+## Change these
 server "#{ENV['CHILECOMPRA_RAILS_SERVER_IP']}", user: "#{ENV['CHILECOMPRA_RAILS_DEPLOY_USER']}", port: 22, roles: [:web, :app, :db], primary: true
 
 set :repo_url,        "#{ENV['CHILECOMPRA_RAILS_REPO']}"
