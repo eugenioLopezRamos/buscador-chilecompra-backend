@@ -1,3 +1,4 @@
+require 'rake'
 require 'resque/tasks'
 require 'resque/scheduler/tasks'
 require 'resque/pool/tasks'
