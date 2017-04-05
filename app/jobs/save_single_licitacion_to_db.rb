@@ -3,10 +3,14 @@ class SaveSingleLicitacionToDB
 
   def self.perform(licitacion)
 
+    if licitacion["Listado"].empty?
+      return
+    end
+
     datos_lic = licitacion["Listado"]
+
     append_log_save_attempt(datos_lic[0]['CodigoExterno'])    
     
-
     codigo_externo = licitacion["Listado"][0]["CodigoExterno"]
 
     @previously_latest_result_value = nil

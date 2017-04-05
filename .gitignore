@@ -26,6 +26,8 @@
 /config/nginx.conf
 
 
+resque.god.production
+
 *.service
 
 
