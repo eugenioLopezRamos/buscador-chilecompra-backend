@@ -48,7 +48,7 @@ Rails.application.configure do
   # config.active_job.queue_adapter     = :resque
   # config.active_job.queue_name_prefix = "cc_#{Rails.env}"
   config.action_mailer.perform_caching = false
-  config.action_mailer.default_url_options = { host: ENV['CC_DEFAULT_CONFIRM_SUCCESS_URL'], port: 443}
+  config.action_mailer.default_url_options = { host: "#{ENV['CC_DEFAULT_CONFIRM_SUCCESS_URL']}/api", port: 443}
   
   config.action_mailer.delivery_method = :mailgun
   config.action_mailer.mailgun_settings = {
