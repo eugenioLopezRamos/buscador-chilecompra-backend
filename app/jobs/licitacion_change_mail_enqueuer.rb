@@ -9,5 +9,4 @@ class LicitacionChangeMailEnqueuer
       User.find(user_id.to_i).send_licitacion_change_email(message)
     end
   end
-
 end

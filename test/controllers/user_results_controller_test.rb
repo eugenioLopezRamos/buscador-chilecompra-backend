@@ -15,20 +15,19 @@ class UserResultsControllerTest < ActionDispatch::IntegrationTest
     assert_equal @response.body, @user.subscriptions.to_json
   end
 
-  test "Show raises when given no user auth headers" do
+  test 'Show raises when given no user auth headers' do
     get '/results/subscriptions'
 
-    assert_equal @response.body, json_message_to_frontend(errors: "Acceso denegado. Por favor ingresa.").to_json
+    assert_equal @response.body, json_message_to_frontend(errors: 'Acceso denegado. Por favor ingresa.').to_json
     assert_response 401
   end
 
-
-  test "Creates a new subscription" do
+  test 'Creates a new subscription' do
     result_id = Result.last.id
 
     create_user_result_params = {
       create_subscription: {
-        name: "mock_name",
+        name: 'mock_name',
         result_id: result_id
       }
     }
@@ -38,18 +37,18 @@ class UserResultsControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response 200
-    assert_equal @response.body, json_message_to_frontend(info: "Suscripción guardada exitosamente", 
-                                                          extra: {subscriptions: @user.subscriptions}).to_json
+    assert_equal @response.body, json_message_to_frontend(info: 'Suscripción guardada exitosamente',
+                                                          extra: { subscriptions: @user.subscriptions }).to_json
   end
 
-  test "Create raises when given invalid params" do 
+  test 'Create raises when given invalid params' do
     result_id = Result.last.id
 
     create_user_result_params = {
       create_subscription: {
-        name: "mock_name",
+        name: 'mock_name',
         result_id: result_id,
-        totally_random_param: "aaaaaa"
+        totally_random_param: 'aaaaaa'
       }
     }
 
@@ -58,17 +57,17 @@ class UserResultsControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response 422
-    assert_equal @response.body, json_message_to_frontend(errors: "Parámetros inválidos").to_json
+    assert_equal @response.body, json_message_to_frontend(errors: 'Parámetros inválidos').to_json
   end
 
-  test "Create raises when subscribing to an already subscribed-to result" do
+  test 'Create raises when subscribing to an already subscribed-to result' do
     result_id = Result.first.id
-    result_codigo_externo = Result.first.value["Listado"][0]["CodigoExterno"]
+    result_codigo_externo = Result.first.value['Listado'][0]['CodigoExterno']
     already_subscribed = UserResult.where(result_id: result_id).first
 
     create_user_result_params = {
       create_subscription: {
-        name: "mock_name",
+        name: 'mock_name',
         result_id: result_id
       }
     }
@@ -81,12 +80,11 @@ class UserResultsControllerTest < ActionDispatch::IntegrationTest
     assert_equal @response.body, json_message_to_frontend(errors: expected_error_message).to_json
   end
 
-  test "Create raises when given no user auth headers" do
-
+  test 'Create raises when given no user auth headers' do
     result_id = Result.last.id
     create_user_result_params = {
       create_subscription: {
-        name: "mock_name",
+        name: 'mock_name',
         result_id: result_id
       }
     }
@@ -96,44 +94,42 @@ class UserResultsControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response 401
-    assert_equal @response.body, json_message_to_frontend(errors: "Acceso denegado. Por favor ingresa.").to_json
-
+    assert_equal @response.body, json_message_to_frontend(errors: 'Acceso denegado. Por favor ingresa.').to_json
   end
 
-  test "Updates a subscription" do
-    #Save as json to save as value instead of ref
+  test 'Updates a subscription' do
+    # Save as json to save as value instead of ref
     old_subscription = UserResult.first.to_json
     old_name = UserResult.first.subscription_name
 
     update_user_result_params = {
       update_subscription: {
         old_name: old_name,
-        name: "name 2.0"
+        name: 'name 2.0'
       }
-    } 
+    }
 
     assert_no_difference 'UserResult.all.count' do
       put '/results/subscriptions', params: update_user_result_params.to_json, headers: @headers
     end
-   
+
     assert_not_equal old_subscription, UserResult.first.to_json
     assert_response 200
-    assert_equal @response.body, json_message_to_frontend(info: "Actualizado exitosamente",
-                                                          extra: {subscriptions: @user.subscriptions}).to_json
-
+    assert_equal @response.body, json_message_to_frontend(info: 'Actualizado exitosamente',
+                                                          extra: { subscriptions: @user.subscriptions }).to_json
   end
 
-  test "Update raises when given invalid params" do
+  test 'Update raises when given invalid params' do
     old_subscription = UserResult.first.to_json
     old_name = UserResult.first.subscription_name
 
     update_user_result_params = {
       update_subscription: {
         old_name: old_name,
-        name: "name 2.0",
-        not_supposed_to_be_here: "hide me"
+        name: 'name 2.0',
+        not_supposed_to_be_here: 'hide me'
       }
-    } 
+    }
 
     assert_no_difference 'UserResult.all.count' do
       put '/results/subscriptions', params: update_user_result_params.to_json, headers: @headers
@@ -141,38 +137,34 @@ class UserResultsControllerTest < ActionDispatch::IntegrationTest
 
     assert_equal old_subscription, UserResult.first.to_json
     assert_response 422
-    assert_equal @response.body, json_message_to_frontend(errors: "Parámetros inválidos").to_json
-
+    assert_equal @response.body, json_message_to_frontend(errors: 'Parámetros inválidos').to_json
   end
 
-  test "Update raises when given no user auth headers" do
-
+  test 'Update raises when given no user auth headers' do
     old_subscription = UserResult.first.to_json
     old_name = UserResult.first.subscription_name
 
     update_user_result_params = {
       update_subscription: {
         old_name: old_name,
-        name: "name 2.0"
+        name: 'name 2.0'
       }
-    } 
+    }
     assert_no_difference 'UserResult.all.count' do
       put '/results/subscriptions', params: update_user_result_params.to_json
     end
     assert_equal old_subscription, UserResult.first.to_json
 
-    assert_equal @response.body, json_message_to_frontend(errors: "Acceso denegado. Por favor ingresa.").to_json
+    assert_equal @response.body, json_message_to_frontend(errors: 'Acceso denegado. Por favor ingresa.').to_json
     assert_response 401
-
   end
 
-
-  test "Destroys a subscription" do
+  test 'Destroys a subscription' do
     subscription_name = UserResult.first.subscription_name
-    
+
     delete_user_result_params = {
       destroy_subscription: {
-        name: subscription_name 
+        name: subscription_name
       }
     }
 
@@ -181,17 +173,16 @@ class UserResultsControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response 200
-    assert_equal @response.body, json_message_to_frontend(info: "Suscripción cancelada exitosamente", 
-                                                          extra: {subscriptions: @user.subscriptions}).to_json
-
+    assert_equal @response.body, json_message_to_frontend(info: 'Suscripción cancelada exitosamente',
+                                                          extra: { subscriptions: @user.subscriptions }).to_json
   end
 
-  test "Destroy raises when given invalid params" do
+  test 'Destroy raises when given invalid params' do
     subscription_name = UserResult.first.subscription_name
     delete_user_result_params = {
       destroy_subscription: {
         name: subscription_name,
-        forbidden_param: "aaaa"
+        forbidden_param: 'aaaa'
       }
     }
     assert_no_difference 'UserResult.all.count' do
@@ -199,14 +190,12 @@ class UserResultsControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response 422
-    assert_equal @response.body, json_message_to_frontend(errors: "Parámetros inválidos").to_json
-
+    assert_equal @response.body, json_message_to_frontend(errors: 'Parámetros inválidos').to_json
   end
-  
 
-  test "Destroy raises when given no user auth headers" do
+  test 'Destroy raises when given no user auth headers' do
     subscription_name = UserResult.first.subscription_name
-    
+
     delete_user_result_params = {
       destroy_subscription: {
         name: subscription_name
@@ -216,54 +205,46 @@ class UserResultsControllerTest < ActionDispatch::IntegrationTest
       delete '/results/subscriptions', params: delete_user_result_params.to_json
     end
 
-    assert_equal @response.body, json_message_to_frontend(errors: "Acceso denegado. Por favor ingresa.").to_json
+    assert_equal @response.body, json_message_to_frontend(errors: 'Acceso denegado. Por favor ingresa.').to_json
     assert_response 401
-
   end
 
-  test "Result history shows a results history" do
+  test 'Result history shows a results history' do
     result_id = UserResult.first.user_id
 
     show_history_params = {
       id: result_id
     }
-    #.to_json not needed here. Makes no diff in real use
+    # .to_json not needed here. Makes no diff in real use
     get '/results/history', params: show_history_params, headers: @headers
-    
+
     assert_response 200
     assert_equal @response.body, Result.find(result_id).history.to_json
-
   end
 
-
-  test "Result history raises when given invalid params" do
+  test 'Result history raises when given invalid params' do
     result_id = UserResult.first.user_id
 
     show_history_params = {
       id: result_id,
-      invalid_param: "1/0"
+      invalid_param: '1/0'
     }
-    #.to_json not needed here. Makes no diff in real use
+    # .to_json not needed here. Makes no diff in real use
     get '/results/history', params: show_history_params, headers: @headers
 
     assert_response 422
-    assert_equal @response.body, json_message_to_frontend(errors: "Parámetros inválidos").to_json 
+    assert_equal @response.body, json_message_to_frontend(errors: 'Parámetros inválidos').to_json
   end
 
-
-  test "Result history raises when given no user auth headers" do
+  test 'Result history raises when given no user auth headers' do
     result_id = UserResult.first.user_id
 
     show_history_params = {
       id: result_id
     }
-    #.to_json not needed here. Makes no diff in real use
+    # .to_json not needed here. Makes no diff in real use
     get '/results/history', params: show_history_params
-    assert_equal @response.body, json_message_to_frontend(errors: "Acceso denegado. Por favor ingresa.").to_json
+    assert_equal @response.body, json_message_to_frontend(errors: 'Acceso denegado. Por favor ingresa.').to_json
     assert_response 401
-  end  
-
-
-
-
+  end
 end

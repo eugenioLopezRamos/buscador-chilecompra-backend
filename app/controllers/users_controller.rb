@@ -1,3 +1,3 @@
 class UsersController < ApplicationController
-  #done through devise
+  # done through devise
 end

@@ -9,14 +9,11 @@ class SaveBatchToDbJobTest < ActiveJob::TestCase
     @job = SaveBatchToDB
   end
 
-  test "Saves batch to db" do
-
+  test 'Saves batch to db' do
     assert_difference 'Batch.count', 1 do
       @job.perform(@batch)
     end
-    
+
     assert_equal @batch.as_json, Batch.last.value.as_json
   end
-
-
 end
