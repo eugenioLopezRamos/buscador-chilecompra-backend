@@ -13,9 +13,23 @@ module ApplicationHelper
 
     hsh
   end
+  
+  def day_in_milliseconds
+    hours = 24
+    minutes = 60
+    seconds = 60
+    thousand = 1000
+    hours * minutes * seconds * thousand
+  end
+
+  def stringify_param_values(parameters)
+    param_data = {}
+    parameters.each_pair { |k, v| param_data[k] = v.to_s }
+  end
 
   def transform_date_format(date)
-    Time.at(date.to_i / 1000).strftime('%Y-%m-%d') # Need to divide the MomentJS date  by 1000 to get the correct one.
+    # Need to divide the MomentJS date  by 1000 to get the correct one.
+    Time.at(date.to_i / 1000).strftime('%Y-%m-%d')
   end
 
   def is_integer?(string)

@@ -21,6 +21,8 @@
 #ignore misc
 .misc
 
+#handle misstypes.
+npm-debug.log
 
 #nginx
 /config/nginx.conf

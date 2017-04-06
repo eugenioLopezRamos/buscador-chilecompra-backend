@@ -1,42 +1,19 @@
 # Misc functions use for requests controller including logic
 module RequestsHelper
-  def day_in_milliseconds
-    hours = 24
-    minutes = 60
-    seconds = 60
-    thousand = 1000
-    hours * minutes * seconds * thousand
-  end
-
-  # TODO: move away from here!
-  def transform_date_format(date)
-    Time.at(date.to_i / 1000).strftime('%Y-%m-%d') # Need to divide the MomentJS date  by 1000 to get the correct one.
-  end
 
   def filter_results(parameters, limit)
-    @json_param_routes = get_json_param_routes(parameters)
-    @to_send = prepare_send_chain(parameters, @json_param_routes)
     dates = determine_dates(parameters)
 
-    filtered_by_palabras_clave = filter_by_palabras_clave(dates, parameters['palabrasClave'])
-    #Calculating results twice, need some way to avoid this
-    total_results = get_total_results_amount(filtered_by_palabras_clave,
-                                             @to_send)
+    total_results = get_total_results(dates, parameters)
+    filtered_by_palabras_clave = filter_by_palabras_clave(total_results, parameters['palabrasClave'])
 
-    offset = calculate_offset(parameters['offset'], total_results[:count], limit)
+    offset = calculate_offset(parameters['offset'], filtered_by_palabras_clave.length, limit)
     sorting = create_order_by(parameters['order_by'])
 
-    sorted_result = limit_and_sort_results(total_results[:values],
-                                           offset,
-                                           limit,
+    sorted_result = limit_and_sort_results(filtered_by_palabras_clave, offset, limit,
                                            sorting)
 
-    { values: sorted_result, count: total_results[:count], limit: limit, offset: offset }
-  end
-
-  def stringify_param_values(parameters)
-    param_data = {}
-    parameters.each_pair { |k, v| param_data[k] = v.to_s }
+    { values: sorted_result, count: filtered_by_palabras_clave.length, limit: limit, offset: offset }
   end
 
   def remove_wildcards(parameters)
@@ -53,7 +30,8 @@ module RequestsHelper
     parameters
   end
 
-  def prepare_send_chain(parameters, json_routes)
+  def prepare_send_chain(parameters)
+    json_routes = get_json_param_routes(parameters)
     to_send = []
     parameters.each_pair do |key, value|
       to_send.push(json_routes[key.to_sym]) unless value.blank? || json_routes[key.to_sym].nil?
@@ -61,11 +39,11 @@ module RequestsHelper
     to_send
   end
 
-  def get_total_results_amount(results, query_array)
-    return {values: results, count: results.length } if query_array.empty?
-    values = query_array.reduce(results) { |acc, elem| acc.send('where', elem) }
-    count = values.length
-    {values: values, count: count}
+  def get_total_results(dates, parameters)
+    results = get_latest_results_per_ids(dates[:start_date], dates[:end_date])
+    query_array = prepare_send_chain(parameters)
+    return results if query_array.empty?
+    query_array.reduce(results) { |acc, elem| acc.send('where', elem) }
   end
 
   def get_latest_results_per_ids(start_date, end_date)
@@ -146,7 +124,7 @@ module RequestsHelper
 
     # order_by = {fields: [...], order: "descending || ascending" }
     fields = if order_by['fields'].empty?
-               RequestsController::DEFAULT_ORDER_BY_FIELD
+               RequestsController::DEFAULT_ORDER_BY_FIELD.map {|elem| elem}
              else
                order_by['fields'].map do |element|
                  if is_integer? element
@@ -156,41 +134,30 @@ module RequestsHelper
                  end
                end
              end
+    fields.unshift("value")
 
-    # TODO: Refactor this....
-
-    if fields.length == 1
-      order_by_query = 'value ->> ' + fields[0]
-    elsif fields.length == 2
-      order_by_query = 'value -> ' + fields[0] + ' ->> ' + fields[1]
-    elsif fields.length == 3
-      order_by_query = 'value -> ' + fields[0] + ' -> ' + fields[1] + ' ->> ' + fields[2]
+    order_by_query = ""
+    if fields.length == 2
+      order_by_query = "#{fields[0]}->> #{fields[1]}"
     else
-      route = fields.slice(0, fields.length - 2).join(' -> ')
-      desired_value = fields.slice(fields.length - 1, 1)[0]
-      full_route = 'value -> ' + route + ' ->> ' + desired_value
-      order_by_query = full_route
+      fields[0..-2].each do |field|
+        order_by_query << " #{field} ->"
+      end
+      order_by_query << " #{fields[-1]} "
     end
 
-    order_by_query += ' DESC' if order_by['order'] == 'descending'
-
-    order_by_query += ' ASC' if order_by['order'] == 'ascending'
+    order_by_query << 'DESC' if order_by['order'] == 'descending'
+    order_by_query << 'ASC' if order_by['order'] == 'ascending'
     order_by_query
   end
 
-  def filter_by_palabras_clave(dates, palabras_clave)
-    start_date = dates[:start_date]
-    end_date = dates[:end_date]
+  def filter_by_palabras_clave(results, palabras_clave_string)
+    return results if palabras_clave_string.nil?
 
-    results = get_latest_results_per_ids(start_date, end_date)
-    return results if palabras_clave.nil?
+    palabras_clave = palabras_clave_string.split(' ')
+    return results if palabras_clave.empty?
 
-    palabras_clave_array = palabras_clave.split(' ')
-    return results if palabras_clave_array.empty?
-
-    palabras_clave_array = palabras_clave_array.map { |palabra| "%#{palabra}%" }
-
-    palabras_amount = palabras_clave_array.length
+    palabras_clave = palabras_clave.map { |palabra| "%#{palabra}%" }
 
     descripcion_query_base = "LOWER(value -> 'Listado' -> 0 ->> 'Descripcion') LIKE LOWER(?)"
     nombre_query_base = "LOWER(value -> 'Listado' -> 0 ->> 'Nombre') LIKE LOWER(?)"
@@ -198,17 +165,17 @@ module RequestsHelper
     @descripcion_query = descripcion_query_base
     @nombre_query = nombre_query_base
 
-    if palabras_amount > 1
-      (palabras_amount - 1).times do
+    if palabras_clave.length > 1
+      (palabras_clave.length - 1).times do
         @descripcion_query = @descripcion_query + ' AND ' + descripcion_query_base
       end
 
-      (palabras_amount - 1).times do
+      (palabras_clave.length - 1).times do
         @nombre_query = @nombre_query + ' AND ' + nombre_query_base
       end
     end
 
     # Twice, since its one palabras_clave_array for @descripcion_query and another for @nombre_query
-    results.where("#{@descripcion_query} OR #{@nombre_query}", *palabras_clave_array, *palabras_clave_array)
+    results.where("#{@descripcion_query} OR #{@nombre_query}", *palabras_clave, *palabras_clave)
   end
 end
