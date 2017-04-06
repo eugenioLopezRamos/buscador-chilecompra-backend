@@ -31,15 +31,14 @@ class AddLicitacionChangeToUserNotifications
     # strings like the real resque. TODO: Fix this somehow....
     licitaciones_queue = 'licitaciones'
     licitaciones_queue = licitaciones_queue.to_sym if Rails.env == 'test'
-    if Resque.size(licitaciones_queue).zero?
-      # This returns a multikey hash with structure:
-      # {user_id0: "message1blablah\n message2\n",
-      #  userid1: "message3\n message4\n" }
-      messages = Redis.current.hgetall('notification_emails')
-      # Then we enqueue the creation of emails so they can be sent through
-      # mailgun(or another service)
-      Resque.enqueue(LicitacionChangeMailEnqueuer, messages)
-    end
+    return if Resque.size(licitaciones_queue) > 0
+    # This returns a multikey hash with structure:
+    # {user_id0: "message1blablah\n message2\n",
+    #  userid1: "message3\n message4\n" }
+    messages = Redis.current.hgetall('notification_emails')
+    # Then we enqueue the creation of emails so they can be sent through
+    # mailgun(or another service)
+    Resque.enqueue(LicitacionChangeMailEnqueuer, messages)
   end
 
   def self.create_users_notification(codigo_externo, users)
@@ -52,8 +51,7 @@ class AddLicitacionChangeToUserNotifications
 
     # Returns a hash {"8": "cambios en xxxx \n cambios en yyyy \n cambios en zzz \n"}
     current_messages = Redis.current.hgetall('notification_emails')
-
-    # TODO: try to refactor this?
+    # TODO: try to refactor this? eg subscription_name to model?
     users.each do |user_id|
       subscription_name = User
                           .find(user_id)
@@ -68,7 +66,6 @@ class AddLicitacionChangeToUserNotifications
         log_save_failure(user_id, codigo_externo)
       end
     end
-
     Redis.current.hmset('notification_emails', *current_messages)
   end
 

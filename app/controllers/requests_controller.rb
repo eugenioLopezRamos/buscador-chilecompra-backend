@@ -5,6 +5,9 @@ class RequestsController < ApplicationController
   DEFAULT_ORDER_BY_FIELD = ["\'Listado\'", "\'0\'", "\'CodigoExterno\'"].freeze
 
   before_action :valid_get_info_params?, only: :get_info
+  before_action :verify_correct_date_format, only: :get_info
+  before_action :verify_valid_always_from?, only: :get_info
+  before_action :verify_valid_offset_format, only: :get_info
   before_action :valid_get_misc_info_params?, only: :get_misc_info
   before_action :authenticate_user!
 
@@ -13,13 +16,9 @@ class RequestsController < ApplicationController
   end
 
   def get_info
-    verify_correct_date_format(params[:startDate], params[:endDate])
-    verify_valid_always_from?(params[:alwaysFromToday], params[:alwaysToToday])
-    verify_valid_offset_format(params[:offset])
-    # TODO: add verify_valid_order here
-
-    result = filter_results(params, @result_limit_amount)
-
+    string_params = stringify_param_values(params)
+    remove_wildcards(string_params)
+    result = filter_results(string_params, @result_limit_amount)
     # renders => {results: [{json1}, {json2}, ...{jsonN}], count: "200", limit: "200"}
     render plain: JSON.fast_generate(result), content_type: 'application/json'
 
@@ -40,8 +39,9 @@ class RequestsController < ApplicationController
 
   private
 
-  def verify_correct_date_format(*dates)
+  def verify_correct_date_format
     # dates = unix epoch format
+    dates = [params[:startDate], params[:endDate]]
     dates.each do |date|
       unless is_integer?(date)
         raise ArgumentError, 'Fecha en formato inválido, por favor intentar de nuevo.'
@@ -57,7 +57,8 @@ class RequestsController < ApplicationController
     end
   end
 
-  def verify_valid_offset_format(offset)
+  def verify_valid_offset_format
+    offset = params[:offset]
     offset_value = offset
     offset_value = 0 unless offset_value # || offset_value.empty?
 
@@ -67,7 +68,8 @@ class RequestsController < ApplicationController
     offset
   end
 
-  def verify_valid_always_from?(*values)
+  def verify_valid_always_from?
+    values = [params[:alwaysFromToday], params[:alwaysToToday]]
     values.each do |value|
       unless is_boolean? value
         raise ArgumentError, "Valor 'Siempre desde/siempre hasta' inválido (debe ser booleano)"

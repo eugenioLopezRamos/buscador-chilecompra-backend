@@ -1,3 +1,5 @@
+# Caches commonly used data from chilecompra
+# Runs daily at 8AM
 class CacheLicitacionesData
   require 'net/http'
   require 'json'
@@ -15,12 +17,10 @@ class CacheLicitacionesData
     # this is an array of hashes
     parsed_json_response = JSON.parse(Net::HTTP.get(uri))['listaEmpresas']
 
-    response_hash = {}
-    parsed_json_response.each_with_object(response_hash) do |current, accumulator|
-      codigo_organismo_publico = current['CodigoEmpresa']
-      nombre_organismo_publico = current['NombreEmpresa']
-
-      accumulator[codigo_organismo_publico] = nombre_organismo_publico
+    response_hash = parsed_json_response.reduce({}) do |accumulator, current|
+      codigo_org_publico = current['CodigoEmpresa']
+      nombre_org_publico = current['NombreEmpresa']
+      accumulator[codigo_org_publico] = nombre_org_publico
       accumulator
     end
 

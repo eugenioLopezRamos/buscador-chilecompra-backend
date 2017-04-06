@@ -1,10 +1,10 @@
+# Misc functions use for requests controller including logic
 module RequestsHelper
   def day_in_milliseconds
     hours = 24
     minutes = 60
     seconds = 60
     thousand = 1000
-
     hours * minutes * seconds * thousand
   end
 
@@ -14,54 +14,47 @@ module RequestsHelper
   end
 
   def filter_results(parameters, limit)
-    # TEMPORARY
-    ActiveRecord::Base.connection.query_cache.clear
+    @json_param_routes = get_json_param_routes(parameters)
+    @to_send = prepare_send_chain(parameters, @json_param_routes)
+    dates = determine_dates(parameters)
 
-    @param_data = stringify_param_values(parameters)
-    @json_param_routes = get_json_param_routes(@param_data)
-    @to_send = prepare_send_chain(@param_data, @json_param_routes)
-    # ver to_send no funciona
+    filtered_by_palabras_clave = filter_by_palabras_clave(dates, parameters['palabrasClave'])
+    #Calculating results twice, need some way to avoid this
+    total_results = get_total_results_amount(filtered_by_palabras_clave,
+                                             @to_send)
 
-    start_date = determine_dates(@param_data)[:start_date]
-    end_date = determine_dates(@param_data)[:end_date]
+    offset = calculate_offset(parameters['offset'], total_results[:count], limit)
+    sorting = create_order_by(parameters['order_by'])
 
-    latest_results_per_ids = get_latest_results_per_ids(start_date, end_date)
+    sorted_result = limit_and_sort_results(total_results[:values],
+                                           offset,
+                                           limit,
+                                           sorting)
 
-    # TODO: Calculating same thing twice...
-
-    filtered_by_palabras_clave = filter_by_palabras_clave(latest_results_per_ids, @param_data['palabrasClave'])
-    total_results_amount = get_total_results_amount(filtered_by_palabras_clave, @to_send)
-
-    offset = calculate_offset(@param_data['offset'], total_results_amount, limit)
-    sorting = create_order_by(@param_data['order_by'])
-
-    sorted_result = get_result_from_query(filtered_by_palabras_clave, @to_send, offset, limit, sorting)
-
-    { values: sorted_result, count: total_results_amount, limit: limit, offset: offset }
+    { values: sorted_result, count: total_results[:count], limit: limit, offset: offset }
   end
 
   def stringify_param_values(parameters)
     param_data = {}
-
     parameters.each_pair { |k, v| param_data[k] = v.to_s }
+  end
 
-    if param_data['organismoPublico'] == '*' || !param_data['organismoPublico']
-      param_data['organismoPublico'] = ''
+  def remove_wildcards(parameters)
+    if parameters['organismoPublico'] == '*' || !parameters['organismoPublico']
+      parameters['organismoPublico'] = ''
     end
 
-    if param_data['estadoLicitacion'] == '*' || !param_data['estadoLicitacion']
-      param_data['estadoLicitacion'] = ''
+    if parameters['estadoLicitacion'] == '*' || !parameters['estadoLicitacion']
+      parameters['estadoLicitacion'] = ''
     end
-
-    param_data['offset'] = 0 unless param_data['offset'] # .nil? || param_data["offset"].empty?
+    parameters['offset'] = 0 unless parameters['offset']
     # see what to do wth order_by....
-    param_data['order_by'] = parameters['order_by']
-    param_data
+    parameters['order_by'] = parameters['order_by']
+    parameters
   end
 
   def prepare_send_chain(parameters, json_routes)
     to_send = []
-
     parameters.each_pair do |key, value|
       to_send.push(json_routes[key.to_sym]) unless value.blank? || json_routes[key.to_sym].nil?
     end
@@ -69,7 +62,10 @@ module RequestsHelper
   end
 
   def get_total_results_amount(results, query_array)
-    query_array.reduce(results) { |_acc, elem| prev.send('where', elem) }.count
+    return {values: results, count: results.length } if query_array.empty?
+    values = query_array.reduce(results) { |acc, elem| acc.send('where', elem) }
+    count = values.length
+    {values: values, count: count}
   end
 
   def get_latest_results_per_ids(start_date, end_date)
@@ -78,27 +74,13 @@ module RequestsHelper
     Result.where(id: latest_result_ids_per_codigo_externo)
   end
 
-  def get_result_from_query(results, query_array, offset, limit, sorting)
+  def limit_and_sort_results(results, offset, limit, sorting)
     # here I get the latest, even if no modifications where made so I might end up with a codigoLicitacion
     # that was entered @ 9AM 'missing' since it will only show the latest(for example, at 11 AM)
-
-    #  return results.order(sorting)
-    #                .offset(offset)
-    #                .limit(limit)
-    #                .map {|obj| obj.as_json}
-
-    if query_array.empty?
-      return results.order(sorting)
-                    .offset(offset)
-                    .limit(limit)
-                    .map(&:as_json)
-   end
-
-    query_array.reduce(results) { |_acc, elem| prev.send('where', elem) }
-               .order(sorting)
-               .offset(offset)
-               .limit(limit)
-               .map(&:as_json)
+    results.order(sorting)
+           .offset(offset)
+           .limit(limit)
+           .map(&:as_json)
   end
 
   def determine_dates(parameters)
@@ -109,17 +91,8 @@ module RequestsHelper
     # so we'll get all results with date LESS than 2017-01-26 @ 00:00 AM
 
     # Javascript time is ruby time * 1000
-    default_start_date = transform_date_format(Time.zone.now.to_i * 1000)
-    default_end_date = transform_date_format(Time.zone.now.to_i * 1000 + day_in_milliseconds)
-
-    dates = { start_date: default_start_date,
-              end_date: default_end_date }
-    # If alwaysFromToday == "true" then we use defaults for BOTH dates
-    return dates if parameters['alwaysFromToday'] == 'true'
-    # if alwaysToToday, use the default only for end_date(start_date gets its entered value)
-    if parameters['alwaysToToday'] == 'true'
-      dates[:start_date] = transform_date_format(parameters['startDate'])
-      return dates
+    if parameters['alwaysFromToday'] || parameters['alwaysToToday']
+      return dates_with_always_today(parameters)
     end
 
     start_date = transform_date_format(parameters['startDate'])
@@ -127,7 +100,25 @@ module RequestsHelper
 
     end_date = transform_date_format(end_date_next_day)
 
-    dates = { start_date: start_date, end_date: end_date }
+    { start_date: start_date, end_date: end_date }
+  end
+
+  def dates_with_always_today(parameters)
+    # If alwaysFromToday == "true" then we use defaults for BOTH dates
+    return default_dates if parameters['alwaysFromToday'] == 'true'
+    # if alwaysToToday, use the default only for end_date(start_date gets its entered value)
+    {
+      start_date: transform_date_format(parameters['startDate']),
+      end_date: default_dates[:end_date]
+    }
+  end
+
+  def default_dates
+    {
+      start_date: transform_date_format(Time.zone.now.to_i * 1000),
+      end_date: transform_date_format(Time.zone.now.to_i * 1000 +
+                                      day_in_milliseconds)
+    }
   end
 
   def get_json_param_routes(param_data)
@@ -151,7 +142,7 @@ module RequestsHelper
   end
 
   def create_order_by(order_by)
-    # TODO: Check if vulnerable to sql injection
+    # TODO: Check if vulnerable to sql injection :(
 
     # order_by = {fields: [...], order: "descending || ascending" }
     fields = if order_by['fields'].empty?
@@ -161,7 +152,7 @@ module RequestsHelper
                  if is_integer? element
                    element.to_s
                  else
-                   "'#{element}'"
+                   ActiveRecord::Base.connection.quote(element)
                  end
                end
              end
@@ -172,14 +163,13 @@ module RequestsHelper
       order_by_query = 'value ->> ' + fields[0]
     elsif fields.length == 2
       order_by_query = 'value -> ' + fields[0] + ' ->> ' + fields[1]
-    elsif fields.length === 3
+    elsif fields.length == 3
       order_by_query = 'value -> ' + fields[0] + ' -> ' + fields[1] + ' ->> ' + fields[2]
     else
       route = fields.slice(0, fields.length - 2).join(' -> ')
       desired_value = fields.slice(fields.length - 1, 1)[0]
       full_route = 'value -> ' + route + ' ->> ' + desired_value
       order_by_query = full_route
-
     end
 
     order_by_query += ' DESC' if order_by['order'] == 'descending'
@@ -188,7 +178,11 @@ module RequestsHelper
     order_by_query
   end
 
-  def filter_by_palabras_clave(results, palabras_clave)
+  def filter_by_palabras_clave(dates, palabras_clave)
+    start_date = dates[:start_date]
+    end_date = dates[:end_date]
+
+    results = get_latest_results_per_ids(start_date, end_date)
     return results if palabras_clave.nil?
 
     palabras_clave_array = palabras_clave.split(' ')

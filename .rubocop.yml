@@ -13,6 +13,9 @@ Style/Encoding:
   EnforcedStyle: never
   Enabled: true
 
+Style/EachWithObject:
+  Enabled: false
+  
 Metrics/LineLength:
   Enabled: false
 
