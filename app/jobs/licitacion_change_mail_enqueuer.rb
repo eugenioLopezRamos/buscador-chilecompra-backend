@@ -1,3 +1,5 @@
+# Enqueues notifications emails sent to users when a licitacion they are
+# subscribed to changes.
 class LicitacionChangeMailEnqueuer
   @queue = :mail
 

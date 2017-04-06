@@ -14,8 +14,12 @@ Style/Encoding:
   Enabled: true
 
 Metrics/LineLength:
-  # This will disable the rule completely, regardless what other options you put
   Enabled: false
+
+Rails/FindEach:
+  Description: 'Prefer all.find_each over all.find.'
+  StyleGuide: 'https://github.com/bbatsov/rails-style-guide#find-each'
+  Enabled: true
 
 Lint/AmbiguousBlockAssociation:
   Exclude:

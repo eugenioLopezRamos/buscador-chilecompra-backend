@@ -1,3 +1,4 @@
+# Fetches a licitacion by codigo_externo from the Chilecompra API
 class GetSingleLicitacion
   @queue = :licitaciones
 
