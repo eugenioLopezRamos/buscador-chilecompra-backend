@@ -1,6 +1,5 @@
 # Misc functions use for requests controller including logic
 module RequestsHelper
-
   def filter_results(parameters, limit)
     dates = determine_dates(parameters)
 
@@ -46,12 +45,6 @@ module RequestsHelper
     query_array.reduce(results) { |acc, elem| acc.send('where', elem) }
   end
 
-  def get_latest_results_per_ids(start_date, end_date)
-    latest_result_ids_per_codigo_externo = Result.latest_entry_per_codigo_externo(start_date, end_date)
-                                                 .sort { |a, z| a <=> z }
-    Result.where(id: latest_result_ids_per_codigo_externo)
-  end
-
   def limit_and_sort_results(results, offset, limit, sorting)
     # here I get the latest, even if no modifications where made so I might end up with a codigoLicitacion
     # that was entered @ 9AM 'missing' since it will only show the latest(for example, at 11 AM)
@@ -69,7 +62,7 @@ module RequestsHelper
     # so we'll get all results with date LESS than 2017-01-26 @ 00:00 AM
 
     # Javascript time is ruby time * 1000
-    if parameters['alwaysFromToday'] || parameters['alwaysToToday']
+    if parameters['alwaysFromToday'] == 'true' || parameters['alwaysToToday'] == 'true'
       return dates_with_always_today(parameters)
     end
 
@@ -91,23 +84,6 @@ module RequestsHelper
     }
   end
 
-  def default_dates
-    {
-      start_date: transform_date_format(Time.zone.now.to_i * 1000),
-      end_date: transform_date_format(Time.zone.now.to_i * 1000 +
-                                      day_in_milliseconds)
-    }
-  end
-
-  def get_json_param_routes(param_data)
-    {
-      codigoLicitacion: ["value -> 'Listado' -> 0 ->> 'CodigoExterno' = ? ", param_data['codigoLicitacion']],
-      estadoLicitacion: ["value -> 'Listado' -> 0 ->> 'CodigoEstado' = ? ", param_data['estadoLicitacion']],
-      organismoPublico: ["value -> 'Listado' -> 0 -> 'Comprador' ->> 'CodigoOrganismo' = ? ", param_data['organismoPublico']],
-      rutProveedor: ["value -> 'Listado' -> 0 -> 'Items' -> 'Listado' -> 0 -> 'Adjudicacion' ->> 'RutProveedor' = ? ", param_data['rutProveedor']]
-    }
-  end
-
   def calculate_offset(offset, results_amount, limit)
     return 0 if offset.to_i < 0
     if offset.to_i >= results_amount
@@ -121,61 +97,43 @@ module RequestsHelper
 
   def create_order_by(order_by)
     # TODO: Check if vulnerable to sql injection :(
-
     # order_by = {fields: [...], order: "descending || ascending" }
-    fields = if order_by['fields'].empty?
-               RequestsController::DEFAULT_ORDER_BY_FIELD.map {|elem| elem}
-             else
-               order_by['fields'].map do |element|
-                 if is_integer? element
-                   element.to_s
-                 else
-                   ActiveRecord::Base.connection.quote(element)
-                 end
-               end
-             end
-    fields.unshift("value")
-
-    order_by_query = ""
-    if fields.length == 2
-      order_by_query = "#{fields[0]}->> #{fields[1]}"
-    else
-      fields[0..-2].each do |field|
-        order_by_query << " #{field} ->"
-      end
-      order_by_query << " #{fields[-1]} "
-    end
-
+    fields = order_by_fields(order_by['fields'])
+    order_by_query = ''
+    fields[0..-2].each { |field| order_by_query << " #{field} ->" }
+    order_by_query << " #{fields[-1]} "
     order_by_query << 'DESC' if order_by['order'] == 'descending'
     order_by_query << 'ASC' if order_by['order'] == 'ascending'
     order_by_query
   end
 
+  def order_by_fields(fields_array)
+    return ['value'].concat RequestsController::DEFAULT_ORDER_BY_FIELD if fields_array.empty?
+    fields = fields_array.map do |element|
+      if is_integer? element
+        element.to_s
+      else
+        ActiveRecord::Base.connection.quote(element)
+      end
+    end
+    ['value'].concat fields
+  end
+
   def filter_by_palabras_clave(results, palabras_clave_string)
     return results if palabras_clave_string.nil?
-
     palabras_clave = palabras_clave_string.split(' ')
     return results if palabras_clave.empty?
 
-    palabras_clave = palabras_clave.map { |palabra| "%#{palabra}%" }
-
-    descripcion_query_base = "LOWER(value -> 'Listado' -> 0 ->> 'Descripcion') LIKE LOWER(?)"
-    nombre_query_base = "LOWER(value -> 'Listado' -> 0 ->> 'Nombre') LIKE LOWER(?)"
-
-    @descripcion_query = descripcion_query_base
-    @nombre_query = nombre_query_base
-
-    if palabras_clave.length > 1
-      (palabras_clave.length - 1).times do
-        @descripcion_query = @descripcion_query + ' AND ' + descripcion_query_base
-      end
-
-      (palabras_clave.length - 1).times do
-        @nombre_query = @nombre_query + ' AND ' + nombre_query_base
-      end
-    end
-
+    palabras_clave.map! { |palabra| "%#{palabra}%" }
+    @descripcion_query = palabras_clave_query_base.call('Descripcion')
+    @nombre_query = palabras_clave_query_base.call('Nombre')
     # Twice, since its one palabras_clave_array for @descripcion_query and another for @nombre_query
+    return results.where("#{@descripcion_query} OR #{@nombre_query}", *palabras_clave, *palabras_clave) if palabras_clave.length == 1
+
+    (palabras_clave.length - 1).times do
+      @descripcion_query << " AND #{palabras_clave_query_base.call('Descripcion')}"
+      @nombre_query << " AND #{palabras_clave_query_base.call('Nombre')}"
+    end
     results.where("#{@descripcion_query} OR #{@nombre_query}", *palabras_clave, *palabras_clave)
   end
 end

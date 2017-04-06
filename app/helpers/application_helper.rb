@@ -43,4 +43,11 @@ module ApplicationHelper
   def is_boolean?(value)
     [true, 'true', false, 'false'].include? value
   end
+
+  def get_latest_results_per_ids(start_date, end_date)
+    latest_result_ids_per_codigo_externo = Result.latest_entry_per_codigo_externo(start_date, end_date)
+                                                 .sort { |a, z| a <=> z }
+    Result.where(id: latest_result_ids_per_codigo_externo)
+  end
+
 end
