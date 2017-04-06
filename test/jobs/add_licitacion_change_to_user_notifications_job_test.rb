@@ -25,7 +25,7 @@ class AddLicitacionChangeToUserNotificationsJobTest < ActiveJob::TestCase
     end
 
     assert @user.subscribed_to_result? @result.id
-    assert_equal [@user.id], @job.get_users_to_notify(@codigo_externo)
+    assert_equal [@user.id], @job.users_to_notify(@codigo_externo)
   end
 
   test "Correctly creates a user's notification" do
@@ -35,7 +35,7 @@ class AddLicitacionChangeToUserNotificationsJobTest < ActiveJob::TestCase
     assert_equal Hash.new, Redis.current.hgetall("notification_emails")
 
     #get users to be emailed
-    users = @job.get_users_to_notify(@codigo_externo)
+    users = @job.users_to_notify(@codigo_externo)
     
     #do it create notifications?
     assert_difference 'Notification.count', 1 do
@@ -78,7 +78,7 @@ class AddLicitacionChangeToUserNotificationsJobTest < ActiveJob::TestCase
 
     assert_not_queued LicitacionChangeMailEnqueuer
 
-    users = @job.get_users_to_notify(@codigo_externo)
+    users = @job.users_to_notify(@codigo_externo)
     #Name of the subscription we're informing the user about
     sub_name = User.find(users.first).subscriptions_by_codigo_externo.key(@codigo_externo)
     #Message to be added to the redis hash
@@ -101,7 +101,7 @@ class AddLicitacionChangeToUserNotificationsJobTest < ActiveJob::TestCase
       @job.perform(@codigo_externo)
     end
 
-    users = @job.get_users_to_notify(@codigo_externo)
+    users = @job.users_to_notify(@codigo_externo)
     #Name of the subscription we're informing the user about
     sub_name = User.find(users.first).subscriptions_by_codigo_externo.key(@codigo_externo)
     #Message to be added to the redis hash
