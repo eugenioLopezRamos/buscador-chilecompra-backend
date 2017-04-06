@@ -45,7 +45,7 @@ class Result < ApplicationRecord
   end
 
   def self.last_per_codigo_externo
-    Rails.env != 'test' ? codigos = get_all_unique_codigo_externo : codigos = get_all_unique_codigo_externo(force_db: true)
+    codigos = Rails.env != 'test' ? get_all_unique_codigo_externo : get_all_unique_codigo_externo(force_db: true)
     last_codigos = []
     codigos.each do |codigo|
       last_codigos.push(Result.where("value -> 'Listado' -> 0 ->> 'CodigoExterno' = ?", codigo).last)

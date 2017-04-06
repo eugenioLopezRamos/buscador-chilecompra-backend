@@ -39,10 +39,10 @@ class CacheLicitacionesDataJobTest < ActiveJob::TestCase
     @job.cache_organismos_publicos
 
     expected_organismos_publicos_values = @mock_organismos_publicos
-                                            .reduce({}) do |accum, current|
+                                            .reduce({}) do |accum, elem|
                                            
-                                              codigo_organismo_publico = current[:CodigoEmpresa]
-                                              nombre_organismo_publico = current[:NombreEmpresa]
+                                              codigo_organismo_publico = elem[:CodigoEmpresa]
+                                              nombre_organismo_publico = elem[:NombreEmpresa]
 
                                               accum[codigo_organismo_publico] = nombre_organismo_publico
                                               accum
@@ -59,10 +59,10 @@ class CacheLicitacionesDataJobTest < ActiveJob::TestCase
     @job.cache_estados_licitacion
 
     expected_estados_licitacion_values = @mock_estados_licitacion
-                                            .reduce({}) do |acc, curr|
+                                            .reduce({}) do |acc, elem|
                                               #Transform value number into string
                                               #curr[0] = key, curr[1] = value
-                                              acc[curr[0]] = curr[1].to_s
+                                              acc[elem[0]] = elem[1].to_s
                                               acc
                                             end
     assert_equal expected_estados_licitacion_values.as_json, Redis.current.hgetall("estados_licitacion")

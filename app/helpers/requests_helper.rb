@@ -69,7 +69,7 @@ module RequestsHelper
   end
 
   def get_total_results_amount(results, query_array)
-    query_array.reduce(results) { |prev, curr| prev.send('where', curr) }.count
+    query_array.reduce(results) { |_acc, elem| prev.send('where', elem) }.count
   end
 
   def get_latest_results_per_ids(start_date, end_date)
@@ -94,7 +94,7 @@ module RequestsHelper
                     .map(&:as_json)
    end
 
-    query_array.reduce(results) { |prev, curr| prev.send('where', curr) }
+    query_array.reduce(results) { |_acc, elem| prev.send('where', elem) }
                .order(sorting)
                .offset(offset)
                .limit(limit)
@@ -154,17 +154,17 @@ module RequestsHelper
     # TODO: Check if vulnerable to sql injection
 
     # order_by = {fields: [...], order: "descending || ascending" }
-    if order_by['fields'].empty?
-      fields = RequestsController::DEFAULT_ORDER_BY_FIELD
-    else
-      fields = order_by['fields'].map do |element|
-        if is_integer? element
-          element.to_s
-        else
-          "'#{element}'"
-        end
-      end
-    end
+    fields = if order_by['fields'].empty?
+               RequestsController::DEFAULT_ORDER_BY_FIELD
+             else
+               order_by['fields'].map do |element|
+                 if is_integer? element
+                   element.to_s
+                 else
+                   "'#{element}'"
+                 end
+               end
+             end
 
     # TODO: Refactor this....
 

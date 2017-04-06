@@ -53,12 +53,12 @@ class AddLicitacionChangeToUserNotifications
                                          message: message)
 
       if notification.save
-        if !current_values[user_id.to_s]
-          current_values[user_id.to_s] = message + "\n"
-        else
-          # #{message} is intentional, it adds a space before it.
-          current_values[user_id.to_s] = current_values[user_id.to_s] + " #{message}" + "\n"
-        end
+        current_values[user_id.to_s] = if !current_values[user_id.to_s]
+                                         message + "\n"
+                                       else
+                                         # #{message} is intentional, it adds a space before it.
+                                         current_values[user_id.to_s] + " #{message}" + "\n"
+                                       end
       else !notification.save
            File.open("#{Rails.root}/log/add_result_change_to_user_notifications.log", 'a+') do |f|
              f << "Error al guardar notificación para usuario id #{user_id} por codigo externo #{codigo_externo} a las #{Time.now} \n"
