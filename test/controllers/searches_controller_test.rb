@@ -45,7 +45,7 @@ include ApplicationHelper
       post '/searches', params: create_search_params.to_json, headers: @headers
     end
 
-    assert_equal @response.body, json_message_to_frontend(
+    assert_equal @response.body, json_message(
                                                           info: {"guardado con éxito": [create_search_params[:search][:name]]},
                                                           errors: {"repetidos": [], "errores": []},
                                                           extra: {searches: show_searches(@user)}
@@ -77,7 +77,7 @@ include ApplicationHelper
       post '/searches', params: create_search_params.to_json, headers: @headers
     end
     assert_response 422
-    assert_equal @response.body, json_message_to_frontend(errors: "Parámetros inválidos").to_json
+    assert_equal @response.body, json_message(errors: "Parámetros inválidos").to_json
   end
 
   test "Create search raises when no user auth headers are given" do
@@ -106,7 +106,7 @@ include ApplicationHelper
       post '/searches', params: create_search_params.to_json
     end
 
-    assert_equal @response.body, json_message_to_frontend(errors: "Acceso denegado. Por favor ingresa.").to_json
+    assert_equal @response.body, json_message(errors: "Acceso denegado. Por favor ingresa.").to_json
     assert_response 401
 
   end
@@ -140,7 +140,7 @@ include ApplicationHelper
     end
     
     assert_response 200
-    assert_equal @response.body, json_message_to_frontend(
+    assert_equal @response.body, json_message(
                                                           info: {"Modificado exitosamente": [update_search_params[:search][:searchName]]},
                                                           extra: {searches: show_searches(@user)}
                                                           ).to_json
@@ -178,7 +178,7 @@ include ApplicationHelper
     end
 
     assert_response 422
-    assert_equal @response.body, json_message_to_frontend(errors: "Parámetros inválidos").to_json
+    assert_equal @response.body, json_message(errors: "Parámetros inválidos").to_json
 
 
   end
@@ -212,7 +212,7 @@ include ApplicationHelper
     end
 
     assert_response 401
-    assert_equal @response.body, json_message_to_frontend(errors: "Acceso denegado. Por favor ingresa.").to_json
+    assert_equal @response.body, json_message(errors: "Acceso denegado. Por favor ingresa.").to_json
   end
   
   test "Destroys searches correctly" do
@@ -226,7 +226,7 @@ include ApplicationHelper
     end
 
     assert_response 200
-    assert_equal @response.body, json_message_to_frontend(
+    assert_equal @response.body, json_message(
                                       info: {"Borrado exitosamente": [search_name]}, 
                                       extra: {searches: show_searches(@user)}
                                       ).to_json
@@ -244,7 +244,7 @@ include ApplicationHelper
     end
 
     assert_response 422
-    assert_equal @response.body, json_message_to_frontend(errors: "Parámetros inválidos").to_json
+    assert_equal @response.body, json_message(errors: "Parámetros inválidos").to_json
 
   end
 
@@ -258,7 +258,7 @@ include ApplicationHelper
       delete '/searches', params: delete_search_params.to_json
     end
     assert_response 401
-    assert_equal @response.body, json_message_to_frontend(errors: "Acceso denegado. Por favor ingresa.").to_json
+    assert_equal @response.body, json_message(errors: "Acceso denegado. Por favor ingresa.").to_json
 
   end
 

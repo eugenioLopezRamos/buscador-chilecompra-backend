@@ -72,8 +72,8 @@ class UserResultTest < ActiveSupport::TestCase
     new_subscription_name = 'new sub name'
     codigo_externo = Result.find(mock_result.id).codigo_externo
 
-    UserResult.subscribe_user_to_result(@user, mock_result.id, codigo_externo, new_subscription_name)
-
+    UserResult.subscribe_user_to_result(@user, mock_result.id, codigo_externo,
+                                        new_subscription_name)
     assert UserResult.user_subscribed_to? @user, mock_result.id
   end
 

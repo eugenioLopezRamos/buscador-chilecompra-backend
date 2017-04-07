@@ -1,10 +1,9 @@
 # Handles requests for info from outside
 class RequestsController < ApplicationController
   include RequestsHelper
-  require 'json'
   require 'redis'
   DEFAULT_ORDER_BY_FIELD = ["\'Listado\'", "\'0\'", "\'CodigoExterno\'"].freeze
-
+  RESULT_LIMIT_AMOUNT = 200
   before_action :valid_licitacion_data_params?, only: :licitacion_data
   before_action :verify_correct_date_format, only: :licitacion_data
   before_action :verify_valid_always_from?, only: :licitacion_data
@@ -12,19 +11,14 @@ class RequestsController < ApplicationController
   before_action :valid_chilecompra_misc_data_params?, only: :chilecompra_misc_data
   before_action :authenticate_user!
 
-  def initialize
-    @result_limit_amount = 200
-  end
-
   def licitacion_data
     string_params = stringify_param_values(params)
     remove_wildcards(string_params)
-    result = filter_results(string_params, @result_limit_amount)
+    result = filter_results(string_params, RESULT_LIMIT_AMOUNT)
     # renders => {results: [{json1}, {json2}, ...{jsonN}], count: "200", limit: "200"}
-    render plain: JSON.fast_generate(result), content_type: 'application/json'
-
+    render json: result
   rescue ArgumentError => except
-    render json: json_message_to_frontend(errors: except), status: 422
+    render json: json_message(errors: except), status: 422
   end
 
   def chilecompra_misc_data
@@ -35,7 +29,22 @@ class RequestsController < ApplicationController
 
     raise ArgumentError, 'Parámetros inválidos'
   rescue ArgumentError => except
-    render json: json_message_to_frontend(errors: except), status: 422
+    render json: json_message(errors: except), status: 422
+  end
+
+  def filter_results(parameters, limit)
+    dates = determine_dates(parameters)
+
+    total_results = get_total_results(dates, parameters)
+    filtered_by_palabras_clave = filter_by_palabras_clave(total_results, parameters['palabrasClave'])
+
+    offset = calculate_offset(parameters['offset'], filtered_by_palabras_clave.length, limit)
+    sorting = create_order_by(parameters['order_by'])
+
+    sorted_result = limit_and_sort_results(filtered_by_palabras_clave, offset, limit,
+                                           sorting)
+
+    { values: sorted_result, count: filtered_by_palabras_clave.length, limit: limit, offset: offset }
   end
 
   private
@@ -59,13 +68,8 @@ class RequestsController < ApplicationController
   end
 
   def verify_valid_offset_format
-    offset = params[:offset]
-    offset_value = offset
-    offset_value = 0 unless offset_value # || offset_value.empty?
-
-    unless integer?(offset_value)
-      raise ArgumentError, 'Offset inválido (Debe ser número entero)'
-    end
+    offset = params[:offset] ? params[:offset] : 0
+    raise ArgumentError, 'Offset inválido (Debe ser núm entero)' unless integer?(offset)
     offset
   end
 
@@ -94,14 +98,14 @@ class RequestsController < ApplicationController
       order_by: [:order, fields: []]
     )
   rescue ActionController::UnpermittedParameters, ActionController::ParameterMissing
-    render json: json_message_to_frontend(errors: 'Parámetros inválidos'), status: 422
+    render json: json_message(errors: 'Parámetros inválidos'), status: 422
   end
 
   def valid_chilecompra_misc_data_params?
     params.require(:info)
 
   rescue ActionController::ParameterMissing, ActionController::ParameterMissing
-    render json: json_message_to_frontend(errors: 'Parámetros inválidos'), status: 422
+    render json: json_message(errors: 'Parámetros inválidos'), status: 422
   end
 
   def get_json_param_routes(param_data)

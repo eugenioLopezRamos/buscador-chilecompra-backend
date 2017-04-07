@@ -10,7 +10,7 @@ class ApplicationController < ActionController::API
   # devise_token_auth doesn't seem to use custom failure apps like devise does.
   def authenticate_user!
     return if current_user
-    render json: json_message_to_frontend(errors: 'Acceso denegado. Por favor ingresa.'), status: 401
+    render json: json_message(errors: 'Acceso denegado. Por favor ingresa.'), status: 401
   end
 
   def configure_permitted_parameters

@@ -18,7 +18,7 @@ class UserResultsControllerTest < ActionDispatch::IntegrationTest
   test 'Show raises when given no user auth headers' do
     get '/results/subscriptions'
 
-    assert_equal @response.body, json_message_to_frontend(errors: 'Acceso denegado. Por favor ingresa.').to_json
+    assert_equal @response.body, json_message(errors: 'Acceso denegado. Por favor ingresa.').to_json
     assert_response 401
   end
 
@@ -37,7 +37,7 @@ class UserResultsControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response 200
-    assert_equal @response.body, json_message_to_frontend(info: 'Suscripción guardada exitosamente',
+    assert_equal @response.body, json_message(info: 'Suscripción guardada exitosamente',
                                                           extra: { subscriptions: @user.subscriptions }).to_json
   end
 
@@ -57,7 +57,7 @@ class UserResultsControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response 422
-    assert_equal @response.body, json_message_to_frontend(errors: 'Parámetros inválidos').to_json
+    assert_equal @response.body, json_message(errors: 'Parámetros inválidos').to_json
   end
 
   test 'Create raises when subscribing to an already subscribed-to result' do
@@ -77,7 +77,7 @@ class UserResultsControllerTest < ActionDispatch::IntegrationTest
 
     expected_error_message = "Ya estás suscrito a la licitacion de código externo #{result_codigo_externo} (Nombre suscripción: #{already_subscribed.subscription_name})"
     assert_response 422
-    assert_equal @response.body, json_message_to_frontend(errors: expected_error_message).to_json
+    assert_equal @response.body, json_message(errors: expected_error_message).to_json
   end
 
   test 'Create raises when given no user auth headers' do
@@ -94,7 +94,7 @@ class UserResultsControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response 401
-    assert_equal @response.body, json_message_to_frontend(errors: 'Acceso denegado. Por favor ingresa.').to_json
+    assert_equal @response.body, json_message(errors: 'Acceso denegado. Por favor ingresa.').to_json
   end
 
   test 'Updates a subscription' do
@@ -115,7 +115,7 @@ class UserResultsControllerTest < ActionDispatch::IntegrationTest
 
     assert_not_equal old_subscription, UserResult.first.to_json
     assert_response 200
-    assert_equal @response.body, json_message_to_frontend(info: 'Actualizado exitosamente',
+    assert_equal @response.body, json_message(info: 'Actualizado exitosamente',
                                                           extra: { subscriptions: @user.subscriptions }).to_json
   end
 
@@ -137,7 +137,7 @@ class UserResultsControllerTest < ActionDispatch::IntegrationTest
 
     assert_equal old_subscription, UserResult.first.to_json
     assert_response 422
-    assert_equal @response.body, json_message_to_frontend(errors: 'Parámetros inválidos').to_json
+    assert_equal @response.body, json_message(errors: 'Parámetros inválidos').to_json
   end
 
   test 'Update raises when given no user auth headers' do
@@ -155,7 +155,7 @@ class UserResultsControllerTest < ActionDispatch::IntegrationTest
     end
     assert_equal old_subscription, UserResult.first.to_json
 
-    assert_equal @response.body, json_message_to_frontend(errors: 'Acceso denegado. Por favor ingresa.').to_json
+    assert_equal @response.body, json_message(errors: 'Acceso denegado. Por favor ingresa.').to_json
     assert_response 401
   end
 
@@ -173,7 +173,7 @@ class UserResultsControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response 200
-    assert_equal @response.body, json_message_to_frontend(info: 'Suscripción cancelada exitosamente',
+    assert_equal @response.body, json_message(info: 'Suscripción cancelada exitosamente',
                                                           extra: { subscriptions: @user.subscriptions }).to_json
   end
 
@@ -190,7 +190,7 @@ class UserResultsControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response 422
-    assert_equal @response.body, json_message_to_frontend(errors: 'Parámetros inválidos').to_json
+    assert_equal @response.body, json_message(errors: 'Parámetros inválidos').to_json
   end
 
   test 'Destroy raises when given no user auth headers' do
@@ -205,7 +205,7 @@ class UserResultsControllerTest < ActionDispatch::IntegrationTest
       delete '/results/subscriptions', params: delete_user_result_params.to_json
     end
 
-    assert_equal @response.body, json_message_to_frontend(errors: 'Acceso denegado. Por favor ingresa.').to_json
+    assert_equal @response.body, json_message(errors: 'Acceso denegado. Por favor ingresa.').to_json
     assert_response 401
   end
 
@@ -233,7 +233,7 @@ class UserResultsControllerTest < ActionDispatch::IntegrationTest
     get '/results/history', params: show_history_params, headers: @headers
 
     assert_response 422
-    assert_equal @response.body, json_message_to_frontend(errors: 'Parámetros inválidos').to_json
+    assert_equal @response.body, json_message(errors: 'Parámetros inválidos').to_json
   end
 
   test 'Result history raises when given no user auth headers' do
@@ -244,7 +244,7 @@ class UserResultsControllerTest < ActionDispatch::IntegrationTest
     }
     # .to_json not needed here. Makes no diff in real use
     get '/results/history', params: show_history_params
-    assert_equal @response.body, json_message_to_frontend(errors: 'Acceso denegado. Por favor ingresa.').to_json
+    assert_equal @response.body, json_message(errors: 'Acceso denegado. Por favor ingresa.').to_json
     assert_response 401
   end
 end

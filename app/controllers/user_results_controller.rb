@@ -19,12 +19,12 @@ class UserResultsController < ApplicationController
     @name = valid_create_result_subscription_params[:name]
     current_user.subscribe_to_result(@result_id, @name)
     new_subscriptions = current_user.subscriptions
-    render json: json_message_to_frontend(info: 'Suscripción guardada exitosamente', extra: { subscriptions: new_subscriptions })
+    render json: json_message(info: 'Suscripción guardada exitosamente', extra: { subscriptions: new_subscriptions })
     # TODO: Fix in model too.
   rescue ArgumentError => message
-    render json: json_message_to_frontend(errors: message), status: 422
+    render json: json_message(errors: message), status: 422
   rescue ActiveRecord::RecordNotUnique
-    render json: json_message_to_frontend(errors: 'Error, ya está suscrito a este resultado y/o nombre ya existe')
+    render json: json_message(errors: 'Error, ya está suscrito a este resultado y/o nombre ya existe')
   end
 
   def update
@@ -33,35 +33,35 @@ class UserResultsController < ApplicationController
     @old_name = valid_update_result_subscription_params[:old_name]
 
     if current_user.update_result_subscription(@old_name, @name)
-      @message = json_message_to_frontend(info: 'Actualizado exitosamente',
-                                          extra: { subscriptions: current_user.subscriptions })
+      @message = json_message(info: 'Actualizado exitosamente',
+                              extra: { subscriptions: current_user.subscriptions })
       return render json: @message
     end
 
-    render json: json_message_to_frontend(errors: 'Lo sentimos, hubo un error. Por favor inténtalo nuevamente')
+    render json: json_message(errors: 'Lo sentimos, hubo un error. Por favor inténtalo nuevamente')
 
   rescue ActiveRecord::RecordNotUnique
-    render json: json_message_to_frontend(errors: 'Error, este nombre ya existe'), status: 422
+    render json: json_message(errors: 'Error, este nombre ya existe'), status: 422
   end
 
   def destroy
     @result = valid_destroy_result_subscription_params[:name]
 
     if current_user.destroy_result_subscription @result
-      return render json: json_message_to_frontend(info: 'Suscripción cancelada exitosamente',
-                                                   extra: { subscriptions: current_user.subscriptions })
+      return render json: json_message(info: 'Suscripción cancelada exitosamente',
+                                       extra: { subscriptions: current_user.subscriptions })
     end
 
-    render json: json_message_to_frontend(errors: 'No se pudo cancelar la suscripción'), status: 422
+    render json: json_message(errors: 'No se pudo cancelar la suscripción'), status: 422
 
   rescue ActiveRecord::ActiveRecordError
-    render json: json_message_to_frontend(errors: 'Error al cancelar la suscripción'), status: 422
+    render json: json_message(errors: 'Error al cancelar la suscripción'), status: 422
   end
 
   def show_history
     # Looks for up a result by id, then calls its :history method
     # which brings up all the database entries WITH THE SAME CODIGOEXTERNO
-    # chronologically (that is, ASC in SQL terms) and sends them to the json_message_to_frontend
+    # chronologically (that is, ASC in SQL terms) and sends them to the json_message
     # which then does the comparison and presents the results to the end user
     @id = valid_result_history_params.to_i
 
@@ -70,7 +70,7 @@ class UserResultsController < ApplicationController
     render json: @result.history
 
   rescue ActiveRecord::RecordNotFound
-    return render json: json_message_to_frontend(errors: 'No se encontró dicho registro.'), status: 404
+    return render json: json_message(errors: 'No se encontró dicho registro.'), status: 404
   end
 
   private
@@ -78,19 +78,19 @@ class UserResultsController < ApplicationController
   def valid_create_result_subscription_params
     params.require(:create_subscription).permit(:name, :result_id)
   rescue ActionController::UnpermittedParameters, ActionController::ParameterMissing
-    render json: json_message_to_frontend(errors: 'Parámetros inválidos'), status: 422
+    render json: json_message(errors: 'Parámetros inválidos'), status: 422
   end
 
   def valid_update_result_subscription_params
     params.require(:update_subscription).permit(:old_name, :name)
   rescue ActionController::UnpermittedParameters, ActionController::ParameterMissing
-    render json: json_message_to_frontend(errors: 'Parámetros inválidos'), status: 422
+    render json: json_message(errors: 'Parámetros inválidos'), status: 422
   end
 
   def valid_destroy_result_subscription_params
     params.require(:destroy_subscription).permit(:name)
   rescue ActionController::UnpermittedParameters, ActionController::ParameterMissing
-    render json: json_message_to_frontend(errors: 'Parámetros inválidos'), status: 422
+    render json: json_message(errors: 'Parámetros inválidos'), status: 422
   end
 
   def valid_result_history_params
@@ -100,8 +100,8 @@ class UserResultsController < ApplicationController
     params.permit(:id).require(:id)
 
   rescue ArgumentError => e
-    render json: json_message_to_frontend(errors: e)
+    render json: json_message(errors: e)
   rescue ActionController::UnpermittedParameters, ActionController::ParameterMissing
-    render json: json_message_to_frontend(errors: 'Parámetros inválidos'), status: 422
+    render json: json_message(errors: 'Parámetros inválidos'), status: 422
   end
 end

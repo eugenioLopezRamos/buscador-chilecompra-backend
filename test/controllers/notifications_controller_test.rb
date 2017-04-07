@@ -19,7 +19,7 @@ class NotificationsControllerTest < ActionDispatch::IntegrationTest
 
   test 'Notifications#show fails if given no user auth headers' do
     get '/notifications'
-    assert_equal @response.body, json_message_to_frontend(errors: 'Acceso denegado. Por favor ingresa.').to_json
+    assert_equal @response.body, json_message(errors: 'Acceso denegado. Por favor ingresa.').to_json
     assert_response 401
   end
 
@@ -37,7 +37,7 @@ class NotificationsControllerTest < ActionDispatch::IntegrationTest
       delete '/notifications', params: { notification: { notification_id: 99_999 } }.to_json, headers: @headers
     end
 
-    assert_equal @response.body, json_message_to_frontend(errors: 'No se encontró dicha notificación').to_json
+    assert_equal @response.body, json_message(errors: 'No se encontró dicha notificación').to_json
     assert_response 404
   end
 
@@ -49,6 +49,6 @@ class NotificationsControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response 422
-    assert_equal @response.body, json_message_to_frontend(errors: 'Parámetros inválidos').to_json
+    assert_equal @response.body, json_message(errors: 'Parámetros inválidos').to_json
   end
 end

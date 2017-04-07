@@ -1,20 +1,5 @@
 # Misc functions use for requests controller including logic
 module RequestsHelper
-  def filter_results(parameters, limit)
-    dates = determine_dates(parameters)
-
-    total_results = get_total_results(dates, parameters)
-    filtered_by_palabras_clave = filter_by_palabras_clave(total_results, parameters['palabrasClave'])
-
-    offset = calculate_offset(parameters['offset'], filtered_by_palabras_clave.length, limit)
-    sorting = create_order_by(parameters['order_by'])
-
-    sorted_result = limit_and_sort_results(filtered_by_palabras_clave, offset, limit,
-                                           sorting)
-
-    { values: sorted_result, count: filtered_by_palabras_clave.length, limit: limit, offset: offset }
-  end
-
   def remove_wildcards(parameters)
     if parameters['organismoPublico'] == '*' || !parameters['organismoPublico']
       parameters['organismoPublico'] = ''
