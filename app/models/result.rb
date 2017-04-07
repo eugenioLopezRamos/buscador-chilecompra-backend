@@ -93,6 +93,8 @@ class Result < ApplicationRecord
       result_ids
     end
 
+    # rubocop:disable Metrics/MethodLength
+    # Can't currently find a way to make this smaller w/o losing readability
     def group_rank_and_filter_sql_statement(connection, start_date, finish_date)
       connection.execute(
         "SELECT id FROM (
@@ -106,5 +108,6 @@ class Result < ApplicationRecord
         ) as q WHERE by_fecha_creacion < 2"
       )
     end
+    # rubocop:enable Metrics/MethodLength
   end
 end

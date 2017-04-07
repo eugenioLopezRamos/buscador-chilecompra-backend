@@ -7,6 +7,7 @@ require 'resque_unit'
 require 'fakeredis/minitest'
 require 'webmock/minitest'
 
+# rubocop:disable Style/ClassAndModuleChildren
 class ActiveSupport::TestCase
   # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
   # fixtures :all
@@ -33,3 +34,4 @@ class ActionController::TestCase
   include ApplicationHelper
   include Devise::Test::ControllerHelpers
 end
+# rubocop:enable Style/ClassAndModuleChildren

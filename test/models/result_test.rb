@@ -1,5 +1,5 @@
 require 'test_helper'
-
+# rubocop:disable Metrics/ClassLength
 class ResultTest < ActiveSupport::TestCase
   include ApplicationHelper
 
@@ -83,8 +83,6 @@ class ResultTest < ActiveSupport::TestCase
   end
 
   test 'Should get the last result entry with codigo_externo == result.codigo_externo' do
-    codigo_externo = Result.get_all_unique_codigo_externo.map { |codigo| "'#{codigo}'" }
-
     test_result = Result.last_per_codigo_externo.as_json
 
     sql_result = @connection.execute(
@@ -179,3 +177,4 @@ class ResultTest < ActiveSupport::TestCase
     assert_equal [], sql_result_ids - test_result_ids
   end
 end
+# rubocop:enable Metrics/ClassLength

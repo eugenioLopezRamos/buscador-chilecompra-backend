@@ -1,6 +1,7 @@
 require 'test_helper'
 
 class CacheLicitacionesDataJobTest < ActiveJob::TestCase
+  # rubocop:disable Metrics/MethodLength
   def setup
     @job = CacheLicitacionesData
     @mock_organismos_publicos = [
@@ -16,15 +17,11 @@ class CacheLicitacionesDataJobTest < ActiveJob::TestCase
                                            "FechaCreacion": '2017-03-13T14:56:05.947',
                                            "listaEmpresas": @mock_organismos_publicos }
     @mock_estados_licitacion = {
-      Todos: '',
-      Publicada: 5,
-      Cerrada: 6,
-      Desierta: 7,
-      Adjudicada: 8,
-      Revocada: 15,
-      Suspendida: 19
+      Todos: '', Publicada: 5, Cerrada: 6, Desierta: 7, Adjudicada: 8,
+      Revocada: 15, Suspendida: 19
     }
   end
+  # rubocop:enable Metrics/MethodLength
 
   test 'Caches organismos publicos' do
     stub_request(:get, "http://api.mercadopublico.cl/servicios/v1/Publico/Empresas/BuscarComprador?ticket=#{ENV['CC_TOKEN']}")

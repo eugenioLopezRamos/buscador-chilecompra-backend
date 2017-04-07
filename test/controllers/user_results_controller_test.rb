@@ -1,5 +1,5 @@
 require 'test_helper'
-
+# rubocop:disable Metrics/ClassLength
 class UserResultsControllerTest < ActionDispatch::IntegrationTest
   include UserResultsHelper
   include ApplicationHelper
@@ -248,3 +248,4 @@ class UserResultsControllerTest < ActionDispatch::IntegrationTest
     assert_response 401
   end
 end
+# rubocop:enable Metrics/ClassLength

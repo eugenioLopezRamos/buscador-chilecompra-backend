@@ -1,5 +1,5 @@
 require 'test_helper'
-
+# rubocop:disable Metrics/ClassLength
 class RequestsControllerTest < ActionDispatch::IntegrationTest
   CODIGOS_EXTERNOS_SET = :codigos_externos
   include ApplicationHelper
@@ -153,6 +153,8 @@ class RequestsControllerTest < ActionDispatch::IntegrationTest
     assert_equal @response.body, expected_response
   end
 
+  # rubocop:disable Metrics/MethodLength
+  # Not much to do here, these two are just big sql queries...
   def chilecompra_data_from_db_sql(start_date, finish_date, offset)
     ActiveRecord::Base.connection.execute("
       SELECT id, value -> 'Listado' -> 0 ->> 'CodigoExterno' as codigo_externo
@@ -193,6 +195,7 @@ class RequestsControllerTest < ActionDispatch::IntegrationTest
       ORDER BY value -> 'Listado' -> '0' -> 'CodigoExterno' DESC
       LIMIT 200 OFFSET #{offset}")
   end
+  # rubocop:enable Metrics/MethodLength
 
   def filter_by_palabras_clave_sql
     ActiveRecord::Base.connection.execute('
@@ -207,3 +210,4 @@ class RequestsControllerTest < ActionDispatch::IntegrationTest
       'AND "value"::json#>>\'{Listado,0,Descripcion}\' LIKE ' + "\'%MOVILIZACION%\' ")
   end
 end
+# rubocop:enable Metrics/ClassLength

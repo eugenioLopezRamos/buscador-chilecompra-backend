@@ -1,5 +1,5 @@
 require 'test_helper'
-
+# rubocop:disable Metrics/ClassLength
 class SearchesControllerTest < ActionDispatch::IntegrationTest
   include SearchesHelper
   include ApplicationHelper
@@ -20,18 +20,11 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
     create_search_params = {
       search: {
         value: {
-          offset: 0,
-          endDate: Time.zone.now.to_i * 1000,
-          order_by: { order: 'descending', fields: [] },
-          startDate: Time.zone.now.to_i * 1000,
-          rutProveedor: '11111111',
-          alwaysToToday: false,
-          palabrasClave: '',
-          alwaysFromToday: false,
-          codigoLicitacion: '',
-          organismosPublicosFilter: 'va',
-          selectedEstadoLicitacion: '',
-          selectedOrganismoPublico: '7016'
+          offset: 0, order_by: { order: 'descending', fields: [] },
+          startDate: Time.zone.now.to_i * 1000, rutProveedor: '11111111',
+          alwaysToToday: false, palabrasClave: '', alwaysFromToday: false,
+          codigoLicitacion: '', organismosPublicosFilter: 'va',
+          selectedEstadoLicitacion: '', selectedOrganismoPublico: '7016'
         },
         name: 'mock search'
       }
@@ -80,18 +73,13 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
     create_search_params = {
       search: {
         value: {
-          offset: 0,
-          endDate: Time.zone.now.to_i * 1000,
+          offset: 0, endDate: Time.zone.now.to_i * 1000,
           order_by: { order: 'descending', fields: [] },
           startDate: Time.zone.now.to_i * 1000,
-          rutProveedor: '11111111',
-          alwaysToToday: false,
-          palabrasClave: '',
-          alwaysFromToday: false,
-          codigoLicitacion: '',
-          organismosPublicosFilter: 'va',
-          selectedEstadoLicitacion: '',
-          selectedOrganismoPublico: '7016'
+          rutProveedor: '11111111', alwaysToToday: false,
+          palabrasClave: '', alwaysFromToday: false,
+          codigoLicitacion: '', organismosPublicosFilter: 'va',
+          selectedEstadoLicitacion: '', selectedOrganismoPublico: '7016'
         },
         name: 'mock search'
       }
@@ -112,17 +100,11 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
     update_search_params = {
       search: {
         newValues: {
-          rutProveedor: '2222',
-          order_by: { order: 'ascending', fields: [] },
-          offset: 0,
-          endDate: Time.zone.now.to_i * 1000,
-          startDate: Time.zone.now.to_i * 1000,
-          alwaysToToday: false,
-          palabrasClave: '',
-          alwaysFromToday: false,
-          codigoLicitacion: '',
-          organismosPublicosFilter: 'va',
-          selectedEstadoLicitacion: '',
+          rutProveedor: '2222', order_by: { order: 'ascending', fields: [] },
+          offset: 0, endDate: Time.zone.now.to_i * 1000,
+          startDate: Time.zone.now.to_i * 1000, alwaysToToday: false,
+          palabrasClave: '', alwaysFromToday: false, codigoLicitacion: '',
+          organismosPublicosFilter: 'va', selectedEstadoLicitacion: '',
           selectedOrganismoPublico: '7016'
         },
         searchName: search_name,
@@ -147,18 +129,12 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
     update_search_params = {
       search: {
         newValues: {
-          rutProveedor: '2222',
-          order_by: { order: 'ascending', fields: [] },
-          offset: 0,
-          endDate: Time.zone.now.to_i * 1000,
-          startDate: Time.zone.now.to_i * 1000,
-          alwaysToToday: false,
-          palabrasClave: '',
-          alwaysFromToday: false,
-          codigoLicitacion: '',
-          organismosPublicosFilter: 'va',
-          selectedEstadoLicitacion: '',
-          selectedOrganismoPublico: '7016'
+          rutProveedor: '2222', order_by: { order: 'ascending', fields: [] },
+          offset: 0, endDate: Time.zone.now.to_i * 1000,
+          startDate: Time.zone.now.to_i * 1000, alwaysToToday: false,
+          palabrasClave: '', alwaysFromToday: false,
+          codigoLicitacion: '', organismosPublicosFilter: 'va',
+          selectedEstadoLicitacion: '', selectedOrganismoPublico: '7016'
         },
         searchName: search_name,
         searchId: search_id,
@@ -181,17 +157,11 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
     update_search_params = {
       search: {
         newValues: {
-          rutProveedor: '2222',
-          order_by: { order: 'ascending', fields: [] },
-          offset: 0,
-          endDate: Time.zone.now.to_i * 1000,
-          startDate: Time.zone.now.to_i * 1000,
-          alwaysToToday: false,
-          palabrasClave: '',
-          alwaysFromToday: false,
-          codigoLicitacion: '',
-          organismosPublicosFilter: 'va',
-          selectedEstadoLicitacion: '',
+          rutProveedor: '2222', order_by: { order: 'ascending', fields: [] },
+          offset: 0, endDate: Time.zone.now.to_i * 1000,
+          startDate: Time.zone.now.to_i * 1000, alwaysToToday: false,
+          palabrasClave: '', alwaysFromToday: false, codigoLicitacion: '',
+          organismosPublicosFilter: 'va', selectedEstadoLicitacion: '',
           selectedOrganismoPublico: '7016'
         },
         searchName: search_name,
@@ -248,3 +218,4 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
     assert_equal @response.body, json_message(errors: 'Acceso denegado. Por favor ingresa.').to_json
   end
 end
+# rubocop:enable Metrics/ClassLength
