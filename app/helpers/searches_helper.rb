@@ -2,7 +2,7 @@
 module SearchesHelper
   def show_searches(user)
     searches = user.searches.pluck(*show_fields)
-    hashify.call(show_fields.flatten, 0, searches.flatten, {}).delete_if { |_key, value| value == [nil] }
+    hashify(show_fields.flatten, 0, searches.flatten, {}).delete_if { |_key, value| value == [nil] }
   end
 
   def populate_response(response, search_name)
@@ -18,23 +18,22 @@ module SearchesHelper
     %w(name value id)
   end
 
-  def hashify
-    # TODO: Document this in detail. TL;DR => makes a hash like {"name": [name1, name2, name3...], "value": [{value1...}, {value2...}], "id":[id1, id2, id3...]}
-    lambda do |*show_fields, start_index, plucked_array, new_hash|
-      len = show_fields.flatten.length
-      batch = plucked_array.flatten.slice(start_index, len)
+  def hashify(*show_fields, start_index, plucked_array, new_hash)
+    # TODO: Document this in detail. TL;DR
+    # => makes a hash like
+    # {"name": [name1, name2, name3...],
+    #  "value": [{value1...}, {value2...}],
+    #  "id":[id1, id2, id3...]
+    #  }
+    fields_length = show_fields.length
+    batch = plucked_array.slice(start_index, fields_length)
 
-      show_fields.flatten.each_with_index do |key, i|
-        new_hash[key] = if !new_hash[key]
-                          [].push(batch[i])
-                        else
-                          new_hash[key].push(batch[i])
-                        end
-      end
-      new_index = start_index + len
-
-      return new_hash if new_index >= plucked_array.flatten.length
-      hashify.call(show_fields, new_index, plucked_array, new_hash)
+    show_fields.each_with_index do |key, i|
+      batch_value = batch[i]
+      new_hash[key] ? new_hash[key].push(batch_value) : new_hash[key] = [].push(batch_value)
     end
+    new_index = start_index + fields_length
+    return new_hash if new_index >= plucked_array.length
+    hashify(show_fields, new_index, plucked_array, new_hash)
   end
 end
