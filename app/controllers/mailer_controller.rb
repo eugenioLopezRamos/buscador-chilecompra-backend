@@ -1,3 +1,4 @@
+# Sends emails through mailgun
 class MailerController < ApplicationController
   # needed to be able to use render_to_string
   include ActionView::Rendering

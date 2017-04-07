@@ -13,8 +13,8 @@ class SearchesController < ApplicationController
   def create
     response = create_search(search_params)
     render json: json_message_to_frontend(info: { "guardado con éxito": response[:successful] },
-                             errors: { "repetidos": response[:not_uniq], "errores": response[:errors] },
-                             extra: { searches: show_searches(current_user) })
+                                          errors: { "repetidos": response[:not_uniq], "errores": response[:errors] },
+                                          extra: { searches: show_searches(current_user) })
   end
 
   def update
@@ -26,11 +26,12 @@ class SearchesController < ApplicationController
 
     if result[:successful?]
       return render json: json_message_to_frontend(info: { "Borrado exitosamente": [result[:name]] },
-                    extra: { searches: show_searches(current_user) })
+                                                   extra: { searches: show_searches(current_user) })
     end
     render json: json_message_to_frontend(errors: { "Fallido": [result[:name]] },
                                           extra: { searches: show_searches(current_user) }), status: 500
   end
+
   private
 
   def search_params

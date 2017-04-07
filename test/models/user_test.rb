@@ -27,7 +27,7 @@ class UserTest < ActiveSupport::TestCase
     expected_response[:subscriptions] = @user.subscriptions
     expected_response[:notifications] = @user.notifications
 
-    assert_equal expected_response, @user.get_all_related_data
+    assert_equal expected_response, @user.all_related_data
   end
 
   test "Gets a user's subscriptions" do

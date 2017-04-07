@@ -10,6 +10,6 @@ class SessionsController < DeviseTokenAuth::SessionsController
     # @user_data[:subscriptions] = @resource.subscriptions
     # @user_data[:notifications] = @resource.notifications
     # binding.pry
-    render json: { data: @resource } # .get_all_related_data}
+    render json: { data: @resource } # Could also be user.all_related_data
   end
 end

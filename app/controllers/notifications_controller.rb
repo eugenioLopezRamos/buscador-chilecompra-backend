@@ -1,3 +1,4 @@
+# Handles Notifications created for Users
 class NotificationsController < ApplicationController
   before_action :authenticate_user!
   before_action :valid_destroy_notification_params, only: :destroy

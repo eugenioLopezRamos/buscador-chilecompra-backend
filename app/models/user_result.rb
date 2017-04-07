@@ -1,3 +1,5 @@
+# Model that handles results that the user decided to save (so he/she can keep
+# as reference or whatever else he/she may want to do)
 class UserResult < ApplicationRecord
   belongs_to :user
   belongs_to :result

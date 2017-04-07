@@ -1,3 +1,4 @@
+# Overrides for devise token auth registrations controller
 class RegistrationsController < DeviseTokenAuth::RegistrationsController
   # ALTERAR EL RESULTADO FINAL DE #UPDATE
   def render_update_error

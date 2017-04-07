@@ -22,7 +22,7 @@ class User < ActiveRecord::Base
     MailerController.new.send_notification_email(self, message)
   end
 
-  def get_all_related_data
+  def all_related_data
     @this_user = as_json
     @this_user[:searches] = show_searches(self)
     @this_user[:subscriptions] = subscriptions

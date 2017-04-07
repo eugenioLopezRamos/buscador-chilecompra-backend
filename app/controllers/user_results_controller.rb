@@ -1,3 +1,4 @@
+# Handles results that the user has stored for posterity.
 class UserResultsController < ApplicationController
   include UserResultsHelper
 
