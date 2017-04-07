@@ -2,7 +2,6 @@ require 'test_helper'
 
 class RequestsControllerTest < ActionDispatch::IntegrationTest
   CODIGOS_EXTERNOS_SET = :codigos_externos
-  include RequestsHelper
   include ApplicationHelper
 
   def setup

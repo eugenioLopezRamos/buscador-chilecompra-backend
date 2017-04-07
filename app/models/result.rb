@@ -45,58 +45,66 @@ class Result < ApplicationRecord
     value['Listado'][0]['CodigoExterno']
   end
 
-  def self.last_per_codigo_externo
-    codigos = Rails.env != 'test' ? get_all_unique_codigo_externo : get_all_unique_codigo_externo(force_db: true)
-    last_codigos = []
-    codigos.each do |codigo|
-      last_codigos.push(Result.where("value -> 'Listado' -> 0 ->> 'CodigoExterno' = ?", codigo).last)
+  class << self
+    def last_per_codigo_externo
+      codigos = Rails.env != 'test' ? get_all_unique_codigo_externo : get_all_unique_codigo_externo(force_db: true)
+      last_codigos = []
+      codigos.each do |codigo|
+        last_codigos.push(Result.where("value -> 'Listado' -> 0 ->> 'CodigoExterno' = ?", codigo).last)
+      end
+      last_codigos
     end
-    last_codigos
-  end
 
-  # as of whenever the method is called
-  def self.all_with_codigo_externo(codigo_externo)
-    Result.where("value -> 'Listado' -> 0 ->> 'CodigoExterno' = ?", codigo_externo)
-  end
-
-  # Has a date range
-  def self.latest_entry_per_codigo_externo(start_day, end_day)
-    connection = ActiveRecord::Base.connection
-    result_ids = []
-
-    # Gets results id by codigo externo where updated_at is the greatest
-    # (In simpler words, gets the last DB record entry per Codigo Externo between dates  start_day("YYYY-MM-DD"), end_day)
-
-    # TODO: See if its possible to structure this query in a way that is cacheable with redis
-    # TODO: Although the parameters are checked before_action for the correct format
-    # (date must be UNIX epoch format, so an integer and transformation to string is done where
-    # after checking that what we received is an int) its probably a good idea to
-    # add a call to .quote
-    # Like this: ActiveRecord::Base.connection.quote(value)
-
-    # TODO: See if its convenient to use ApplicationHelper#integer? here
-    start_date = connection.quote(start_day)
-    finish_date = connection.quote(end_day)
-    unique = group_rank_and_filter_sql_statement(connection, start_date,
-                                                 finish_date)
-
-    unique.each do |hash|
-      hash.each_pair { |_key, value| result_ids.push value }
+    # as of whenever the method is called
+    def all_with_codigo_externo(codigo_externo)
+      Result.where("value -> 'Listado' -> 0 ->> 'CodigoExterno' = ?", codigo_externo)
     end
-    result_ids
-  end
 
-  def self.group_rank_and_filter_sql_statement(connection, start_date, finish_date)
-    connection.execute(
-      "SELECT id FROM (
-          SELECT id, updated_at,
-              dense_rank() OVER (
-                  PARTITION BY value -> 'Listado' -> 0 -> 'CodigoExterno'
-                  ORDER BY value ->> 'FechaCreacion' DESC) as by_fecha_creacion
-          FROM results
-          WHERE f_cast_isots(value ->> 'FechaCreacion'::text) >= #{start_date}
-          AND f_cast_isots(value ->> 'FechaCreacion'::text) <= #{finish_date}
-      ) as q WHERE by_fecha_creacion < 2"
-    )
+    def get_latest_results_per_ids(start_date, end_date)
+      latest_result_ids_per_codigo_externo = Result.latest_entry_per_codigo_externo(start_date, end_date)
+                                                   .sort { |a, z| a <=> z }
+      Result.where(id: latest_result_ids_per_codigo_externo)
+    end
+
+    # Has a date range
+    def latest_entry_per_codigo_externo(start_day, end_day)
+      connection = ActiveRecord::Base.connection
+      result_ids = []
+
+      # Gets results id by codigo externo where updated_at is the greatest
+      # (In simpler words, gets the last DB record entry per Codigo Externo between dates  start_day("YYYY-MM-DD"), end_day)
+
+      # TODO: See if its possible to structure this query in a way that is cacheable with redis
+      # TODO: Although the parameters are checked before_action for the correct format
+      # (date must be UNIX epoch format, so an integer and transformation to string is done where
+      # after checking that what we received is an int) its probably a good idea to
+      # add a call to .quote
+      # Like this: ActiveRecord::Base.connection.quote(value)
+
+      # TODO: See if its convenient to use ApplicationHelper#integer? here
+      start_date = connection.quote(start_day)
+      finish_date = connection.quote(end_day)
+      unique = group_rank_and_filter_sql_statement(connection, start_date,
+                                                   finish_date)
+
+      unique.each do |hash|
+        hash.each_pair { |_key, value| result_ids.push value }
+      end
+      result_ids
+    end
+
+    def group_rank_and_filter_sql_statement(connection, start_date, finish_date)
+      connection.execute(
+        "SELECT id FROM (
+            SELECT id, updated_at,
+                dense_rank() OVER (
+                    PARTITION BY value -> 'Listado' -> 0 -> 'CodigoExterno'
+                    ORDER BY value ->> 'FechaCreacion' DESC) as by_fecha_creacion
+            FROM results
+            WHERE f_cast_isots(value ->> 'FechaCreacion'::text) >= #{start_date}
+            AND f_cast_isots(value ->> 'FechaCreacion'::text) <= #{finish_date}
+        ) as q WHERE by_fecha_creacion < 2"
+      )
+    end
   end
 end

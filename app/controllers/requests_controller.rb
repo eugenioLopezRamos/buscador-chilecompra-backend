@@ -1,7 +1,6 @@
 require "#{Rails.root}/lib/licitacion_data.rb"
 # Handles requests for info from outside
 class RequestsController < ApplicationController
-  
   require 'redis'
   DEFAULT_ORDER_BY_FIELD = ["\'Listado\'", "\'0\'", "\'CodigoExterno\'"].freeze
   RESULT_LIMIT_AMOUNT = 200

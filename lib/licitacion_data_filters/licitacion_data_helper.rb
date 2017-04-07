@@ -1,6 +1,5 @@
 # Helper methods for LicitacionDataFilters
 module LicitacionDataHelper
-
   def default_dates
     {
       start_date: transform_date_format(Time.zone.now.to_i * 1000),
@@ -21,5 +20,4 @@ module LicitacionDataHelper
       rutProveedor: ["value -> 'Listado' -> 0 -> 'Items' -> 'Listado' -> 0 -> 'Adjudicacion' ->> 'RutProveedor' = ? ", param_data['rutProveedor']]
     }
   end
-
 end

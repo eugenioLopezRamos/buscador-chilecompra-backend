@@ -1,5 +1,5 @@
 # Prepares parameter values so they are valid
-# Eg remove "*" which is used only on the frontend to '' so it is ignored, 
+# Eg remove "*" which is used only on the frontend to '' so it is ignored,
 # applies the current date when alwaysToToday/alwaysFromToday is checked etc
 module LicitacionDataScrubber
   include ApplicationHelper
@@ -85,14 +85,13 @@ module LicitacionDataScrubber
 
   def palabras_clave_to_array(parameters)
     parameters['palabrasClave'] = [] if parameters['palabrasClave'].nil? ||
-                                       parameters['palabrasClave'].split(' ')
-                                                                 .empty?
+                                        parameters['palabrasClave'].split(' ')
+                                                                   .empty?
     unless parameters['palabrasClave'].empty?
       parameters['palabrasClave'] = parameters['palabrasClave']
-                                   .split(' ')
-                                   .map! { |palabra| "%#{palabra}%" }
+                                    .split(' ')
+                                    .map! { |palabra| "%#{palabra}%" }
     end
     parameters
   end
-
 end

@@ -7,6 +7,15 @@ AllCops:
     - 'vendor/**/*'
     - 'spec/fixtures/**/*'
     - 'tmp/**/*'
+    - 'test/mocks/*'
+    - 'log/*'
+    - 'db/*'
+    - 'db/**/*'
+    - 'config/*'
+    - 'config/**/*'
+    - 'bin/**'
+    - 'bin/*'
+    - 'Gemfile'
   TargetRubyVersion: 2.2
 
 Style/Encoding:

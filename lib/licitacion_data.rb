@@ -11,13 +11,12 @@ class LicitacionData
     palabras_clave_to_array(parameters)
     @parameters = parameters
     @limit = result_limit_amount
+    @filter_chain = prepare_filter_chain
+    @dates = determine_dates(parameters)
   end
 
   def filter
-
-    dates = determine_dates(@parameters)
-
-    total_results = get_total_results(dates)
+    total_results = get_total_results(@dates)
     filtered_by_palabras_clave = filter_by_palabras_clave(total_results, @parameters['palabrasClave'])
 
     offset = calculate_offset(@parameters['offset'], filtered_by_palabras_clave.length, @limit)
@@ -29,6 +28,8 @@ class LicitacionData
   end
 
   def prepare_filter_chain
+    # Prepares filter for codigoLicitacion, organismoPublico, rutProveedor
+    # estadoLicitacion (which are fields in the "value" column (JSON))
     json_routes = get_json_param_routes(@parameters)
     @filter_chain = []
     @parameters.each_pair do |key, value|
@@ -38,8 +39,7 @@ class LicitacionData
   end
 
   def get_total_results(dates)
-    results = get_latest_results_per_ids(dates[:start_date], dates[:end_date])
-    prepare_filter_chain
+    results = Result.get_latest_results_per_ids(dates[:start_date], dates[:end_date])
     return results if @filter_chain.empty?
     @filter_chain.reduce(results) { |acc, elem| acc.send('where', elem) }
   end
@@ -66,5 +66,4 @@ class LicitacionData
     end
     results.where("#{@descripcion_query} OR #{@nombre_query}", *palabras_clave, *palabras_clave)
   end
-
 end
