@@ -11,24 +11,36 @@ class SearchesController < ApplicationController
   end
 
   def create
-    response = create_search(search_params)
+    response = { successful: [], not_uniq: [], errors: [] }
+    populate_response(response, search_params[:name])
     render json: json_message(info: { "guardado con éxito": response[:successful] },
-                              errors: { "repetidos": response[:not_uniq], "errores": response[:errors] },
+                              errors: { "repetidos": response[:not_uniq],
+                                        "errores": response[:errors] },
                               extra: { searches: show_searches(current_user) })
   end
 
   def update
-    render json: update_search(search_update_params)
+    search = search_update_params
+    name = search[:searchName]
+    current_user.searches
+                .find_by(name: name)
+                .update_attributes(value: search[:newValues], name: name)
+
+    render json: json_message(info: { "Modificado exitosamente": [name] },
+                              extra: { searches: show_searches(current_user) })
+
+  rescue ActiveRecord::ActiveRecordError
+    render json: json_message(errors: 'Error al guardar cambios, por favor intentalo de nuevo'), status: 500
   end
 
   def destroy
-    result = destroy_search(search_delete_params)
-
-    if result[:successful?]
-      return render json: json_message(info: { "Borrado exitosamente": [result[:name]] },
+    search = Search.find_by(user_id: current_user.id,
+                            id: search_delete_params[:id])
+    if search.destroy
+      return render json: json_message(info: { "Borrado exitosamente": [search.name] },
                                        extra: { searches: show_searches(current_user) })
     end
-    render json: json_message(errors: { "Fallido": [result[:name]] },
+    render json: json_message(errors: { "Fallido": [search.name] },
                               extra: { searches: show_searches(current_user) }), status: 500
   end
 

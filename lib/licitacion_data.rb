@@ -1,6 +1,8 @@
 require "#{Rails.root}/lib/licitacion_data_filters/licitacion_data_helper.rb"
 require "#{Rails.root}/lib/parameters_scrubbers/licitacion_data_scrubber.rb"
-
+# TODO: Maybe make the filters more modular? like partial application of
+# @filter_chain (including a reader so you can know what filters are there and
+# in what position etc)
 # Misc functions use for requests controller including logic
 class LicitacionData
   include LicitacionDataHelper
