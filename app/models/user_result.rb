@@ -40,19 +40,20 @@ class UserResult < ApplicationRecord
     end
   end
 
-  def self.subscribe_user_to_result(user, result_id, name)
+  def self.subscribe_user_to_result(user, result_id, codigo_externo, name)
     # Search if the user is already subscribed to result_id
-    @codigo_externo = Result.find(result_id).codigo_externo
-    @all_ids_with_codigo_externo = Result.all_with_codigo_externo(@codigo_externo).pluck('id')
-    # Returns the ids of the results with CodigoExterno == @codigo_externo
+
+    @all_ids_with_codigo_externo = Result
+                                   .all_with_codigo_externo(codigo_externo)
+                                   .pluck('id')
+    # Returns the ids of the results with CodigoExterno == codigo_externo
     @user_subscriptions_to_codigo_externo = user.subscriptions.values.select { |value| @all_ids_with_codigo_externo.include? value }
 
     # If there are more than zero, the same CodigoExterno is already subscribed to!
     if !@user_subscriptions_to_codigo_externo.empty?
-
       @nombre_suscripcion = user.subscriptions.key(@user_subscriptions_to_codigo_externo[0])
       # TODO: Fix in controller too (Use a more appropiate error, ActiveRecord::RecordInvalid doesnt work as expected)
-      raise ArgumentError, "Ya estás suscrito a la licitacion de código externo #{@codigo_externo} (Nombre suscripción: #{@nombre_suscripcion})"
+      raise ArgumentError, "Ya estás suscrito a la licitacion de código externo #{codigo_externo} (Nombre suscripción: #{@nombre_suscripcion})"
     else
       create(user_id: user.id, result_id: result_id, subscribed: true, subscription_name: name)
     end

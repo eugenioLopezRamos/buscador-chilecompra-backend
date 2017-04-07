@@ -21,14 +21,13 @@ class MailerControllerTest < ActionDispatch::IntegrationTest
     read_instance_var = ->(name) { @kontroller.instance_variable_get("@#{name}".to_sym) }
 
     user = read_instance_var.call('user')
-    name = read_instance_var.call('name')
     greeting = read_instance_var.call('greeting')
     subject = read_instance_var.call('subject')
     message = read_instance_var.call('message')
     message_html = read_instance_var.call('message_html')
 
     assert_equal @user, user
-    assert_equal @user.name, name
+    assert_equal @user.name, user.name
     assert_equal 'Hola!', greeting
     assert_equal 'Buscador Chilecompra - Cambio en estado de licitacion', subject
     assert_equal @message, message

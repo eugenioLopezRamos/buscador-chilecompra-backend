@@ -70,7 +70,9 @@ class UserResultTest < ActiveSupport::TestCase
     # use Result.last.value as a mock since it checks codigo_externo in the value json
     mock_result = Result.create(value: Result.last.value)
     new_subscription_name = 'new sub name'
-    UserResult.subscribe_user_to_result(@user, mock_result.id, new_subscription_name)
+    codigo_externo = Result.find(mock_result.id).codigo_externo
+
+    UserResult.subscribe_user_to_result(@user, mock_result.id, codigo_externo, new_subscription_name)
 
     assert UserResult.user_subscribed_to? @user, mock_result.id
   end

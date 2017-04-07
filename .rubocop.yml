@@ -24,14 +24,14 @@ Rails/FindEach:
   StyleGuide: 'https://github.com/bbatsov/rails-style-guide#find-each'
   Enabled: true
 
-Lint/AmbiguousBlockAssociation:
-  Exclude:
-    - 'spec/**/*.rb'
+# Lint/AmbiguousBlockAssociation:
+#   Exclude:
+#     - 'spec/**/*.rb'
 
-Lint/UselessAccessModifier:
-  MethodCreatingMethods:
-    - 'def_matcher'
-    - 'def_node_matcher'
+# Lint/UselessAccessModifier:
+#   MethodCreatingMethods:
+#     - 'def_matcher'
+#     - 'def_node_matcher'
 
 Metrics/BlockLength:
   Exclude:

@@ -77,28 +77,26 @@ class Result < ApplicationRecord
     # TODO: See if its convenient to use ApplicationHelper#integer? here
     start_date = connection.quote(start_day)
     finish_date = connection.quote(end_day)
-
-    # f_cast_isots defined in migration
-    # 20170321210651_add_fecha_creacion_index_to_results
-    unique = connection.execute(
-      "
-      SELECT id FROM (
-          SELECT id, updated_at,
-              dense_rank() OVER (
-                  PARTITION BY value -> 'Listado' -> 0 -> 'CodigoExterno'
-                  ORDER BY value ->> 'FechaCreacion' DESC
-                  ) as by_fecha_creacion
-          FROM results
-          WHERE f_cast_isots(value ->> 'FechaCreacion'::text) >= #{start_date}
-          AND f_cast_isots(value ->> 'FechaCreacion'::text) <= #{finish_date}
-      ) as q
-      WHERE by_fecha_creacion < 2
-      "
-    )
+    unique = group_rank_and_filter_sql_statement(connection, start_date,
+                                                 finish_date)
 
     unique.each do |hash|
       hash.each_pair { |_key, value| result_ids.push value }
     end
     result_ids
+  end
+
+  def self.group_rank_and_filter_sql_statement(connection, start_date, finish_date)
+    connection.execute(
+      "SELECT id FROM (
+          SELECT id, updated_at,
+              dense_rank() OVER (
+                  PARTITION BY value -> 'Listado' -> 0 -> 'CodigoExterno'
+                  ORDER BY value ->> 'FechaCreacion' DESC) as by_fecha_creacion
+          FROM results
+          WHERE f_cast_isots(value ->> 'FechaCreacion'::text) >= #{start_date}
+          AND f_cast_isots(value ->> 'FechaCreacion'::text) <= #{finish_date}
+      ) as q WHERE by_fecha_creacion < 2"
+    )
   end
 end

@@ -44,7 +44,8 @@ class User < ActiveRecord::Base
   end
 
   def subscribe_to_result(result_id, name)
-    UserResult.subscribe_user_to_result(self, result_id, name)
+    codigo_externo = Result.find(result_id).codigo_externo
+    UserResult.subscribe_user_to_result(self, result_id, codigo_externo, name)
   end
 
   def update_result_subscription(old_name, new_name)
@@ -65,6 +66,10 @@ class User < ActiveRecord::Base
 
   def destroy_all_notifications
     Notification.delete_all_notifications_of_user(self)
+  end
+
+  def subscription_name_by_codigo_externo(codigo_externo)
+    subscriptions_by_codigo_externo.key(codigo_externo)
   end
 
   private

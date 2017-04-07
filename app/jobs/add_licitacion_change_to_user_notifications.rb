@@ -53,26 +53,22 @@ class AddLicitacionChangeToUserNotifications
     current_messages = Redis.current.hgetall('notification_emails')
     # TODO: try to refactor this? eg subscription_name to model?
     users.each do |user_id|
-      subscription_name = User
-                          .find(user_id)
-                          .subscriptions_by_codigo_externo
-                          .key(codigo_externo)
+      subscription_name = User.find(user_id).subscription_name_by_codigo_externo(codigo_externo)
       message = "Cambios en la suscripción #{subscription_name} (cod.#{codigo_externo})"
-      notification = create_each_notification(user_id, message)
-      if notification.save
-        user_message = create_user_message(user_id, current_messages, message)
-        current_messages[user_id.to_s] = user_message
-      else
-        log_save_failure(user_id, codigo_externo)
-      end
+      create_each_notification(user_id, message, current_messages)
     end
     Redis.current.hmset('notification_emails', *current_messages)
   end
 
-  def self.create_each_notification(user_id, message)
+  def self.create_each_notification(user_id, message, current_messages)
     notification = Notification.create(user_id: user_id,
                                        message: message)
-    notification
+    if notification.save
+      user_message = create_user_message(user_id, current_messages, message)
+      current_messages[user_id.to_s] = user_message
+    else
+      log_save_failure(user_id, codigo_externo)
+    end
   end
 
   def self.create_user_message(user_id, current_messages, message)
