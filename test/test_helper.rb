@@ -18,17 +18,11 @@ class ActiveSupport::TestCase
     token = @response.headers['access-token']
     expiry = @response.headers['expiry']
     client = @response.headers['client']
-    # Otherwise you might get a different number of assertions on each test
-    # assert_response 200
-
-    headers = {
-      'access-token' => token,
-      'token-type' => 'Bearer',
-      'client' => client,
-      'uid' => @user.uid,
-      'expiry' => expiry,
-      "Content-Type": 'application/json',
-      "accept": 'application/json'
+    # these are headers
+    {
+      'access-token' => token, 'token-type' => 'Bearer',
+      'client' => client, 'uid' => @user.uid, 'expiry' => expiry,
+      'Content-Type': 'application/json', 'accept': 'application/json'
     }
   end
 

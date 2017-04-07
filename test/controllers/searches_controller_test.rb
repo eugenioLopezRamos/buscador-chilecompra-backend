@@ -225,7 +225,6 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
 
   test 'Destroy search raises when given unpermitted params' do
     search_id = Search.first.id
-    search_name = Search.first.name
     delete_search_params = {
       search: { id: search_id, whatever: 'param data goes here' }
     }
@@ -239,7 +238,6 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
 
   test 'Destroy search raises when given no user auth headers' do
     search_id = Search.first.id
-    search_name = Search.first.name
     delete_search_params = {
       search: { id: search_id }
     }

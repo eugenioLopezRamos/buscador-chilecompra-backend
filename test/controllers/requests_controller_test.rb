@@ -139,7 +139,6 @@ class RequestsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'Returns an error when passing random parameters to chilecompra_misc_data' do
-    headers = sign_in_example_user
     get '/chilecompra_misc_data?random_param=random_value', headers: @headers
     assert_response 422
     expected_response = { message: { errors: 'Parámetros inválidos' } }.to_json

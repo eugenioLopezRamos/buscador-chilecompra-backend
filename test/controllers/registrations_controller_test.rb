@@ -11,7 +11,6 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'When account update fails, get a customized error message' do
-    old_name = @user.name
     put '/auth/', params: { current_password: 'wrongpassword', name: 'AnotherName' }.to_json, headers: @headers
 
     expected_response = { message: { errors: 'No se pudo actualizar. Ingresaste tu contraseña?' } }
