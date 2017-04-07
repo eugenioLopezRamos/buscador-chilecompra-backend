@@ -1,21 +1,22 @@
+# Handles requests for info from outside
 class RequestsController < ApplicationController
   include RequestsHelper
   require 'json'
   require 'redis'
   DEFAULT_ORDER_BY_FIELD = ["\'Listado\'", "\'0\'", "\'CodigoExterno\'"].freeze
 
-  before_action :valid_get_info_params?, only: :get_info
-  before_action :verify_correct_date_format, only: :get_info
-  before_action :verify_valid_always_from?, only: :get_info
-  before_action :verify_valid_offset_format, only: :get_info
-  before_action :valid_get_misc_info_params?, only: :get_misc_info
+  before_action :valid_licitacion_data_params?, only: :licitacion_data
+  before_action :verify_correct_date_format, only: :licitacion_data
+  before_action :verify_valid_always_from?, only: :licitacion_data
+  before_action :verify_valid_offset_format, only: :licitacion_data
+  before_action :valid_chilecompra_misc_data_params?, only: :chilecompra_misc_data
   before_action :authenticate_user!
 
   def initialize
     @result_limit_amount = 200
   end
 
-  def get_info
+  def licitacion_data
     string_params = stringify_param_values(params)
     remove_wildcards(string_params)
     result = filter_results(string_params, @result_limit_amount)
@@ -26,7 +27,7 @@ class RequestsController < ApplicationController
     render json: json_message_to_frontend(errors: except), status: 422
   end
 
-  def get_misc_info
+  def chilecompra_misc_data
     # TODO: Make this a single request on the front end and a .each do block here
     if %w(estados_licitacion organismos_publicos).include?(params[:info])
       return render json: Redis.current.hgetall(params[:info])
@@ -51,7 +52,7 @@ class RequestsController < ApplicationController
       # transformed date = "YYYY-MM-DD")
       split_date = transformed_date.split('-')
 
-      return transformed_date if Date.valid_date? *split_date.map(&:to_i)
+      return transformed_date if Date.valid_date?(*split_date.map(&:to_i))
 
       raise ArgumentError, 'Fecha en formato inválido, por favor intentar de nuevo.'
     end
@@ -85,25 +86,18 @@ class RequestsController < ApplicationController
     raise ArgumentError, "Orden debe ser 'ascending' (menor a mayor) o 'descending' (mayor a menor)"
   end
 
-  def valid_get_info_params?
-    # TODO: Make these required
+  def valid_licitacion_data_params?
     params.permit(
-      :codigoLicitacion, :estadoLicitacion,
-      :organismoPublico, :palabrasClave,
-      :rutProveedor,
-      :startDate, :alwaysFromToday,
-      :endDate, :alwaysToToday,
-      :offset,
-      order_by: [
-        :order,
-        fields: []
-      ]
+      :codigoLicitacion, :estadoLicitacion, :organismoPublico,
+      :palabrasClave, :rutProveedor, :startDate, :alwaysFromToday,
+      :endDate, :alwaysToToday, :offset,
+      order_by: [:order, fields: []]
     )
   rescue ActionController::UnpermittedParameters, ActionController::ParameterMissing
     render json: json_message_to_frontend(errors: 'Parámetros inválidos'), status: 422
   end
 
-  def valid_get_misc_info_params?
+  def valid_chilecompra_misc_data_params?
     params.require(:info)
 
   rescue ActionController::ParameterMissing, ActionController::ParameterMissing
@@ -122,7 +116,7 @@ class RequestsController < ApplicationController
   def palabras_clave_query_base
     ->(field_name) { return "LOWER(value -> 'Listado' -> 0 ->> #{ActiveRecord::Base.connection.quote(field_name)}) LIKE LOWER(?)" }
   end
-  
+
   def default_dates
     {
       start_date: transform_date_format(Time.zone.now.to_i * 1000),

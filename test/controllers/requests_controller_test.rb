@@ -15,7 +15,7 @@ class RequestsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'correctly returns chilecompra data from the database when requested' do
-    get_info_params = {
+    licitacion_data_params = {
       startDate: 1000,
       alwaysFromToday: false,
       alwaysToToday: false,
@@ -28,8 +28,8 @@ class RequestsControllerTest < ActionDispatch::IntegrationTest
       }
     }
 
-    run_the_test = lambda do |get_info_params|
-      post '/get_info', params: get_info_params.to_json, headers: @headers
+    run_the_test = lambda do |licitacion_data_params|
+      post '/licitacion_data', params: licitacion_data_params.to_json, headers: @headers
 
       parsed_response = JSON.parse(@response.body)
 
@@ -37,10 +37,10 @@ class RequestsControllerTest < ActionDispatch::IntegrationTest
       # "count" key
       assert_equal Result.last_per_codigo_externo.count, parsed_response['count']
 
-      offset = get_info_params[:offset] - 1 < 0 ? 0 : get_info_params[:offset]
+      offset = licitacion_data_params[:offset] - 1 < 0 ? 0 : licitacion_data_params[:offset]
       limit = assigns(:result_limit_amount)
-      start_date = transform_date_format(get_info_params[:startDate])
-      finish_date = transform_date_format(get_info_params[:endDate])
+      start_date = transform_date_format(licitacion_data_params[:startDate])
+      finish_date = transform_date_format(licitacion_data_params[:endDate])
 
       expected_codigos_externos = ActiveRecord::Base.connection.execute(
         "
@@ -96,9 +96,9 @@ class RequestsControllerTest < ActionDispatch::IntegrationTest
       assert_equal expected_codigos_externos - parsed_response_codigos_externos, []
     end
 
-    run_the_test.call(get_info_params)
-    get_info_params[:offset] = 200
-    run_the_test.call(get_info_params)
+    run_the_test.call(licitacion_data_params)
+    licitacion_data_params[:offset] = 200
+    run_the_test.call(licitacion_data_params)
   end
 
   test 'Correctly filters by dates' do
@@ -109,7 +109,7 @@ class RequestsControllerTest < ActionDispatch::IntegrationTest
     # as its timestamps
     offset_amount = 0
 
-    get_info_params = {
+    licitacion_data_params = {
       startDate: Time.parse('2017-01-05').to_i * 1000,
       alwaysFromToday: false,
       alwaysToToday: false,
@@ -121,12 +121,12 @@ class RequestsControllerTest < ActionDispatch::IntegrationTest
         order: 'descending'
       }
     }
-    post '/get_info', params: get_info_params.to_json, headers: @headers
+    post '/licitacion_data', params: licitacion_data_params.to_json, headers: @headers
     assert_response 200
     parsed_response = JSON.parse @response.body
 
-    start_date = transform_date_format(get_info_params[:startDate])
-    finish_date = transform_date_format(get_info_params[:endDate])
+    start_date = transform_date_format(licitacion_data_params[:startDate])
+    finish_date = transform_date_format(licitacion_data_params[:endDate])
 
     expected_response = ActiveRecord::Base.connection.execute("
                                                        SELECT *
@@ -162,7 +162,7 @@ class RequestsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'Correctly filters by palabras clave' do
-    get_info_params = {
+    licitacion_data_params = {
       startDate: 1,
       alwaysFromToday: false,
       alwaysToToday: false,
@@ -175,7 +175,7 @@ class RequestsControllerTest < ActionDispatch::IntegrationTest
       }
     }
 
-    post '/get_info', params: get_info_params.to_json, headers: @headers
+    post '/licitacion_data', params: licitacion_data_params.to_json, headers: @headers
 
     assert_response 200
     parsed_response = JSON.parse(@response.body)
@@ -202,7 +202,7 @@ class RequestsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'returns error when getting chilecompra data with unpermitted params' do
-    get_info_params = {
+    licitacion_data_params = {
       startDate: 1 * 1000,
       alwaysFromToday: false,
       alwaysToToday: false,
@@ -212,7 +212,7 @@ class RequestsControllerTest < ActionDispatch::IntegrationTest
       madeUpParam: 'Math.sqrt(-1)'
     }
 
-    post '/get_info', params: get_info_params.to_json, headers: @headers
+    post '/licitacion_data', params: licitacion_data_params.to_json, headers: @headers
 
     assert_response 422
     expected_response = { message: { errors: 'Parámetros inválidos' } }.to_json
@@ -220,26 +220,26 @@ class RequestsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'correctly returns estados_licitacion when requested' do
-    get '/get_misc_info?info=estados_licitacion', headers: @headers
+    get '/chilecompra_misc_data?info=estados_licitacion', headers: @headers
 
     assert_equal Redis.current.hgetall('estados_licitacion'), JSON.parse(@response.body)
   end
 
   test 'correctly returns organismos_publicos when requested' do
-    get '/get_misc_info?info=organismos_publicos', headers: @headers
+    get '/chilecompra_misc_data?info=organismos_publicos', headers: @headers
     assert_equal Redis.current.hgetall('organismos_publicos'), JSON.parse(@response.body)
   end
 
-  test 'Returns an error when passing random parameters to get_misc_info' do
+  test 'Returns an error when passing random parameters to chilecompra_misc_data' do
     headers = sign_in_example_user
-    get '/get_misc_info?random_param=random_value', headers: @headers
+    get '/chilecompra_misc_data?random_param=random_value', headers: @headers
     assert_response 422
     expected_response = { message: { errors: 'Parámetros inválidos' } }.to_json
     assert_equal @response.body, expected_response
   end
 
   test 'Returns an error when passing some other value in the :info param' do
-    get '/get_misc_info?info=this_is_not_valid', headers: @headers
+    get '/chilecompra_misc_data?info=this_is_not_valid', headers: @headers
 
     assert_response 422
     expected_response = { message: { errors: 'Parámetros inválidos' } }.to_json

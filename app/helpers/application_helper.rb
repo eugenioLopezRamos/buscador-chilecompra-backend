@@ -13,7 +13,7 @@ module ApplicationHelper
 
     hsh
   end
-  
+
   def day_in_milliseconds
     hours = 24
     minutes = 60
@@ -49,5 +49,4 @@ module ApplicationHelper
                                                  .sort { |a, z| a <=> z }
     Result.where(id: latest_result_ids_per_codigo_externo)
   end
-
 end

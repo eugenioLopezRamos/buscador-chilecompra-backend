@@ -1,3 +1,4 @@
+# Returns devise token auth session info wrapped under key [:data]
 class SessionsController < DeviseTokenAuth::SessionsController
   def new; end
 

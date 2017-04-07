@@ -6,19 +6,19 @@ Rails.application.routes.draw do
 
 
   #To be modified too, should get from cached request/db entry/whatever I decide, but not like it currently is
-  get '/get_misc_info', to: "requests#get_misc_info"
+  get '/chilecompra_misc_data', to: "requests#chilecompra_misc_data"
 
   #This one fetches from the Chilecompra API. (Will not make it into prod, its unscalable. Will instead use the resque cronjobs + DB for this.)
  # get '/get_chilecompra_data', to: "requests#get_chilecompra_data"
  
   #this one gets results from the DB. Will replace get_chilecompra_data
   #TODO: bad name, too general. change here and in frontend
-  post '/get_info', to: "requests#get_info"
+  post '/licitacion_data', to: "requests#licitacion_data"
 
 
   #CRUD for user_results
   #TODO: resources: user_results, or however it's done.
-  #Tambien se puede cambiar a algo como /results => requests#get_info (reemplazando el requests controller)
+  #Tambien se puede cambiar a algo como /results => requests#licitacion_data (reemplazando el requests controller)
   # y luego /results/user, to: user_results#show para hacerlo mas consistente
 
  # get '/results', to: redirect('/results/subscriptions')

@@ -1,27 +1,20 @@
+# Misc helper functions for SearchesController
 module SearchesHelper
   def show_searches(user)
     searches = user.searches.pluck(*show_fields)
-    hashify.call(show_fields, 0, searches, {}).delete_if { |_k, v| v == [nil] }
+    hashify.call(show_fields.flatten, 0, searches.flatten, {}).delete_if { |_key, value| value == [nil] }
   end
 
   def create_search(search)
-    # TODO: just change the hashes to arrays probably.
-    @successful = {}
-    @not_uniq = {}
-    @errors = {}
+    search_name = search[:name]
+    response = { successful: [], not_uniq: [], errors: [] }
     begin
-      new_search = current_user.searches.create(value: search[:value], name: search[:name])
-      if new_search.save
-        @successful[search[:name]] = true
-      else
-        @errors[search[:name]] = true
-      end
+      new_search = current_user.searches.create(value: search_name, name: search_name)
+      new_search.save ? response[:successful].push(search_name) : response[:errors].push(search_name)
     rescue ActiveRecord::RecordNotUnique
-      @not_uniq[search[:name]] = true
+      response[:not_uniq].push(search_name)
     end
-    json_message_to_frontend(info: { "guardado con éxito": @successful.keys },
-                             errors: { "repetidos": @not_uniq.keys, "errores": @errors.keys },
-                             extra: { searches: show_searches(current_user) })
+    response
   end
 
   def update_search(search)
@@ -40,20 +33,7 @@ module SearchesHelper
     id = search[:id]
 
     search = Search.find_by(user_id: current_user.id, id: id)
-    name = search.name
-
-    if search.destroy
-      return json_message_to_frontend(
-        info: { "Borrado exitosamente": [name] },
-        extra: { searches: show_searches(current_user) }
-      )
-    else
-      return json_message_to_frontend(
-        errors: { "Fallido": [name] },
-        extra: { searches: show_searches(current_user) }
-      ), status: 500
-
-    end
+    { successful?: search.destroy, name: search.name }
   end
 
   private
@@ -63,21 +43,22 @@ module SearchesHelper
   end
 
   def hashify
-    # TODO: Document this in detail. TL;DR => makes a hash like {"name": [name1, name2, name3...], "value": [{value1...}, {value2...}], "id":[id1, id2, id3...]}
+    # TODO: Document this in detail. TL;DR
+    # => makes a hash like
+    # {"name": [name1, name2, name3...],
+    #  "value": [{value1...}, {value2...}],
+    #  "id":[id1, id2, id3...]
+    #  }
     lambda do |*show_fields, start_index, plucked_array, new_hash|
-      len = show_fields.flatten.length
-      batch = plucked_array.flatten.slice(start_index, len)
+      fields_length = show_fields.length
+      batch = plucked_array.slice(start_index, fields_length)
 
-      show_fields.flatten.each_with_index do |key, i|
-        new_hash[key] = if !new_hash[key]
-                          [].push(batch[i])
-                        else
-                          new_hash[key].push(batch[i])
-                        end
+      show_fields.each_with_index do |key, i|
+        batch_value = batch[i]
+        new_hash[key] = new_hash[key] ? new_hash[key].push(batch_value) : [].push(batch_value)
       end
-      new_index = start_index + len
-
-      return new_hash if new_index >= plucked_array.flatten.length
+      new_index = start_index + fields_length
+      return new_hash if new_index >= plucked_array.length
       hashify.call(show_fields, new_index, plucked_array, new_hash)
     end
   end
