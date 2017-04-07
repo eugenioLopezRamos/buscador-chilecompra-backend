@@ -38,7 +38,7 @@ class UserResultsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response 200
     assert_equal @response.body, json_message(info: 'Suscripción guardada exitosamente',
-                                                          extra: { subscriptions: @user.subscriptions }).to_json
+                                              extra: { subscriptions: @user.subscriptions }).to_json
   end
 
   test 'Create raises when given invalid params' do
@@ -116,7 +116,7 @@ class UserResultsControllerTest < ActionDispatch::IntegrationTest
     assert_not_equal old_subscription, UserResult.first.to_json
     assert_response 200
     assert_equal @response.body, json_message(info: 'Actualizado exitosamente',
-                                                          extra: { subscriptions: @user.subscriptions }).to_json
+                                              extra: { subscriptions: @user.subscriptions }).to_json
   end
 
   test 'Update raises when given invalid params' do
@@ -174,7 +174,7 @@ class UserResultsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response 200
     assert_equal @response.body, json_message(info: 'Suscripción cancelada exitosamente',
-                                                          extra: { subscriptions: @user.subscriptions }).to_json
+                                              extra: { subscriptions: @user.subscriptions }).to_json
   end
 
   test 'Destroy raises when given invalid params' do
