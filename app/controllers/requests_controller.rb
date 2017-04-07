@@ -44,7 +44,7 @@ class RequestsController < ApplicationController
     # dates = unix epoch format
     dates = [params[:startDate], params[:endDate]]
     dates.each do |date|
-      unless is_integer?(date)
+      unless integer?(date)
         raise ArgumentError, 'Fecha en formato inválido, por favor intentar de nuevo.'
       end
 
@@ -63,7 +63,7 @@ class RequestsController < ApplicationController
     offset_value = offset
     offset_value = 0 unless offset_value # || offset_value.empty?
 
-    unless is_integer?(offset_value)
+    unless integer?(offset_value)
       raise ArgumentError, 'Offset inválido (Debe ser número entero)'
     end
     offset
@@ -72,7 +72,7 @@ class RequestsController < ApplicationController
   def verify_valid_always_from?
     values = [params[:alwaysFromToday], params[:alwaysToToday]]
     values.each do |value|
-      unless is_boolean? value
+      unless boolean? value
         raise ArgumentError, "Valor 'Siempre desde/siempre hasta' inválido (debe ser booleano)"
       end
     end

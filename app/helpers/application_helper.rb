@@ -1,3 +1,4 @@
+# Misc useful functions used several times
 module ApplicationHelper
   def json_message_to_frontend(info: nil, errors: nil, extra: {})
     hsh = { "message": { "info": info, "errors": errors } }
@@ -32,7 +33,7 @@ module ApplicationHelper
     Time.at(date.to_i / 1000).strftime('%Y-%m-%d')
   end
 
-  def is_integer?(string)
+  def integer?(string)
     Integer(string)
   rescue ArgumentError
     false
@@ -40,7 +41,7 @@ module ApplicationHelper
     false
   end
 
-  def is_boolean?(value)
+  def boolean?(value)
     [true, 'true', false, 'false'].include? value
   end
 

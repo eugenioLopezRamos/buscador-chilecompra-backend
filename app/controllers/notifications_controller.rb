@@ -21,7 +21,7 @@ class NotificationsController < ApplicationController
   private
 
   def destroy_notification_params
-    unless is_integer? params['notification']['notification_id']
+    unless integer? params['notification']['notification_id']
       raise ArgumentError, 'Id debe ser un número entero'
     end
 

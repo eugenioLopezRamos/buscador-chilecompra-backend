@@ -94,7 +94,7 @@ class UserResultsController < ApplicationController
   end
 
   def valid_result_history_params
-    unless is_integer? params[:id]
+    unless integer? params[:id]
       raise ArgumentError, 'Id de resultado debe ser un número entero'
     end
     params.permit(:id).require(:id)

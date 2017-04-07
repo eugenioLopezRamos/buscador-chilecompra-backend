@@ -1,3 +1,4 @@
+# Notifications for users
 class Notification < ApplicationRecord
   belongs_to :user
   # add actions here instead of just creating htem on the controller/job

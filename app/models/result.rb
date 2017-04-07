@@ -1,3 +1,4 @@
+# Data that is fetched from the chilecompra API
 class Result < ApplicationRecord
   # Name of the Redis set for unique codigo_externo s
   CODIGOS_EXTERNOS_SET = :codigos_externos
@@ -6,7 +7,7 @@ class Result < ApplicationRecord
   has_many :user_results, dependent: :delete_all
   has_many :user, through: :user_results
 
-  def self.get_all_unique_codigo_externo_from_db
+  def self.all_unique_codigo_externo_from_db
     connection = ActiveRecord::Base.connection
     # a tuple = key value pair such as {"\"column\"": "\"111-AAA-BBB\""}
     # tuples = array of all unique CodigoExternos
@@ -25,11 +26,11 @@ class Result < ApplicationRecord
     cached_codigos_externos = Redis.current.smembers(CODIGOS_EXTERNOS_SET)
 
     return cached_codigos_externos unless cached_codigos_externos.empty? || force_db == true
-    get_all_unique_codigo_externo_from_db
+    all_unique_codigo_externo_from_db
   end
 
   def self.set_all_unique_codigo_externo_to_redis
-    codigos = get_all_unique_codigo_externo_from_db
+    codigos = all_unique_codigo_externo_from_db
     codigos.each do |codigo|
       Redis.current.SADD(CODIGOS_EXTERNOS_SET, codigo)
     end
@@ -73,7 +74,7 @@ class Result < ApplicationRecord
     # add a call to .quote
     # Like this: ActiveRecord::Base.connection.quote(value)
 
-    # TODO: See if its convenient to use ApplicationHelper#is_integer? here
+    # TODO: See if its convenient to use ApplicationHelper#integer? here
     start_date = connection.quote(start_day)
     finish_date = connection.quote(end_day)
 

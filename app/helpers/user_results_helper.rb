@@ -1,3 +1,4 @@
+# Utility functions for user results controller
 module UserResultsHelper
   # TODO: refactor this method...
   # check if it can be made easier with similar performance by using SQL group by in ActiveRecord
@@ -12,7 +13,7 @@ module UserResultsHelper
     # gets only each unique name, which we will use to group
     @names = @resp.map { |result| result[0] }.uniq
     @names.map do |name|
-      @response[name] = @resp.select { |value| value[0] === name }
+      @response[name] = @resp.select { |value| value[0] == name }
                              .map { |value| value[1] }
     end
 

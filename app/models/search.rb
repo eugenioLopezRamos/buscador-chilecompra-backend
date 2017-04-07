@@ -6,6 +6,7 @@ class Search < ApplicationRecord
   before_create :set_now_as_name_if_nil
 
   private
+
   def set_now_as_name_if_nil
     self.name = Time.zone.now unless name
   end

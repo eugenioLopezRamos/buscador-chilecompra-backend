@@ -110,7 +110,7 @@ module RequestsHelper
   def order_by_fields(fields_array)
     return ['value'].concat RequestsController::DEFAULT_ORDER_BY_FIELD if fields_array.empty?
     fields = fields_array.map do |element|
-      if is_integer? element
+      if integer? element
         element.to_s
       else
         ActiveRecord::Base.connection.quote(element)

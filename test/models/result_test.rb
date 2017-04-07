@@ -10,7 +10,7 @@ class ResultTest < ActiveSupport::TestCase
   end
 
   test 'Should return all unique codigo_externos from db' do
-    codigos = Result.get_all_unique_codigo_externo_from_db
+    codigos = Result.all_unique_codigo_externo_from_db
 
     query_result = @connection.execute('SELECT DISTINCT "results"."value"::json#>>\'{Listado,0,CodigoExterno}\' AS "codigo_externo" FROM "results"')
 
@@ -29,7 +29,7 @@ class ResultTest < ActiveSupport::TestCase
 
   test 'Should get all codigo externos from redis' do
     # Tests if the ones from redis are the same as the ones from the db
-    codigos_from_db = Result.get_all_unique_codigo_externo_from_db
+    codigos_from_db = Result.all_unique_codigo_externo_from_db
     codigos_from_redis = Result.get_all_unique_codigo_externo(force_db: false)
 
     assert_equal codigos_from_db - codigos_from_redis, []
@@ -45,11 +45,11 @@ class ResultTest < ActiveSupport::TestCase
 
     # Redis.current... minus Result.get_all.. = [] => They're equal
     # Another option would be sorting them first
-    assert_equal Redis.current.smembers(CODIGOS_EXTERNOS_SET) - Result.get_all_unique_codigo_externo_from_db, []
+    assert_equal Redis.current.smembers(CODIGOS_EXTERNOS_SET) - Result.all_unique_codigo_externo_from_db, []
   end
 
   test 'Should show a results history (all records with codigo_externo = result.codigo_externo)' do
-    unique_codigos_externos = Result.get_all_unique_codigo_externo_from_db
+    unique_codigos_externos = Result.all_unique_codigo_externo_from_db
     # Select a codigo_externo to test
     codigo_externo = unique_codigos_externos[(unique_codigos_externos.length / 2).floor]
 
