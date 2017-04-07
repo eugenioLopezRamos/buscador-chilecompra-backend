@@ -1,6 +1,7 @@
+require "#{Rails.root}/lib/licitacion_data.rb"
 # Handles requests for info from outside
 class RequestsController < ApplicationController
-  include RequestsHelper
+  
   require 'redis'
   DEFAULT_ORDER_BY_FIELD = ["\'Listado\'", "\'0\'", "\'CodigoExterno\'"].freeze
   RESULT_LIMIT_AMOUNT = 200
@@ -12,9 +13,9 @@ class RequestsController < ApplicationController
   before_action :authenticate_user!
 
   def licitacion_data
-    string_params = stringify_param_values(params)
-    remove_wildcards(string_params)
-    result = filter_results(string_params, RESULT_LIMIT_AMOUNT)
+    # string_params = stringify_param_values(params)
+    # remove_wildcards(string_params)
+    result = LicitacionData.new(params, RESULT_LIMIT_AMOUNT).filter
     # renders => {results: [{json1}, {json2}, ...{jsonN}], count: "200", limit: "200"}
     render json: result
   rescue ArgumentError => except

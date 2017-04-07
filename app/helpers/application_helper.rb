@@ -23,11 +23,6 @@ module ApplicationHelper
     hours * minutes * seconds * thousand
   end
 
-  def stringify_param_values(parameters)
-    param_data = {}
-    parameters.each_pair { |k, v| param_data[k] = v.to_s }
-  end
-
   def transform_date_format(date)
     # Need to divide the MomentJS date  by 1000 to get the correct one.
     Time.at(date.to_i / 1000).strftime('%Y-%m-%d')
