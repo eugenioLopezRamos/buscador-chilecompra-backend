@@ -39,6 +39,10 @@ class SearchesControllerTest < ActionDispatch::IntegrationTest
       errors: { "repetidos": [], "errores": [] },
       extra: { searches: show_searches(@user) }
     ).to_json
+
+    new_search = Search.find_by(user_id: @user.id,
+                                name: create_search_params[:search][:name]).value
+    assert_equal new_search.as_json, create_search_params[:search][:value].as_json
   end
 
   test 'Create search raises when given an invalid param' do

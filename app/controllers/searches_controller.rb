@@ -12,7 +12,7 @@ class SearchesController < ApplicationController
 
   def create
     response = { successful: [], not_uniq: [], errors: [] }
-    populate_response(response, search_params[:name])
+    populate_response(response, search_params)
     render json: json_message(info: { "guardado con éxito": response[:successful] },
                               errors: { "repetidos": response[:not_uniq],
                                         "errores": response[:errors] },
