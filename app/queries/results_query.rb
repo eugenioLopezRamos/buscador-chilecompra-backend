@@ -5,8 +5,8 @@ require "#{Rails.root}/app/queries/modules/results_query/results_query_scrubbers
 # in what position etc)
 # Misc functions use for requests controller including logic
 class ResultsQuery
-  include LicitacionDataHelper
-  include LicitacionDataScrubber
+  include ResultsQueryHelper
+  include ResultsQueryScrubber
 
   def initialize(parameters, result_limit_amount)
     remove_wildcards(parameters)

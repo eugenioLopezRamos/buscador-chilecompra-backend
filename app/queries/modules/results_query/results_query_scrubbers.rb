@@ -1,7 +1,7 @@
 # Prepares parameter values so they are valid
 # Eg remove "*" which is used only on the frontend to '' so it is ignored,
 # applies the current date when alwaysToToday/alwaysFromToday is checked etc
-module LicitacionDataScrubber
+module ResultsQueryScrubber
   include ApplicationHelper
 
   def remove_wildcards(parameters)

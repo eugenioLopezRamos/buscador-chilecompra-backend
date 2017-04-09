@@ -1,5 +1,5 @@
 # Helper methods for LicitacionDataFilters
-module LicitacionDataHelper
+module ResultsQueryHelper
   def default_dates
     {
       start_date: transform_date_format(Time.zone.now.to_i * 1000),
