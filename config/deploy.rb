@@ -80,11 +80,14 @@ namespace :deploy do
       upload! "#{ENV['HOME']}/workspaces/deploys/cc_rails/resque.god.production", "/home/#{fetch(:user)}/apps/cc_rails/current/config/resque.god"
     end
   end
-
-  desc 'Reboots the server'
+  # Surely there is a more..."elegant" way to do this?
+  desc 'Reboots the server 1 minute after deploy'
   task :reboot_server do
     on roles(:all) do
-      execute :shutdown, '-r now'
+      # no -r => system is powered off => lose your IP address.
+      execute(:sudo, 'shutdown -r +1', interaction_handler: {
+          "[sudo] password for #{ENV['CHILECOMPRA_RAILS_DEPLOY_USER']}: " => "#{ENV['DEPLOY_PASSWORD']}\n"
+        })
     end
   end
 

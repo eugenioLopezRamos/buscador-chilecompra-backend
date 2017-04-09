@@ -27,6 +27,8 @@ npm-debug.log
 #nginx
 /config/nginx.conf
 
+# not a secret but why keep it
+ssh-in.sh
 
 resque.god.production
 
