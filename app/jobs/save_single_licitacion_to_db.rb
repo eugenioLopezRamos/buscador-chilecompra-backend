@@ -6,7 +6,7 @@ class SaveSingleLicitacionToDB
 
   def self.perform(licitacion)
     licitacion_data = licitacion['Listado']
-    return if licitacion_data.empty?
+    return if licitacion_data.nil? || licitacion_data.empty?
     codigo_externo = licitacion_data[0]['CodigoExterno']
     log_save_attempt(codigo_externo)
     @previous_result_value = get_previous_result_value(codigo_externo)

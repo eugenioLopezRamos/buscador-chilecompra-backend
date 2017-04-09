@@ -19,16 +19,18 @@ class User < ActiveRecord::Base
   has_many :notifications, dependent: :delete_all
 
   def send_licitacion_change_email(message)
-    # Message is a string with \n as line delimiters, which mark each individual message
+    # Message is a string with \n as line delimiters, which mark each individual
+    # message
     MailerController.new.send_notification_email(self, message)
   end
 
   def all_related_data
-    @this_user = as_json
-    @this_user[:searches] = show_searches(self)
-    @this_user[:subscriptions] = subscriptions
-    @this_user[:notifications] = notifications
-    @this_user
+    {
+      user: as_json,
+      searches: show_searches(self),
+      subscriptions: subscriptions,
+      notifications: show_notifications
+    }
   end
 
   def subscriptions

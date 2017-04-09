@@ -14,15 +14,9 @@ Rails.application.routes.draw do
   # TODO: bad name, too general. change here and in frontend
   post '/licitacion_data', to: 'requests#licitacion_data'
 
-  # CRUD for user_results
-  # TODO: resources: user_results, or however it's done.
-  # Tambien se puede cambiar a algo como /results => requests#licitacion_data (reemplazando el requests controller)
-  # y luego /results/user, to: user_results#show para hacerlo mas consistente
-
-  # get '/results', to: redirect('/results/subscriptions')
-  # post '/results', to: "user_results#create_stored_result"
-  # put '/results', to: "user_results#update"
-  # delete '/results', to: "user_results#destroy"
+  #  Gets all of a user's related data (his/her user info, searches,
+  # notifications and stored results)
+  get '/user', to: 'users#all_related_data'
 
   # detail for a certain result.
   get '/results/history', to: 'user_results#show_history' # get all the results with a certain CodigoExterno

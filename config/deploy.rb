@@ -74,10 +74,26 @@ namespace :deploy do
     end
   end
 
+  desc 'Upload resque.god for production'
+  task :upload_resque_god do
+    on roles(:all) do
+      upload! "#{ENV['HOME']}/workspaces/deploys/cc_rails/resque.god.production", "/home/#{fetch(:user)}/apps/cc_rails/current/config/resque.god"
+    end
+  end
+
+  desc 'Reboots the server'
+  task :reboot_server do
+    on roles(:all) do
+      execute :shutdown, '-r now'
+    end
+  end
+
   before :starting,     :check_revision
   # after  :finishing,    :compile_assets
   after  :finishing,    :cleanup
-  after  :finishing,    :restart
+  after :finishing, :upload_resque_god
+  after :finishing, :reboot_server
+  # after  :finishing,    :restart
 end
 
 # ps aux | grep puma    # Get puma pid

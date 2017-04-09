@@ -1,4 +1,4 @@
-require "#{Rails.root}/lib/licitacion_data.rb"
+require "#{Rails.root}/app/queries/results_query.rb"
 # Handles requests for info from outside
 class RequestsController < ApplicationController
   require 'redis'
@@ -14,7 +14,7 @@ class RequestsController < ApplicationController
   def licitacion_data
     # string_params = stringify_param_values(params)
     # remove_wildcards(string_params)
-    result = LicitacionData.new(params, RESULT_LIMIT_AMOUNT).filter
+    result = ResultsQuery.new(params, RESULT_LIMIT_AMOUNT).filter
     # renders => {results: [{json1}, {json2}, ...{jsonN}], count: "200", limit: "200"}
     render json: result
   rescue ArgumentError => except

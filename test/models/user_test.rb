@@ -17,17 +17,14 @@ class UserTest < ActiveSupport::TestCase
                                            .as_json.first
   end
 
-  test 'Sends licitacion change email' do
-    # TODO!
-  end
-
   test 'Gets all data related to a user' do
-    expected_response = @user.as_json
+    expected_response = {}
+    expected_response[:user] = @user.as_json
     expected_response[:searches] = show_searches(@user)
     expected_response[:subscriptions] = @user.subscriptions
-    expected_response[:notifications] = @user.notifications
+    expected_response[:notifications] = @user.show_notifications
 
-    assert_equal expected_response, @user.all_related_data
+    assert_equal expected_response.as_json, @user.all_related_data.as_json
   end
 
   test "Gets a user's subscriptions" do
