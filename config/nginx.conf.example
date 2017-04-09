@@ -9,10 +9,10 @@
 # ├── repo
 # └── shared
 
-## This file should be located in /etc/nginx/sites-enabled/$APP_NAME_AS_FILE_NAME
+## This file should be located in /etc/nginx/sites-enabled/default
+## Your needs may differ though!
 
-
-upstream puma {
+upstream api {
   server unix:///$DEPLOY_DIR/shared/tmp/sockets/$CHILECOMPRA_RAILS_APP_NAME-puma.sock;
 }
 
@@ -23,72 +23,52 @@ server {
   # redirects to ssl domain
   server_name $DOMAIN_NAME.TLD $WWW.DOMAIN_NAME.TLD;
   return 301 https://$server_name$request_uri;
-
-
-  root $DEPLOY_DIR/current/public;
-  access_log $DEPLOY_DIR/current/log/nginx.access.log;
-  error_log $DEPLOY_DIR/current/log/nginx.error.log info;
-
-  location ^~ /assets/ {
-    gzip_static on;
-    expires max;
-    add_header Cache-Control public;
-  }
-
-
-
-  try_files $uri/index.html $uri @puma;
-  location @puma {
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header Host $http_host;
-    proxy_redirect off;
-
-    proxy_pass http://puma;
-  }
-
-  error_page 500 502 503 504 /500.html;
-  client_max_body_size 10M;
-  keepalive_timeout 10;
 }
 
 server {
-  
+  # ssl_config
   listen 443 ssl default_server;
   listen [::]:443 ssl default_server;
   include snippets/ssl-$DOMAIN_NAME.TLD.conf;
   include snippets/ssl-params.conf;
 
-          location ~ /.well-known {
-                allow all;
-        }
+  # The directory with your HTML/CSS/JS files
+  root /home/$DEPLY_USER/dist;
 
+  index index.html index.htm index.nginx-debian.html;
+  server_name _;
 
-  root $DEPLOY_DIR/current/public;
-  access_log $DEPLOY_DIR/current/log/nginx.access.log;
-  error_log $DEPLOY_DIR/current/log/nginx.error.log info;
-
-  location ^~ /assets/ {
-    gzip_static on;
-    expires max;
-    add_header Cache-Control public;
+  # The proxy.
+  location /api {
+    # Removes /api then redirects to the upstream server (in this case puma)
+    rewrite ^/api(/?)(.*) /$2 break;
+    proxy_pass http://api;
   }
 
-
-
-  try_files $uri/index.html $uri @puma;
-  location @puma {
-
-    proxy_set_header X-Forwarded-Proto https;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header Host $http_host;
-    proxy_redirect off;
-
-    proxy_pass http://puma;
+  location / {
+    # If URI is not found, serve index.html => allows us to use React-router to
+    # display a 404.
+    try_files $uri $uri/ /index.html;
   }
 
-  error_page 500 502 503 504 /500.html;
-  client_max_body_size 10M;
-  keepalive_timeout 10;
-
-
+  #needed for lets encrypt ssl
+  location ~/.well-known {
+            allow all;
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

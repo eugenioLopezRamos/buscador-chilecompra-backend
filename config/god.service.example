@@ -1,0 +1,25 @@
+# Enables you to start god automagically upon start/restart of the VPS
+# Same as puma.service => /etc/systemd/system/god.service
+# sudo systemctl enable god
+
+[Unit]
+Description=God monitoring resque-pool & resque-scheduler
+
+[Service]
+User=$DEPLOY_USER
+
+# Same as the puma service
+Environment=CC_API_DB_PASSWORD="the_dbs_password"
+Environment=CC_API_DB_USERNAME=the_db_username
+Environment=SECRET_KEY_BASE=as_given_by_rake_secret
+Environment=RAILS_ENV=production
+Environment=CC_TOKEN=the_chilecompra_api_key
+Environment=MAILGUN_API_KEY=mailgun_api_key_value
+Environment=MAIL_DOMAIN=mail_domain_in_dns_settings
+Environment=CC_DEFAULT_CONFIRM_SUCCESS_URL=url_to_redirect_on_email_success
+
+# use bash as login shell(-l) & pass commands (-c)
+ExecStart=/bin/bash -lc "cd $YOUR_APPS_/current_DIRECTORY && /HOME/$YOUR_USER/.rvm/bin/rvm default do bundle exec god -c $PATH_TO_RESQUE.GOD -b -D"
+
+[Install]
+WantedBy=multi-user.target

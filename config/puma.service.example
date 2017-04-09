@@ -1,45 +1,29 @@
-## This file can't use ruby/rails env vars
-## Those are included for demonstration purposes only.
-
 ## This allows you to boot puma automatically 
-## as a daemon in case the server restarts/crashes/etc
+## as a daemon in case the server restarts/etc
 
-## This file should be located in /etc/systemd/system/
+## This file should be located in /etc/systemd/system/puma.Service
+## Then enabled with sudo systemctl enable puma
 
 [Unit]
-Description=Puma HTTP Server
+Description=Puma Control
 After=network.target
 
-# Uncomment for socket activation (see below)
-#Requires=puma.socket
-
 [Service]
-# Foreground process (do not use --daemon in ExecStart or config.rb)
-#Type=simple
+Type=oneshot
+User=your_user_name
+RemainAfterExit=yes
 
-# Preferably configure a non-privileged user
-User=ENV['CHILECOMPRA_RAILS_DEPLOY_USER']
+Environment=CC_API_DB_PASSWORD=the_dbs_password
+Environment=CC_API_DB_USERNAME=the_db_username
+Environment=SECRET_KEY_BASE=as_given_by_rake_secret
+Environment=RAILS_ENV=production
+Environment=CC_TOKEN=the_chilecompra_api_key
+Environment=MAILGUN_API_KEY=the_mailgun_api_key
+Environment=MAIL_DOMAIN=mail_domain_in_dns_settings
+Environment=CC_DEFAULT_CONFIRM_SUCCESS_URL=url_to_redirect_on_email_success
 
-# Specify the path to your puma application root
-#WorkingDirectory=$APP_DIRECTORY_ON_SERVER
-
-# Helpful for debugging socket activation, etc.
-#Environment=PUMA_DEBUG=1
-
-# The command to start Puma
-# Here we are using a binstub generated via:
-# `bundle binstubs puma --path ./sbin`
-# in the WorkingDirectory (replace <WD> below)
-# You can alternatively use `bundle exec --keep-file-descriptors puma`
-#ExecStart=<WD>/sbin/puma -b tcp://0.0.0.0:9292 -b ssl://0.0.0.0:9293?key=key.pem&cert=cert.pem
-
-# Alternatively with a config file (in WorkingDirectory) and
-# comparable `bind` directives
-Environment=secret_key_base=ENV['SECRET_KEY_BASE']
-ExecStart=$ROUTE_TO_PUMA_RVM_WRAPPER -C $ROUTE_TO_PUMA_CONFIG_ON_REPO
-
-
-Restart=always
+ExecStart=path_to_bash_script_that_starts_puma
+ExecStop=path_to_bash_script_that_stops_puma
 
 [Install]
 WantedBy=multi-user.target
