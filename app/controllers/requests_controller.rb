@@ -31,22 +31,7 @@ class RequestsController < ApplicationController
   rescue ArgumentError => except
     render json: json_message(errors: except), status: 422
   end
-
-  def filter_results(parameters, limit)
-    dates = determine_dates(parameters)
-
-    total_results = get_total_results(dates, parameters)
-    filtered_by_palabras_clave = filter_by_palabras_clave(total_results, parameters['palabrasClave'])
-
-    offset = calculate_offset(parameters['offset'], filtered_by_palabras_clave.length, limit)
-    sorting = create_order_by(parameters['order_by'])
-
-    sorted_result = limit_and_sort_results(filtered_by_palabras_clave, offset, limit,
-                                           sorting)
-
-    { values: sorted_result, count: filtered_by_palabras_clave.length, limit: limit, offset: offset }
-  end
-
+  
   private
 
   def verify_correct_date_format

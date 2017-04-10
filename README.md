@@ -1,4 +1,4 @@
-This a REST API made in Rails that periodically fetches data from the Chilecompra API and stores it in a Postgres DB so it can be queried/analyzed.
+This is a REST API made in Rails that periodically fetches data from the Chilecompra API and stores it in a Postgres DB so it can be queried/analyzed.
 
 There is a live demo here:
   https://buscadorchilecompra.info/
