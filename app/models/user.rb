@@ -1,15 +1,13 @@
 # User data model
 class User < ActiveRecord::Base
   # Include default devise modules.
-
   # TODO: Change devise messages....
-  # TODO: Make the user confirm email address before making it valid.
   # TODO: Make devise not return user data to the client when registering,
   # be it successfully or unsuccessfully
 
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :trackable, :validatable,
-         :omniauthable, :confirmable # No confirm success url for now
+         :omniauthable, :confirmable
   include DeviseTokenAuth::Concerns::User
   include SearchesHelper
 
