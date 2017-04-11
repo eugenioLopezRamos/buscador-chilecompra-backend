@@ -3,7 +3,7 @@ require "#{Rails.root}/app/queries/results_query.rb"
 class RequestsController < ApplicationController
   require 'redis'
   DEFAULT_ORDER_BY_FIELD = ["\'Listado\'", "\'0\'", "\'CodigoExterno\'"].freeze
-  RESULT_LIMIT_AMOUNT = 200
+  RESULT_LIMIT_AMOUNT = 50
   before_action :valid_licitacion_data_params?, only: :licitacion_data
   before_action :verify_correct_date_format, only: :licitacion_data
   before_action :verify_valid_always_from?, only: :licitacion_data
