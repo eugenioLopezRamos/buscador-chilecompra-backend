@@ -13,6 +13,7 @@ Currently the app fetches data at 8AM, 11AM, 3PM, 7PM
 Installing the app:
 
 - install PostgreSQL [Tutorial here](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-16-04)
+- Fork the repo
 - git clone
 - bundle install
 - rails db:setup
