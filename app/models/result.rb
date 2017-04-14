@@ -62,15 +62,12 @@ class Result < ApplicationRecord
 
     def get_latest_results_per_ids(start_date, end_date)
       latest_result_ids_per_codigo_externo = Result.latest_entry_per_codigo_externo(start_date, end_date)
-                                                   .sort { |a, z| a <=> z }
-      Result.where(id: latest_result_ids_per_codigo_externo)
+      Result.filter_by_ids(latest_result_ids_per_codigo_externo)
     end
 
     # Has a date range
     def latest_entry_per_codigo_externo(start_day, end_day)
       connection = ActiveRecord::Base.connection
-      result_ids = []
-
       # Gets results id by codigo externo where updated_at is the greatest
       # (In simpler words, gets the last DB record entry per Codigo Externo between dates  start_day("YYYY-MM-DD"), end_day)
 
@@ -86,16 +83,18 @@ class Result < ApplicationRecord
       finish_date = connection.quote(end_day)
       unique = group_rank_and_filter_sql_statement(connection, start_date,
                                                    finish_date)
-
-      unique.each do |hash|
-        hash.each_pair { |_key, value| result_ids.push value }
-      end
-      result_ids
+      unique.map { |hsh| hsh['id'] }
     end
 
     # rubocop:disable Metrics/MethodLength
     # Can't currently find a way to make this smaller w/o losing readability
     def group_rank_and_filter_sql_statement(connection, start_date, finish_date)
+      # 1. Takes all CodigoExterno with FechaCreacion >= start_date && 
+      #    FechaCreacion <= finish_date
+      # 2. Ranks them (densely: https://www.postgresql.org/docs/9.6/static/functions-window.html)
+      # 3. Sorts the by FechaCreacion DESC (that is, newest to oldest)
+      # 4. Returns the newest one (The first ranked one, hence by_fecha_creacion < 2)
+      # 5. Sorts by id.
       connection.execute(
         "SELECT id FROM (
             SELECT id, updated_at,
@@ -105,9 +104,14 @@ class Result < ApplicationRecord
             FROM results
             WHERE f_cast_isots(value ->> 'FechaCreacion'::text) >= #{start_date}
             AND f_cast_isots(value ->> 'FechaCreacion'::text) <= #{finish_date}
-        ) as q WHERE by_fecha_creacion < 2"
+        ) as q WHERE by_fecha_creacion < 2
+        ORDER BY id"
       )
     end
     # rubocop:enable Metrics/MethodLength
+
+    def filter_by_ids(ids)
+      Result.where("results.id IN(SELECT(UNNEST(array#{ids}::integer[])))")
+    end
   end
 end

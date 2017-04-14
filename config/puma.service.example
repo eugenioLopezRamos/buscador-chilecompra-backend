@@ -9,7 +9,7 @@ Description=Puma Control
 After=network.target
 
 [Service]
-Type=oneshot
+Type=simple
 User=your_user_name
 RemainAfterExit=yes
 
@@ -24,6 +24,8 @@ Environment=CC_DEFAULT_CONFIRM_SUCCESS_URL=url_to_redirect_on_email_success
 
 ExecStart=path_to_bash_script_that_starts_puma
 ExecStop=path_to_bash_script_that_stops_puma
+TimeoutSec=15
+Restart=always
 
 [Install]
 WantedBy=multi-user.target

@@ -15,11 +15,12 @@ class ResultsQuery
     @limit = result_limit_amount
     @filter_chain = prepare_filter_chain
     @dates = determine_dates(parameters)
+    @palabras_clave = parameters['palabrasClave']
   end
 
   def filter
     total_results = get_total_results(@dates)
-    filtered_by_palabras_clave = filter_by_palabras_clave(total_results, @parameters['palabrasClave'])
+    filtered_by_palabras_clave = filter_by_palabras_clave(total_results, @palabras_clave)
 
     offset = calculate_offset(@parameters['offset'], filtered_by_palabras_clave.length, @limit)
     sorting = create_order_by(@parameters['order_by'])

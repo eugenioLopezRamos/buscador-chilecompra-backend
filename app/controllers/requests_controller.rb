@@ -12,8 +12,6 @@ class RequestsController < ApplicationController
   before_action :authenticate_user!
 
   def licitacion_data
-    # string_params = stringify_param_values(params)
-    # remove_wildcards(string_params)
     result = ResultsQuery.new(params, RESULT_LIMIT_AMOUNT).filter
     # renders => {results: [{json1}, {json2}, ...{jsonN}], count: "200", limit: "200"}
     render json: result
@@ -31,15 +29,20 @@ class RequestsController < ApplicationController
   rescue ArgumentError => except
     render json: json_message(errors: except), status: 422
   end
-  
+
   private
 
   def verify_correct_date_format
     # dates = unix epoch format
     dates = [params[:startDate], params[:endDate]]
+
     dates.each do |date|
       unless integer?(date)
         raise ArgumentError, 'Fecha en formato inválido, por favor intentar de nuevo.'
+      end
+
+      if dates[0] + 32 * day_in_milliseconds <= dates[1]
+        raise ArgumentError, 'Fechas deben estar dentro de 31 días de distancia'
       end
 
       transformed_date = transform_date_format(date)
@@ -50,6 +53,8 @@ class RequestsController < ApplicationController
 
       raise ArgumentError, 'Fecha en formato inválido, por favor intentar de nuevo.'
     end
+  rescue ArgumentError => except
+    render json: json_message(errors: except), status: 422
   end
 
   def verify_valid_offset_format

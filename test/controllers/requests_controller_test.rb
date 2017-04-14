@@ -10,12 +10,16 @@ class RequestsControllerTest < ActionDispatch::IntegrationTest
     @user = User.first
     @headers = sign_in_example_user
     Result.set_all_unique_codigo_externo_to_redis
+    @limit = RequestsController::RESULT_LIMIT_AMOUNT
+    @start_date_mock = 1000 * Date.parse(Result.first.value['FechaCreacion'])
+                       .to_time.to_i
+    @end_date_mock = @start_date_mock + 2 * day_in_milliseconds
   end
 
   test 'correctly returns chilecompra data from the database when requested' do
     licitacion_data_params = {
-      startDate: 1000, alwaysFromToday: false, alwaysToToday: false,
-      endDate: Time.zone.now.to_i * 1000, palabrasClave: '', offset: 0,
+      startDate: @start_date_mock, alwaysFromToday: false, alwaysToToday: false,
+      endDate: @end_date_mock, palabrasClave: '', offset: 0,
       order_by: { fields: [], order: 'descending' }
     }
 
@@ -29,7 +33,7 @@ class RequestsControllerTest < ActionDispatch::IntegrationTest
       assert_equal Result.last_per_codigo_externo.count, parsed_response['count']
 
       offset = licitacion_data[:offset] - 1 < 0 ? 0 : licitacion_data[:offset]
-      limit = RequestsController::RESULT_LIMIT_AMOUNT
+
       start_date = transform_date_format(licitacion_data[:startDate])
       finish_date = transform_date_format(licitacion_data[:endDate])
       sql_statement = chilecompra_data_from_db_sql(start_date, finish_date, offset)
@@ -43,7 +47,7 @@ class RequestsControllerTest < ActionDispatch::IntegrationTest
       parsed_response_ids = parsed_response['values'].map { |resp| resp['id'] }.sort { |a, z| a <=> z }
 
       # does the RESULT_LIMIT_AMOUNT work?
-      assert_equal limit, parsed_response_ids.length
+      assert_equal @limit, parsed_response_ids.length
       # They should be equal
       assert_equal expected_ids - parsed_response_ids, []
       assert_equal expected_codigos_externos - parsed_response_codigos_externos, []
@@ -86,9 +90,12 @@ class RequestsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test 'Correctly filters by palabras clave' do
+
+
+    
     licitacion_data_params = {
-      startDate: 1, alwaysFromToday: false, alwaysToToday: false,
-      endDate: Time.zone.now.to_i * 1000,
+      startDate: @start_date_mock, alwaysFromToday: false,
+      alwaysToToday: false, endDate: @end_date_mock,
       palabrasClave: 'SERVICIO DE MOVILIZACION', offset: 0,
       order_by: { fields: [], order: 'descending' }
     }
@@ -172,7 +179,7 @@ class RequestsControllerTest < ActionDispatch::IntegrationTest
       ) as q
       WHERE by_fecha_creacion < 2)
       ORDER BY value -> 'Listado' -> '0' -> 'CodigoExterno' DESC
-      OFFSET #{offset} LIMIT 200")
+      OFFSET #{offset} LIMIT #{@limit}")
   end
 
   def filter_by_date_sql(start_date, finish_date, offset)
@@ -193,7 +200,7 @@ class RequestsControllerTest < ActionDispatch::IntegrationTest
         WHERE by_fecha_creacion < 2
       )
       ORDER BY value -> 'Listado' -> '0' -> 'CodigoExterno' DESC
-      LIMIT 200 OFFSET #{offset}")
+      LIMIT #{@limit} OFFSET #{offset}")
   end
   # rubocop:enable Metrics/MethodLength
 

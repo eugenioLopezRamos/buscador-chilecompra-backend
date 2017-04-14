@@ -11,7 +11,7 @@ class LicitacionChangeMailEnqueuerJobTest < ActiveJob::TestCase
     address = "https://api.mailgun.net/v3/#{ENV['MAIL_DOMAIN']}/messages"
     stub_request(:post, address)
 
-    assert_difference 'Resque.size(:mail)', 1 do
+    assert_difference 'Resque.size(:notificaciones)', 1 do
       Resque.enqueue(@job, @messages)
     end
   end
